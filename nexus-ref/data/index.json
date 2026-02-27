@@ -1,5 +1,53 @@
 [
   {
+    "id": "cursor-context",
+    "path": "data/cursor/0-context.html",
+    "type": "html",
+    "title": "Context Window",
+    "category": "Cursor",
+    "icon": "📚",
+    "accent": "#ff006e",
+    "description": "How AI models process and generate text based on the context window, including token limits and strategies for effective prompting.",
+    "tags": ["ai", "context window", "prompting"],
+    "show-sheet-header": false
+  },
+  {
+    "id": "cursor-rules",
+    "path": "data/cursor/1-rules.html",
+    "type": "html",
+    "title": "Cursor Rules",
+    "category": "Cursor",
+    "icon": "📚",
+    "accent": "#ff006e",
+    "description": "Rules and guidelines for using the cursor effectively within the context window, including best practices and common pitfalls.",
+    "tags": ["ai", "cursor", "rules"],
+    "show-sheet-header": false
+  },
+  {
+    "id": "cursor-commands",
+    "path": "data/cursor/2-commands.html",
+    "type": "html",
+    "title": "Cursor Commands",
+    "category": "Cursor",
+    "icon": "📚",
+    "accent": "#ff006e",
+    "description": "Custom slash commands and built-in Cursor commands.",
+    "tags": ["ai", "cursor", "commands"],
+    "show-sheet-header": false
+  },
+  {
+    "id": "cursor-rules",
+    "path": "data/cursor/3-rules.html",
+    "type": "html",
+    "title": "Cursor Rules",
+    "category": "Cursor",
+    "icon": "📚",
+    "accent": "#ff006e",
+    "description": "Cursor Rules and guidelines for using it effectively, including best practices and common pitfalls.",
+    "tags": ["ai", "cursor", "rules"],
+    "show-sheet-header": false    
+  },
+  {
     "id": "git",
     "path": "data/version-control/git.json",
     "title": "Git",

@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cursor Rules — Complete Cheatsheet</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bricolage+Grotesque:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root, [data-theme="dark"] {
+    --bg:       #070b10;
+    --bg2:      #0b1118;
+    --bg3:      #111820;
+    --bg4:      #161f2a;
+    --border:   #1c2635;
+    --border2:  #263345;
+    --text:     #ccd6e0;
+    --muted:    #607585;
+    --dim:      #2d3f52;
+    --cyan:     #00d4f5;
+    --purple:   #a78bfa;
+    --green:    #2eeba8;
+    --orange:   #f59e42;
+    --yellow:   #fcd34d;
+    --pink:     #f472b6;
+    --red:      #f87171;
+    --blue:     #60a5fa;
+    --code-bg:  #060a0f;
+    --heading:  #fff;
+    --scanline-color: rgba(0,212,245,0.012);
+    --glow1:    rgba(0,212,245,0.04);
+    --glow2:    rgba(167,139,250,0.04);
+  }
+  [data-theme="light"] {
+    --bg:       #f8fafc;
+    --bg2:      #f1f5f9;
+    --bg3:      #e2e8f0;
+    --bg4:      #cbd5e1;
+    --border:   #cbd5e1;
+    --border2:  #94a3b8;
+    --text:     #1e293b;
+    --muted:    #64748b;
+    --dim:      #94a3b8;
+    --cyan:     #0891b2;
+    --purple:   #7c3aed;
+    --green:    #059669;
+    --orange:   #d97706;
+    --yellow:   #ca8a04;
+    --pink:     #db2777;
+    --red:      #dc2626;
+    --blue:     #2563eb;
+    --code-bg:  #e2e8f0;
+    --heading:  #0f172a;
+    --scanline-color: rgba(0,0,0,0.02);
+    --glow1:    rgba(0,0,0,0.02);
+    --glow2:    rgba(0,0,0,0.02);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.65;
+    padding: 36px 20px 80px;
+  }
+
+  /* Scanline overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,212,245,0.012) 2px,
+      rgba(0,212,245,0.012) 4px
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Ambient glow */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 10% 0%,   rgba(0,212,245,0.04)   0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 90% 100%,  rgba(167,139,250,0.04) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 1280px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── HEADER ──────────────────────────────────── */
+  .header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 24px;
+    margin-bottom: 36px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  .eyebrow {
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .eyebrow::before { content: ''; width: 20px; height: 1px; background: var(--cyan); }
+
+  h1 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: clamp(32px, 5vw, 58px);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    color: #fff;
+  }
+  h1 em { font-style: normal; color: var(--cyan); }
+
+  .header-sub {
+    margin-top: 12px;
+    font-size: 11.5px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    max-width: 580px;
+  }
+
+  .meta-pills {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-end;
+  }
+  .pill {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    padding: 6px 14px;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    color: var(--muted);
+  }
+  .pill strong { color: var(--green); }
+
+  /* ── SECTION LABELS ──────────────────────────── */
+  .section-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 32px 0 14px;
+  }
+  .section-label::before { content: attr(data-n); color: var(--cyan); font-size: 11px; }
+  .section-label::after  { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ── GRIDS ───────────────────────────────────── */
+  .g2  { display: grid; grid-template-columns: repeat(auto-fit, minmax(520px, 1fr)); gap: 14px; margin-bottom: 14px; }
+  .g3  { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 14px; margin-bottom: 14px; }
+  .g4  { display: grid; grid-template-columns: repeat(auto-fit, minmax(255px, 1fr)); gap: 14px; margin-bottom: 14px; }
+  .fw  { margin-bottom: 14px; }
+
+  /* ── CARDS ───────────────────────────────────── */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--ac), transparent);
+  }
+
+  .c-cyan   { --ac: var(--cyan); }
+  .c-purple { --ac: var(--purple); }
+  .c-green  { --ac: var(--green); }
+  .c-orange { --ac: var(--orange); }
+  .c-yellow { --ac: var(--yellow); }
+  .c-pink   { --ac: var(--pink); }
+  .c-red    { --ac: var(--red); }
+  .c-blue   { --ac: var(--blue); }
+
+  .card-title {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ac);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .card-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ── CODE BLOCKS ─────────────────────────────── */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--ac, var(--cyan));
+    padding: 13px 16px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11.5px;
+    line-height: 1.75;
+    overflow-x: auto;
+    margin-bottom: 10px;
+  }
+  pre:last-child { margin-bottom: 0; }
+
+  .pre-label {
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 5px;
+    display: block;
+  }
+
+  /* token colours — exact match to previous sheets */
+  .t-cm  { color: var(--muted); font-style: italic; }
+  .t-kw  { color: var(--pink); }
+  .t-st  { color: var(--green); }
+  .t-nm  { color: var(--orange); }
+  .t-fn  { color: var(--blue); }
+  .t-op  { color: var(--cyan); }
+  .t-h1  { color: #fff; font-weight: 700; }
+  .t-h2  { color: var(--cyan); }
+  .t-h3  { color: var(--purple); }
+  .t-bi  { color: var(--yellow); }
+  .t-sl  { color: var(--green); font-weight: 700; }
+  .t-er  { color: var(--red); }
+  .hl    { background: rgba(0,212,245,0.06); display: block; margin: 0 -16px; padding: 0 16px; }
+  .hl-r  { background: rgba(248,113,113,0.06); display: block; margin: 0 -16px; padding: 0 16px; }
+
+  /* ── INLINE CODE ─────────────────────────────── */
+  code {
+    background: var(--bg4);
+    border: 1px solid var(--border2);
+    padding: 1px 5px;
+    font-size: 11px;
+    color: var(--cyan);
+  }
+
+  /* ── CALLOUTS ────────────────────────────────── */
+  .tip, .warn, .info, .danger {
+    padding: 9px 13px;
+    font-size: 11px;
+    margin-bottom: 8px;
+    border-left: 2px solid;
+    line-height: 1.7;
+  }
+  .tip    { background: rgba(46,235,168,0.04);   border-color: var(--green); }
+  .warn   { background: rgba(245,158,66,0.05);   border-color: var(--orange); }
+  .info   { background: rgba(0,212,245,0.04);    border-color: var(--cyan); }
+  .danger { background: rgba(248,113,113,0.05);  border-color: var(--red); }
+
+  .tip strong, .warn strong, .info strong, .danger strong {
+    display: block;
+    font-size: 8.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  .tip strong    { color: var(--green); }
+  .warn strong   { color: var(--orange); }
+  .info strong   { color: var(--cyan); }
+  .danger strong { color: var(--red); }
+
+  /* ── TABLE ───────────────────────────────────── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11.5px;
+    margin-bottom: 10px;
+  }
+  th {
+    text-align: left;
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--border2);
+  }
+  td {
+    padding: 7px 10px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.55;
+  }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { color: var(--cyan); white-space: nowrap; font-weight: 700; }
+  td:nth-child(2) { color: var(--muted); }
+
+  /* ── TAGS ────────────────────────────────────── */
+  .tag {
+    display: inline-block;
+    padding: 2px 7px;
+    font-size: 8.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 700;
+    border: 1px solid;
+    margin: 2px 3px 2px 0;
+  }
+  .tc { color: var(--cyan);   border-color: var(--cyan); }
+  .tp { color: var(--purple); border-color: var(--purple); }
+  .tg { color: var(--green);  border-color: var(--green); }
+  .to { color: var(--orange); border-color: var(--orange); }
+  .ty { color: var(--yellow); border-color: var(--yellow); }
+  .tk { color: var(--pink);   border-color: var(--pink); }
+  .tr { color: var(--red);    border-color: var(--red); }
+  .tb { color: var(--blue);   border-color: var(--blue); }
+
+  /* ── 4-MODE TYPE GRID ────────────────────────── */
+  .mode-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .mode-cell {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    padding: 12px 14px;
+    position: relative;
+  }
+  .mode-cell::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--mc, var(--cyan));
+  }
+  .mode-title {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--mc, var(--cyan));
+    margin-bottom: 6px;
+  }
+  .mode-desc { font-size: 11px; color: var(--muted); line-height: 1.6; }
+  .mode-desc code { font-size: 10.5px; }
+
+  /* ── THREE-COLUMN COMPARE ────────────────────── */
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+  .compare-cell { background: var(--code-bg); padding: 12px 14px; }
+  .compare-cell h4 {
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .compare-cell ul { list-style: none; font-size: 11px; color: var(--muted); line-height: 1.9; }
+  .compare-cell ul li::before { content: '·  '; color: var(--dim); }
+
+  /* ── FILE TREE ───────────────────────────────── */
+  .tree-box {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--ac, var(--cyan));
+    padding: 13px 16px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11.5px;
+    line-height: 2;
+    margin-bottom: 10px;
+    overflow-x: auto;
+  }
+  .td  { color: var(--orange); }
+  .tf  { color: var(--green); }
+  .ts  { color: var(--cyan); }
+  .tc2 { color: var(--muted); font-style: italic; }
+  .td2 { color: var(--red); text-decoration: line-through; opacity: 0.6; }
+
+  /* ── FLOW ROW ────────────────────────────────── */
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+    margin: 10px 0;
+  }
+  .fnode {
+    padding: 6px 12px;
+    font-size: 11px;
+    border: 1px solid var(--border2);
+    background: var(--bg3);
+    white-space: nowrap;
+  }
+  .fnode.c1 { border-color: var(--cyan);   color: var(--cyan); }
+  .fnode.c2 { border-color: var(--green);  color: var(--green); }
+  .fnode.c3 { border-color: var(--purple); color: var(--purple); }
+  .fnode.c4 { border-color: var(--orange); color: var(--orange); }
+  .fnode.c5 { border-color: var(--red);    color: var(--red); }
+  .farrow   { color: var(--dim); padding: 0 6px; font-size: 14px; }
+
+  /* ── DECISION TREE ───────────────────────────── */
+  .tree pre {
+    border-left-color: var(--purple);
+    font-size: 11.5px;
+    line-height: 2;
+  }
+  .tq  { color: var(--text); }
+  .tya { color: var(--green); }
+  .tno { color: var(--orange); }
+  .tre { color: var(--cyan); font-weight: 700; }
+  .tln { color: var(--dim); }
+
+  /* ── FOOTER ──────────────────────────────────── */
+  .footer {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 0.08em;
+  }
+
+  /* ── RESPONSIVE ──────────────────────────────── */
+  @media (max-width: 620px) {
+    .g2, .g3, .g4 { grid-template-columns: 1fr; }
+    .compare, .mode-grid { grid-template-columns: 1fr; }
+    .header { grid-template-columns: 1fr; }
+    .meta-pills { align-items: flex-start; }
+  }
+
+  /* ── THEME TOGGLE ────────────────────────────── */
+  .theme-link { color: var(--cyan); cursor: pointer; font-weight: 700; transition: all 0.2s ease; }
+  .theme-link:hover { color: var(--purple); }
+
+  /* ── ANIMATION ───────────────────────────────── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .card { animation: fadeUp 0.4s ease both; }
+  .card:nth-child(1){animation-delay:.04s}
+  .card:nth-child(2){animation-delay:.08s}
+  .card:nth-child(3){animation-delay:.12s}
+  .card:nth-child(4){animation-delay:.16s}
+</style>
+</head>
+<body>
+<script>
+(function(){
+  var t=localStorage.getItem('theme')||'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  window.addEventListener('DOMContentLoaded', function() {
+    var link=document.getElementById('theme-link');
+    if(link) link.textContent = t.toUpperCase();
+  });
+})();
+function toggleTheme() {
+  var h=document.documentElement;
+  var c=h.getAttribute('data-theme')||'dark';
+  var n=c==='light'?'dark':'light';
+  h.setAttribute('data-theme',n);
+  localStorage.setItem('theme',n);
+  var link=document.getElementById('theme-link');
+  if(link) link.textContent = n.toUpperCase();
+}
+</script>
+<div class="container">
+
+  <!-- ═══════════════════ HEADER ═════════════════════ -->
+  <div class="header">
+    <div>
+      <div class="eyebrow">Reference Sheet · v1.0 → 2.4+ · Feb 2026 · <span id="theme-link" class="theme-link" onclick="toggleTheme()">DARK</span></div>
+      <h1>Cursor <em>Rules</em></h1>
+      <p class="header-sub">// Complete cheatsheet · .mdc anatomy · 4 rule types · All activation modes · All scenario templates · Glob patterns · Troubleshooting</p>
+    </div>
+    <div class="meta-pills">
+      <div class="pill">File format <strong>.mdc</strong></div>
+      <div class="pill">Location <strong>.cursor/rules/</strong></div>
+      <div class="pill">/rules CLI <strong>Jan 8 2026</strong></div>
+      <div class="pill">Legacy .cursorrules <strong>deprecated</strong></div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════ 01: WHAT ARE RULES ══════════════ -->
+  <div class="section-label" data-n="01">What Are Cursor Rules?</div>
+
+  <div class="g2 fw">
+
+    <!-- What / Compare -->
+    <div class="card c-cyan">
+      <div class="card-title">📐 Rules vs Skills vs Commands</div>
+      <p style="color:var(--muted);font-size:11.5px;margin-bottom:14px;">Rules are <strong style="color:var(--text)">persistent, always-available instructions</strong> that shape every AI interaction in your project. Unlike Skills (on-demand how-to) or Commands (manual prompts), rules are <em style="color:var(--cyan)">automatically injected</em> into context based on their activation mode.</p>
+
+      <div class="compare">
+        <div class="compare-cell">
+          <h4 style="color:var(--cyan);">Rules</h4>
+          <ul>
+            <li>.mdc (YAML + Markdown)</li>
+            <li>Auto-applied / always-on</li>
+            <li>Standards &amp; style</li>
+            <li>Persistent constraints</li>
+            <li>4 activation modes</li>
+            <li>Cursor only</li>
+            <li>Glob-scoped</li>
+          </ul>
+        </div>
+        <div class="compare-cell">
+          <h4 style="color:var(--purple);">Skills</h4>
+          <ul>
+            <li>SKILL.md + dirs</li>
+            <li>On-demand (lazy load)</li>
+            <li>How-to knowledge</li>
+            <li>Auto + /slash menu</li>
+            <li>Has scripts/ dir</li>
+            <li>Open standard</li>
+            <li>20+ agents</li>
+          </ul>
+        </div>
+        <div class="compare-cell">
+          <h4 style="color:var(--green);">Commands</h4>
+          <ul>
+            <li>.cursor/commands/*.md</li>
+            <li>Manual invoke only</li>
+            <li>Saved prompts</li>
+            <li>Type /name</li>
+            <li>No scripts</li>
+            <li>Cursor only</li>
+            <li>No frontmatter</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="flow-row">
+        <div class="fnode c1">file opened</div>
+        <div class="farrow">→</div>
+        <div class="fnode c2">glob matched?</div>
+        <div class="farrow">→</div>
+        <div class="fnode c3">rule injected into context</div>
+        <div class="farrow">→</div>
+        <div class="fnode c4">AI follows it automatically</div>
+      </div>
+    </div>
+
+    <!-- Hierarchy -->
+    <div class="card c-purple">
+      <div class="card-title">🏛 Rules Hierarchy — 4 Levels</div>
+      <table>
+        <thead><tr><th>Level</th><th>Location</th><th>Scope</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Global</td>
+            <td>Cursor Settings → Rules for AI</td>
+            <td>All projects, all files. Plain text, not .mdc.</td>
+          </tr>
+          <tr>
+            <td>Project</td>
+            <td><code>.cursor/rules/*.mdc</code></td>
+            <td>Entire repo. Version-controlled. Recommended.</td>
+          </tr>
+          <tr>
+            <td>Subdirectory</td>
+            <td><code>subdir/.cursor/rules/*.mdc</code></td>
+            <td>Only active when working inside that folder.</td>
+          </tr>
+          <tr>
+            <td style="color:var(--red);text-decoration:line-through">Legacy</td>
+            <td style="color:var(--dim);"><code>.cursorrules</code> (root)</td>
+            <td style="color:var(--dim);">Deprecated. .mdc files win on conflict. Migrate.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="warn">
+        <strong>⚠ Conflict Resolution</strong>
+        If you have the same rule in both <code>.cursorrules</code> and <code>.cursor/rules/</code>, the <code>.mdc</code> version wins silently. The legacy file is ignored with no error or warning.
+      </div>
+      <div class="info">
+        <strong>ℹ /rules CLI Command</strong>
+        Since Jan 8 2026: type <code>/rules</code> in a CLI session to create new rules or edit existing ones directly from the terminal without opening a file.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ════════════ 02: .MDC ANATOMY ═════════════════ -->
+  <div class="section-label" data-n="02">.MDC File Anatomy</div>
+
+  <div class="g2 fw">
+
+    <!-- Full template -->
+    <div class="card c-cyan">
+      <div class="card-title">📄 Full .MDC Template</div>
+      <span class="pre-label">📁 .cursor/rules/my-rule.mdc</span>
+      <pre><span class="t-cm">─── YAML FRONTMATTER (required) ─────────────────</span>
+<span class="t-op">---</span>
+<span class="t-nm">description</span>: <span class="t-st">Short description of the rule's purpose</span>
+               <span class="t-cm"># shown in Cursor Settings UI</span>
+               <span class="t-cm"># used for agent-decision mode matching</span>
+
+<span class="t-nm">globs</span>: <span class="t-st">src/**/*.ts, src/**/*.tsx</span>
+       <span class="t-cm"># comma-separated glob patterns</span>
+       <span class="t-cm"># rule auto-attaches when matched file is open</span>
+       <span class="t-cm"># ignored if alwaysApply: true</span>
+
+<span class="t-nm">alwaysApply</span>: <span class="t-kw">false</span>
+             <span class="t-cm"># true  → always in context, no conditions</span>
+             <span class="t-cm"># false → conditional (glob or agent-decides)</span>
+             <span class="t-cm"># omitted → still works in agent mode</span>
+<span class="t-op">---</span>
+<span class="t-cm">─── MARKDOWN BODY ───────────────────────────────</span>
+
+<span class="t-h1"># Rule Title</span>
+
+<span class="t-h2">## Context</span>
+<span class="t-cm">Brief context: what this rule governs and why.</span>
+
+<span class="t-h2">## Requirements</span>
+<span class="t-cm">- Specific, actionable constraint #1</span>
+<span class="t-cm">- Specific, actionable constraint #2</span>
+<span class="t-cm">- Never do X. Always do Y.</span>
+
+<span class="t-h2">## Examples</span>
+<span class="t-cm">**Good:**</span>
+<span class="t-cm">```ts</span>
+<span class="t-cm">// ✓ correct pattern</span>
+<span class="t-cm">```</span>
+
+<span class="t-cm">**Bad:**</span>
+<span class="t-cm">```ts</span>
+<span class="t-cm">// ✗ what to avoid</span>
+<span class="t-cm">```</span></pre>
+    </div>
+
+    <!-- Frontmatter fields + activation modes -->
+    <div class="card c-yellow">
+      <div class="card-title">📋 Frontmatter Fields &amp; Behaviours</div>
+      <table>
+        <thead><tr><th>Field</th><th>Type</th><th>Behaviour</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>description</td>
+            <td style="color:var(--text);">string</td>
+            <td>Shown in Settings UI. Used by agent to decide relevance. Can be empty but reduces auto-detection quality.</td>
+          </tr>
+          <tr>
+            <td>globs</td>
+            <td style="color:var(--text);">string</td>
+            <td>Comma-separated glob list. Rule auto-attaches when a matching file is open. Ignored if <code>alwaysApply: true</code>.</td>
+          </tr>
+          <tr>
+            <td>alwaysApply</td>
+            <td style="color:var(--text);">boolean</td>
+            <td><code>true</code> = always in context regardless of file. <code>false</code> or omitted = conditional. Glob filters ignored when true.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="mode-grid">
+        <div class="mode-cell" style="--mc:var(--cyan)">
+          <div class="mode-title">① Always</div>
+          <div class="mode-desc"><code>alwaysApply: true</code><br>No globs needed. Rule is injected into every single conversation. Use for universal code style standards.</div>
+        </div>
+        <div class="mode-cell" style="--mc:var(--green)">
+          <div class="mode-title">② Auto-attach</div>
+          <div class="mode-desc"><code>globs: src/**/*.ts</code><br><code>alwaysApply: false</code><br>Injected automatically when a matching file is open or referenced.</div>
+        </div>
+        <div class="mode-cell" style="--mc:var(--orange)">
+          <div class="mode-title">③ Manual</div>
+          <div class="mode-desc">No globs, no alwaysApply.<br>Attach explicitly with <code>@rule-name</code> in Cmd-K or chat. Good for opt-in standards.</div>
+        </div>
+        <div class="mode-cell" style="--mc:var(--purple)">
+          <div class="mode-title">④ Agent Decision</div>
+          <div class="mode-desc">Has <code>description</code> set.<br>AI reads description and decides whether to apply based on task relevance. Non-deterministic.</div>
+        </div>
+      </div>
+
+      <div class="danger">
+        <strong>⚡ Critical — Silent Failures</strong>
+        Missing or malformed YAML frontmatter causes the rule to silently not load — <strong>no error, no warning</strong>. The closing <code>---</code> must be present. Validate with <code>npx cursor-lint</code>.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════ 03: FILE STRUCTURE ══════════════ -->
+  <div class="section-label" data-n="03">File Structure &amp; Storage</div>
+
+  <div class="g2 fw">
+
+    <div class="card c-green">
+      <div class="card-title">📁 Directory Layout</div>
+      <span class="pre-label">Recommended project structure</span>
+      <div class="tree-box">
+<span class="td">PROJECT_ROOT/</span><br>
+├── <span class="td">.cursor/</span></div><br>
+│   └── <span class="td">rules/</span>                  <span class="tc2"># All project rules</span><br>
+│       ├── <span class="tf">code-style.mdc</span>        <span class="tc2"># alwaysApply: true</span><br>
+│       ├── <span class="tf">typescript.mdc</span>        <span class="tc2"># globs: **/*.ts, **/*.tsx</span><br>
+│       ├── <span class="tf">testing.mdc</span>           <span class="tc2"># globs: **/*.test.*</span><br>
+│       ├── <span class="tf">react-components.mdc</span>  <span class="tc2"># globs: src/components/**</span><br>
+│       ├── <span class="tf">api-routes.mdc</span>        <span class="tc2"># globs: src/api/**</span><br>
+│       ├── <span class="tf">security.mdc</span>          <span class="tc2"># alwaysApply: true</span><br>
+│       └── <span class="tf">migration-guide.mdc</span>   <span class="tc2"># manual @mention only</span><br>
+├── <span class="td">frontend/</span><br>
+│   └── <span class="td">.cursor/rules/</span>          <span class="tc2"># Scoped to frontend/ only</span><br>
+│       └── <span class="tf">component-style.mdc</span><br>
+├── <span class="td">backend/</span><br>
+│   └── <span class="td">.cursor/rules/</span>          <span class="tc2"># Scoped to backend/ only</span><br>
+│       └── <span class="tf">db-patterns.mdc</span><br>
+└── <span class="td2">.cursorrules</span>              <span class="tc2"># Deprecated — migrate to .mdc</span><br>
+      </div>
+
+      <div class="tip">
+        <strong>✦ Version control your rules</strong>
+        Commit <code>.cursor/rules/</code> to git. All teammates get consistent AI behaviour from day one of cloning the repo.
+      </div>
+    </div>
+
+    <div class="card c-orange">
+      <div class="card-title">🔡 Naming Conventions &amp; Glob Patterns</div>
+
+      <span class="pre-label">File naming</span>
+      <pre><span class="t-cm"># ✓ CORRECT — kebab-case, .mdc extension</span>
+<span class="t-fn">code-style.mdc</span>
+<span class="t-fn">typescript-strict.mdc</span>
+<span class="t-fn">react-hooks.mdc</span>
+<span class="t-fn">api-error-handling.mdc</span>
+<span class="t-fn">no-console-logs.mdc</span>
+
+<span class="t-cm"># ✗ WRONG — wrong extension</span>
+<span class="t-er">code-style.md</span>          <span class="t-cm"># .md won't load</span>
+<span class="t-er">TypeScript Rules.mdc</span>    <span class="t-cm"># spaces in name</span>
+<span class="t-er">rules.txt</span>               <span class="t-cm"># wrong extension</span></pre>
+
+      <span class="pre-label">Glob pattern reference</span>
+      <pre><span class="t-cm"># Single extension</span>
+<span class="t-nm">globs</span>: <span class="t-st">**/*.ts</span>
+
+<span class="t-cm"># Multiple extensions (comma-separated)</span>
+<span class="t-nm">globs</span>: <span class="t-st">**/*.ts, **/*.tsx, **/*.js</span>
+
+<span class="t-cm"># Scoped to a directory</span>
+<span class="t-nm">globs</span>: <span class="t-st">src/components/**/*.tsx</span>
+
+<span class="t-cm"># Test files only</span>
+<span class="t-nm">globs</span>: <span class="t-st">**/*.test.ts, **/*.spec.ts</span>
+
+<span class="t-cm"># API routes</span>
+<span class="t-nm">globs</span>: <span class="t-st">src/api/**/*.ts, app/api/**/*.ts</span>
+
+<span class="t-cm"># Python files</span>
+<span class="t-nm">globs</span>: <span class="t-st">**/*.py</span>
+
+<span class="t-cm"># Config files</span>
+<span class="t-nm">globs</span>: <span class="t-st">*.config.ts, *.config.js</span>
+
+<span class="t-cm"># Schema / migration files</span>
+<span class="t-nm">globs</span>: <span class="t-st">prisma/**/*.prisma, migrations/**</span></pre>
+
+      <div class="warn">
+        <strong>⚠ Glob behaviour quirk</strong>
+        If you set <code>globs:</code> without <code>alwaysApply: true</code>, the rule only attaches when a matched file is actually open. If no file is open, the rule is ignored entirely.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════ 04: SCENARIO TEMPLATES ══════════ -->
+  <div class="section-label" data-n="04">Real-World Rule Templates — All Scenarios</div>
+
+  <div class="g3 fw">
+
+    <!-- 01 Universal Code Style -->
+    <div class="card c-cyan">
+      <div class="card-title">🎨 Universal Code Style</div>
+      <span class="tag tc">Always</span><span class="tag tg">alwaysApply</span>
+      <span class="pre-label" style="margin-top:10px;">.cursor/rules/code-style.mdc</span>
+      <pre><span class="t-op">---</span>
+<span class="t-nm">description</span>: <span class="t-st">Universal code style for this project</span>
+<span class="t-nm">alwaysApply</span>: <span class="t-kw">true</span>
+<span class="t-op">---</span>
+
+<span class="t-h1"># Code Style</span>
+
+<span class="t-h2">## Principles</span>
+<span class="t-cm">- Write self-documenting code</span>
+<span class="t-cm">- Prefer readability over cleverness</span>
+<span class="t-cm">- One concept per function</span>
+<span class="t-cm">- Use early returns to reduce nesting</span>
+<span class="t-cm">- DRY but not at the cost of clarity</span>
+
+<span class="t-h2">## Naming</span>
+<span class="t-cm">- Variables/functions: camelCase</span>
+<span class="t-cm">- Classes/types: PascalCase</span>
+<span class="t-cm">- Constants: SCREAMING_SNAKE_CASE</span>
+<span class="t-cm">- Files: kebab-case</span>
+<span class="t-cm">- Booleans: isX, hasX, canX, shouldX</span>
+
+<span class="t-h2">## Comments</span>
+<span class="t-cm">- Comments explain WHY, not WHAT</span>
+<span class="t-cm">- No commented-out code in commits</span>
+<span class="t-cm">- English only</span></pre>
+    </div>
+
+    <!-- 02 TypeScript Strict -->
+    <div class="card c-blue">
+      <div class="card-title">📘 TypeScript Strict Mode</div>
+      <span class="tag tb">Auto-attach</span><span class="tag tc">Glob</span>
+      <span class="pre-label" style="margin-top:10px;">.cursor/rules/typescript.mdc</span>
+      <pre><span class="t-op">---</span>
+<span class="t-nm">description</span>: <span class="t-st">TypeScript strict coding standards</span>
+<span class="t-nm">globs</span>: <span class="t-st">**/*.ts, **/*.tsx</span>
+<span class="t-nm">alwaysApply</span>: <span class="t-kw">false</span>
+<span class="t-op">---</span>
+
+<span class="t-h1"># TypeScript Standards</span>
+
+<span class="t-h2">## Types</span>
+<span class="t-cm">- Never use `any` — use `unknown` instead</span>
+<span class="t-cm">- All function params must be typed</span>
+<span class="t-cm">- All function returns must be typed</span>
+<span class="t-cm">- Prefer `interface` for objects,</span>
+<span class="t-cm">  `type` for unions/intersections</span>
+<span class="t-cm">- Use branded types for domain IDs:</span>
+<span class="t-cm">  type UserId = string &amp; { _brand: 'UserId' }</span>
+
+<span class="t-h2">## Patterns</span>
+<span class="t-cm">- Prefer `const` assertions for literals</span>
+<span class="t-cm">- Use discriminated unions over optional</span>
+<span class="t-cm">- Avoid enums — use const objects instead</span>
+<span class="t-cm">- Nullish coalescing over || for defaults</span></pre>
+    </div>
+
+    <!-- 03 React Components -->
+    <div class="card c-pink">
+      <div class="card-title">⚛️ React Component Patterns</div>
+      <span class="tag tk">Auto-attach</span><span class="tag tc">Glob</span>
+      <span class="pre-label" style="margin-top:10px;">.cursor/rules/react-components.mdc</span>
+      <pre><span class="t-op">---</span>
+<span class="t-nm">description</span>: <span class="t-st">React component conventions</span>
+<span class="t-nm">globs</span>: <span class="t-st">src/components/**/*.tsx</span>
+<span class="t-nm">alwaysApply</span>: <span class="t-kw">false</span>
+<span class="t-op">---</span>
+
+<span class="t-h1"># React Components</span>
+
+<span class="t-h2">## Structure</span>
+<span class="t-cm">- Functional components only (no class)</span>
+<span class="t-cm">- Props interface named `[Name]Props`</span>
+<span class="t-cm">- Default export the component</span>
+<span class="t-cm">- Named export for tests</span>
+
+<span class="t-h2">## Hooks</span>
+<span class="t-cm">- No logic outside of hooks/handlers</span>
+<span class="t-cm">- Custom hooks prefix: use*</span>
+<span class="t-cm">- Memoize expensive computations</span>
+<span class="t-cm">- useCallback for stable references</span>
+
+<span class="t-h2">## Styling</span>
+<span class="t-cm">- Tailwind utility classes only</span>
+<span class="t-cm">- No inline styles</span>
+<span class="t-cm">- Variant-driven with cva()</span></pre>
+    </div>
+
+    <!-- 04 Testing -->
+    <div class="card c-green">
+      <div class="card-title">🧪 Testing Standards</div>
+      <span class="tag tg">Auto-attach</span><span class="tag tc">Glob</span>
+      <span class="pre-label" style="margin-top:10px;">.cursor/rules/testing.mdc</span>
+      <pre><span class="t-op">---</span>
+<span class="t-nm">description</span>: <span class="t-st">Test writing conventions and patterns</span>
+<span class="t-nm">globs</span>: <span class="t-st">**/*.test.ts, **/*.spec.ts,
+  **/*.test.tsx, **/*.spec.tsx</span>
+<span class="t-nm">alwaysApply</span>: <span class="t-kw">false</span>
+<span class="t-op">---</span>
+
+<span class="t-h1"># Testing Standards</span>
+
+<span class="t-h2">## Structure</span>
+<span class="t-cm">- AAA: Arrange → Act → Assert</span>
+<span class="t-cm">- One assertion per test (when possible)</span>
+<span class="t-cm">- Describe blocks match the unit name</span>
+<span class="t-cm">- it() descriptions: "should [behavior]"</span>
+
+<span class="t-h2">## Rules</span>
+<span class="t-cm">- Never use `any` in test files</span>
+<span class="t-cm">- Mock at the module boundary</span>
+<span class="t-cm">- No test-only code in source files</span>
+<span class="t-cm">- No `.only` or `.skip` in commits</span>
+
+<span class="t-h2">## Coverage</span>
+<span class="t-cm">- 80% line coverage minimum</span>
+<span class="t-cm">- Always test error/edge cases</span></pre>
+    </div>
+
+    <!-- 05 API Routes -->
+    <div class="card c-orange">
+      <div class="card-title">🌐 API Route Conventions</div>
+      <span class="tag to">Auto-attach</span><span class="tag tc">Glob</span>
+      <span class="pre-label" style="margin-top:10px;">.cursor/rules/api-routes.mdc</span>
+      <pre><span class="t-op">---</span>
+<span class="t-nm">description</span>: <span class="t-st">REST API route standards</span>
+<span class="t-nm">globs</span>: <span class="t-st">src/api/**/*.ts, app/api/**/*.ts</span>
+<span class="t-nm">alwaysApply</span>: <span class="t-kw">false</span>
+<span class="t-op">---</span>
+
+<span class="t-h1"># API Routes</span>
+
+<span class="t-h2">## Response Shape</span>
+<span class="t-cm">Always return:
+{
+  data:    T | null,
+  error:   string | null,
+  status:  number
+}</span>
+
+<span class="t-h2">## Status Codes</span>
+<span class="t-cm">200 GET success   404 not found</span>
+<span class="t-cm">201 POST created  400 bad request</span>
+<span class="t-cm">204 DELETE done   401 unauthorized</span>
+<span class="t-cm">422 validation    500 server error</span>
+
+<span class="t-h2">## Auth</span>
+<span class="t-cm">- Every mutation route requires auth</span>
+<span class="t-cm">- Validate session before DB access</span>
+<span class="t-cm">- Rate limit all public endpoints</span></pre>
+    </div>
+
+    <!-- 06 Security -->
+    <div class="card c-red">
+      <div class="card-title">🛡 Security Always-On</div>
+      <span class="tag tr">Always</span><span class="tag tg">alwaysApply</span>
+      <span class="pre-label" style="margin-top:10px;">.cursor/rules/security.mdc</span>
+      <pre><span class="t-op">---</span>
+<span class="t-nm">description</span>: <span class="t-st">Security non-negotiables for all code</span>
+<span class="t-nm">alwaysApply</span>: <span class="t-kw">true</span>
+<span class="t-op">---</span>
+
+<span class="t-h1"># Security Rules</span>
+
+<span class="t-h2">## Non-Negotiables</span>
+<span class="t-cm">- NEVER hardcode secrets, keys, tokens</span>
+<span class="t-cm">- NEVER use process.env directly in</span>
+<span class="t-cm">  client-side code</span>
+<span class="t-cm">- NEVER trust user input without</span>
+<span class="t-cm">  validation and sanitization</span>
+<span class="t-cm">- NEVER expose stack traces to clients</span>
+<span class="t-cm">- ALWAYS parameterize DB queries</span>
+
+<span class="t-h2">## Secrets</span>
+<span class="t-cm">- Use env vars via @/lib/env.ts</span>
+<span class="t-cm">- Validate env schema with Zod on boot</span>
+
+<span class="t-h2">## Dependencies</span>
+<span class="t-cm">- Run `npm audit` before each release</span></pre>
+    </div>
+
+    <!-- 07 Python -->
+    <div class="card c-yellow">
+      <div class="card-title">🐍 Python Standards</div>
+      <span class="tag ty">Auto-attach</span><span class="tag tc">Glob</span>
+      <span class="pre-label" style="margin-top:10px;">.cursor/rules/python.mdc</span>
+      <pre><span class="t-op">---</span>
+<span class="t-nm">description</span>: <span class="t-st">Python coding guidelines</span>
+<span class="t-nm">globs</span>: <span class="t-st">**/*.py</span>
+<span class="t-nm">alwaysApply</span>: <span class="t-kw">false</span>
+<span class="t-op">---</span>
+
+<span class="t-h1"># Python Guidelines</span>
+
+<span class="t-h2">## Style</span>
+<span class="t-cm">- Follow PEP 8 strictly</span>
+<span class="t-cm">- Max line length: 88 (Black default)</span>
+<span class="t-cm">- Type hints on all function signatures</span>
+<span class="t-cm">- Google-style docstrings on all funcs</span>
+
+<span class="t-h2">## Patterns</span>
+<span class="t-cm">- Prefer functional over OOP</span>
+<span class="t-cm">- Use early returns</span>
+<span class="t-cm">- Use dataclasses over plain dicts</span>
+<span class="t-cm">- Raise specific exception types</span>
+<span class="t-cm">- Never use bare `except:`</span>
+
+<span class="t-h2">## Tools</span>
+<span class="t-cm">Formatter: Black · Linter: Ruff</span>
+<span class="t-cm">Type check: mypy --strict</span></pre>
+    </div>
+
+    <!-- 08 Database -->
+    <div class="card c-purple">
+      <div class="card-title">🗄 Database / Prisma Rules</div>
+      <span class="tag tp">Auto-attach</span><span class="tag tc">Glob</span>
+      <span class="pre-label" style="margin-top:10px;">.cursor/rules/database.mdc</span>
+      <pre><span class="t-op">---</span>
+<span class="t-nm">description</span>: <span class="t-st">Database schema and query conventions</span>
+<span class="t-nm">globs</span>: <span class="t-st">prisma/**/*.prisma,
+  src/**/db/**/*.ts,
+  migrations/**</span>
+<span class="t-nm">alwaysApply</span>: <span class="t-kw">false</span>
+<span class="t-op">---</span>
+
+<span class="t-h1"># Database Rules</span>
+
+<span class="t-h2">## Schema</span>
+<span class="t-cm">- All tables need createdAt/updatedAt</span>
+<span class="t-cm">- Use UUIDs for all primary keys</span>
+<span class="t-cm">- Index all foreign keys</span>
+<span class="t-cm">- Never use nullable unless required</span>
+
+<span class="t-h2">## Queries</span>
+<span class="t-cm">- Always select only needed fields</span>
+<span class="t-cm">- Paginate all list queries</span>
+<span class="t-cm">- Never N+1: use include/join</span>
+<span class="t-cm">- Wrap mutations in transactions</span>
+
+<span class="t-h2">## Migrations</span>
+<span class="t-cm">- Never drop without 2-phase plan</span>
+<span class="t-cm">- Always write rollback migration</span></pre>
+    </div>
+
+    <!-- 09 Error handling -->
+    <div class="card c-orange">
+      <div class="card-title">⚠️ Error Handling</div>
+      <span class="tag tg">Always</span><span class="tag tg">alwaysApply</span>
+      <span class="pre-label" style="margin-top:10px;">.cursor/rules/error-handling.mdc</span>
+      <pre><span class="t-op">---</span>
+<span class="t-nm">description</span>: <span class="t-st">Error handling patterns for all code</span>
+<span class="t-nm">alwaysApply</span>: <span class="t-kw">true</span>
+<span class="t-op">---</span>
+
+<span class="t-h1"># Error Handling</span>
+
+<span class="t-h2">## Rules</span>
+<span class="t-cm">- Always catch errors explicitly</span>
+<span class="t-cm">- Never swallow errors silently</span>
+<span class="t-cm">- Use specific error types, not Error</span>
+<span class="t-cm">- Error messages: actionable, specific</span>
+<span class="t-cm">- Log errors with context (file, fn, input)</span>
+
+<span class="t-h2">## Pattern (Result type)</span>
+<span class="t-cm">type Result&lt;T&gt; =</span>
+<span class="t-cm">  | { ok: true;  value: T }
+  | { ok: false; error: AppError }</span>
+
+<span class="t-h2">## Async</span>
+<span class="t-cm">- All async functions return Result&lt;T&gt;</span>
+<span class="t-cm">- No unhandled promise rejections</span>
+<span class="t-cm">- Handle both network AND logic errors</span></pre>
+    </div>
+
+    <!-- 10 Git commit -->
+    <div class="card c-cyan">
+      <div class="card-title">📝 Git &amp; Commit Standards</div>
+      <span class="tag tc">Manual</span><span class="tag to">@mention</span>
+      <span class="pre-label" style="margin-top:10px;">.cursor/rules/git-commits.mdc</span>
+      <pre><span class="t-op">---</span>
+<span class="t-nm">description</span>: <span class="t-st">Git commit message standards and
+  branch naming. Apply when creating
+  commits or branches.</span>
+<span class="t-nm">alwaysApply</span>: <span class="t-kw">false</span>
+<span class="t-op">---</span>
+
+<span class="t-h1"># Git Standards</span>
+
+<span class="t-h2">## Commit Format (Conventional)</span>
+<span class="t-cm">type(scope): subject  ← 72 chars max</span>
+<span class="t-cm">             blank line</span>
+<span class="t-cm">             body: explain WHY</span>
+
+<span class="t-cm">Types: feat | fix | refactor |</span>
+<span class="t-cm">       docs | chore | test | ci</span>
+
+<span class="t-h2">## Branch Naming</span>
+<span class="t-cm">feat/TICKET-123-short-description</span>
+<span class="t-cm">fix/TICKET-456-what-was-broken</span>
+<span class="t-cm">chore/update-deps</span>
+
+<span class="t-h2">## Rules</span>
+<span class="t-cm">- Squash feature branch commits</span>
+<span class="t-cm">- One logical change per commit</span>
+<span class="t-cm">- No WIP commits on main</span></pre>
+    </div>
+
+    <!-- 11 Performance -->
+    <div class="card c-green">
+      <div class="card-title">⚡ Performance Standards</div>
+      <span class="tag tg">Agent Decision</span>
+      <span class="pre-label" style="margin-top:10px;">.cursor/rules/performance.mdc</span>
+      <pre><span class="t-op">---</span>
+<span class="t-nm">description</span>: <span class="t-st">Performance optimization guidelines.
+  Apply when writing data-heavy code,
+  React components, or database queries.</span>
+<span class="t-nm">alwaysApply</span>: <span class="t-kw">false</span>
+<span class="t-op">---</span>
+
+<span class="t-h1"># Performance</span>
+
+<span class="t-h2">## Frontend</span>
+<span class="t-cm">- Code-split at route level</span>
+<span class="t-cm">- Lazy-load below-the-fold components</span>
+<span class="t-cm">- Memoize pure components</span>
+<span class="t-cm">- Avoid re-renders: stable references</span>
+<span class="t-cm">- Optimize images: next/image or similar</span>
+
+<span class="t-h2">## Backend</span>
+<span class="t-cm">- Cache expensive DB queries (Redis)</span>
+<span class="t-cm">- Paginate all list endpoints</span>
+<span class="t-cm">- Avoid synchronous operations in</span>
+<span class="t-cm">  request handlers</span>
+
+<span class="t-h2">## Budgets</span>
+<span class="t-cm">LCP &lt; 2.5s  CLS &lt; 0.1  FID &lt; 100ms</span></pre>
+    </div>
+
+    <!-- 12 Documentation -->
+    <div class="card c-purple">
+      <div class="card-title">📖 Documentation Standards</div>
+      <span class="tag tp">Auto-attach</span><span class="tag tc">Glob</span>
+      <span class="pre-label" style="margin-top:10px;">.cursor/rules/documentation.mdc</span>
+      <pre><span class="t-op">---</span>
+<span class="t-nm">description</span>: <span class="t-st">Inline documentation standards</span>
+<span class="t-nm">globs</span>: <span class="t-st">src/**/*.ts, src/**/*.tsx</span>
+<span class="t-nm">alwaysApply</span>: <span class="t-kw">false</span>
+<span class="t-op">---</span>
+
+<span class="t-h1"># Documentation</span>
+
+<span class="t-h2">## Required on all exports</span>
+<span class="t-cm">/**</span>
+<span class="t-cm"> * Brief description (one sentence)</span>
+<span class="t-cm"> *</span>
+<span class="t-cm"> * @param name - what it represents</span>
+<span class="t-cm"> * @returns what is returned</span>
+<span class="t-cm"> * @throws ErrorType - when it throws</span>
+<span class="t-cm"> *</span>
+<span class="t-cm"> * @example</span>
+<span class="t-cm"> * const result = myFn("input")</span>
+<span class="t-cm"> */</span>
+
+<span class="t-h2">## README Updates</span>
+<span class="t-cm">- Update README for public API changes</span>
+<span class="t-cm">- Document breaking changes in CHANGELOG</span>
+<span class="t-cm">- All env vars in .env.example</span></pre>
+    </div>
+
+  </div>
+
+
+  <!-- ═══════════ 05: GLOBAL RULES ══════════════════ -->
+  <div class="section-label" data-n="05">Global Rules (Settings) vs Project Rules</div>
+
+  <div class="g2 fw">
+
+    <div class="card c-blue">
+      <div class="card-title">🌐 Global Rules — Cursor Settings</div>
+      <p style="color:var(--muted);font-size:11.5px;margin-bottom:12px;">Global rules are configured in <strong style="color:var(--text)">Cursor Settings → Rules for AI</strong>. They are plain text (no YAML frontmatter, no .mdc) and apply to <em>every project</em> on your machine.</p>
+      <span class="pre-label">Example global rules content (plain text)</span>
+      <pre><span class="t-h2">&lt;personal_preferences&gt;</span>
+<span class="t-cm">- Always use British English spelling</span>
+<span class="t-cm">- Prefer functional programming patterns</span>
+<span class="t-cm">- Always include type annotations</span>
+<span class="t-cm">- Keep responses concise and direct</span>
+<span class="t-h2">&lt;/personal_preferences&gt;</span>
+
+<span class="t-h2">&lt;code_style&gt;</span>
+<span class="t-cm">- Comments in English only</span>
+<span class="t-cm">- Follow DRY, KISS, and YAGNI principles</span>
+<span class="t-cm">- Write pure functions where possible</span>
+<span class="t-cm">- Use strict typing everywhere</span>
+<span class="t-h2">&lt;/code_style&gt;</span>
+
+<span class="t-h2">&lt;error_handling&gt;</span>
+<span class="t-cm">- Always raise errors explicitly</span>
+<span class="t-cm">- Use specific error types</span>
+<span class="t-cm">- Error messages: clear and actionable</span>
+<span class="t-h2">&lt;/error_handling&gt;</span></pre>
+      <div class="tip">
+        <strong>✦ Global vs Project</strong>
+        Keep global rules to personal preferences only (tone, formatting style). All project standards belong in <code>.cursor/rules/</code> so the whole team benefits and rules are version-controlled.
+      </div>
+    </div>
+
+    <div class="card c-green">
+      <div class="card-title">🔁 Migrating from .cursorrules</div>
+      <table>
+        <thead><tr><th>Old (.cursorrules)</th><th>New (.mdc equivalent)</th></tr></thead>
+        <tbody>
+          <tr><td>Single monolithic file</td><td>Multiple focused .mdc files</td></tr>
+          <tr><td>Always applied</td><td><code>alwaysApply: true</code> per file</td></tr>
+          <tr><td>No scoping</td><td>Glob patterns per rule</td></tr>
+          <tr><td>Not version-controlled by convention</td><td>Committed to <code>.cursor/rules/</code></td></tr>
+          <tr><td>No description/metadata</td><td>YAML frontmatter with full metadata</td></tr>
+        </tbody>
+      </table>
+
+      <span class="pre-label" style="margin-top:12px;">Migration steps</span>
+      <pre><span class="t-cm"># Step 1: Split monolithic .cursorrules</span>
+<span class="t-cm"># into focused .mdc files by concern</span>
+<span class="t-fn">mkdir</span> -p .cursor/rules
+
+<span class="t-cm"># Step 2: Create index.mdc for rules</span>
+<span class="t-cm"># that must always apply globally</span>
+<span class="t-cm">---
+description: Core project conventions
+alwaysApply: true
+---
+[content from .cursorrules here]</span>
+
+<span class="t-cm"># Step 3: Extract scoped rules to files</span>
+<span class="t-cm"># with appropriate glob patterns</span>
+
+<span class="t-cm"># Step 4: Commit .cursor/rules/ to git</span>
+<span class="t-cm"># Step 5: Delete .cursorrules</span>
+<span class="t-fn">git</span> rm .cursorrules</pre>
+
+      <div class="warn">
+        <strong>⚠ Don't run both in parallel</strong>
+        <code>.mdc</code> files win when both exist, but having both creates confusion. Migrate fully and delete <code>.cursorrules</code>.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ════════════ 06: INVOCATION ═══════════════════ -->
+  <div class="section-label" data-n="06">Invocation &amp; Validation</div>
+
+  <div class="g2 fw">
+
+    <div class="card c-cyan">
+      <div class="card-title">📌 How to Invoke Rules</div>
+      <pre><span class="t-cm">── Automatic (alwaysApply: true) ─────────────────</span>
+<span class="t-cm"># Rule is always in context. Nothing needed.</span>
+<span class="t-cm"># Active rules are shown in Agent sidebar.</span>
+
+<span class="t-cm">── Automatic (glob-matched) ──────────────────────</span>
+<span class="t-cm"># Open a file that matches the glob.</span>
+<span class="t-cm"># Rule automatically attaches to context.</span>
+<span class="t-cm"># Example: open auth.ts → typescript.mdc loads</span>
+
+<span class="t-cm">── Manual (@mention in chat) ─────────────────────</span>
+<span class="t-sl">@code-style</span>         <span class="t-cm"># in chat or Cmd-K</span>
+<span class="t-sl">@git-commits</span>        <span class="t-cm"># attach any rule manually</span>
+<span class="t-sl">@migration-guide</span>    <span class="t-cm"># by file name without .mdc</span>
+
+<span class="t-cm">── CLI create/edit rules ─────────────────────────</span>
+<span class="t-sl">/rules</span>              <span class="t-cm"># in CLI session (Jan 2026+)</span>
+<span class="t-sl">/rules new</span>          <span class="t-cm"># create new rule</span>
+
+<span class="t-cm">── Combine rules in one prompt ───────────────────</span>
+<span class="t-cm">"@typescript @react-components</span>
+<span class="t-cm"> build a user profile component"</span>
+
+<span class="t-cm">── Force-check active rules ──────────────────────</span>
+<span class="t-cm">"Which rules are currently active?"</span>
+<span class="t-cm">"Show me all rules that apply here"</span></pre>
+    </div>
+
+    <div class="card c-orange">
+      <div class="card-title">🔬 Validation &amp; Troubleshooting</div>
+      <pre><span class="t-cm">── Lint rules locally ────────────────────────────</span>
+<span class="t-fn">npx</span> cursor-lint
+<span class="t-cm"># ✓ .cursor/rules/typescript.mdc  — all checks passed</span>
+<span class="t-cm"># ✗ .cursor/rules/bad.mdc</span>
+<span class="t-cm">#   Missing YAML frontmatter</span>
+<span class="t-cm">#   → Add --- block with description</span>
+
+<span class="t-cm">── CI linting (GitHub Actions) ──────────────────</span>
+<span class="t-cm"># .github/workflows/lint-cursor-rules.yml</span>
+<span class="t-nm">name</span>: <span class="t-st">Lint Cursor Rules</span>
+<span class="t-nm">on</span>: <span class="t-st">[push, pull_request]</span>
+<span class="t-nm">jobs</span>:
+  <span class="t-nm">lint</span>:
+    <span class="t-nm">runs-on</span>: <span class="t-st">ubuntu-latest</span>
+    <span class="t-nm">steps</span>:
+      - <span class="t-nm">uses</span>: <span class="t-st">actions/checkout@v4</span>
+      - <span class="t-nm">uses</span>: <span class="t-st">cursorrulespacks/cursor-lint-action@v1</span>
+
+<span class="t-cm">── 7 failure modes to check ─────────────────────</span>
+<span class="t-cm">Malformed YAML (no closing ---)   → silent fail</span>
+<span class="t-cm">No frontmatter at all             → silent fail</span>
+<span class="t-cm">Missing alwaysApply               → still works</span>
+<span class="t-cm">alwaysApply: false                → still works</span>
+<span class="t-cm">Wrong glob pattern                → silently skipped</span>
+<span class="t-cm">Empty description                 → still works</span>
+<span class="t-cm">.cursorrules + .mdc conflict      → .mdc wins</span></pre>
+    </div>
+  </div>
+
+
+  <!-- ════════════ 07: DECISION TREE ════════════════ -->
+  <div class="section-label" data-n="07">Decision Tree — Which Activation Mode?</div>
+
+  <div class="card c-purple fw">
+    <div class="card-title">🌿 Mode Selection Guide</div>
+    <pre><span class="tree"><span class="tq">Should this rule apply to every single conversation?</span>
+<span class="tln">├─ </span><span class="tya">YES</span> → Is it a hard security/safety non-negotiable?
+<span class="tln">│  ├─ </span><span class="tya">YES</span> → <span class="tre">alwaysApply: true</span>  (security.mdc, no-secrets.mdc)
+<span class="tln">│  └─ </span><span class="tno">NO</span>  → Is it a universal coding style or principle?
+<span class="tln">│     ├─ </span><span class="tya">YES</span> → <span class="tre">alwaysApply: true</span>  (code-style.mdc, naming.mdc)
+<span class="tln">│     └─ </span><span class="tno">NO</span>  → Consider making it scoped — see below
+<span class="tln">└─ </span><span class="tno">NO</span>  → Does it apply to a specific file type or directory?
+   <span class="tln">├─ </span><span class="tya">YES</span> → Can you express the scope as a glob pattern?
+   <span class="tln">│  ├─ </span><span class="tya">YES</span> → <span class="tre">globs: src/**/*.ts</span> + <span class="tre">alwaysApply: false</span>  (auto-attach)
+   <span class="tln">│  └─ </span><span class="tno">NO</span>  → Use a subdirectory .cursor/rules/ for that folder
+   └─ <span class="tno">NO</span>  → Is it an opt-in standard or reference doc?
+      <span class="tln">├─ </span><span class="tya">YES</span> → Is it used rarely / on specific tasks?
+      <span class="tln">│  ├─ </span><span class="tya">YES</span> → <span class="tre">Manual — no globs, no alwaysApply</span>  (use @rule-name)
+      <span class="tln">│  └─ </span><span class="tno">NO</span>  → <span class="tre">Agent Decision — set description carefully</span>
+      └─ <span class="tno">NO</span>  → Does it encode workflow knowledge or scripts?
+              └─ → It's probably a <span class="tre">Skill</span>, not a Rule (.cursor/skills/)</span></pre>
+  </div>
+
+
+  <!-- ════════════ 08: BEST PRACTICES ═══════════════ -->
+  <div class="section-label" data-n="08">Best Practices &amp; Anti-Patterns</div>
+
+  <div class="g2 fw">
+
+    <div class="card c-green">
+      <div class="card-title">✅ Best Practices</div>
+      <div class="tip"><strong>✦ One Rule, One Purpose</strong>Split concerns into separate files: <code>typescript.mdc</code>, <code>testing.mdc</code>, <code>security.mdc</code>. Never put all conventions in one giant file — scoping stops working.</div>
+      <div class="tip"><strong>✦ Specific over Vague</strong>"All type aliases must use the Branded prefix" gets followed. "Write clean code" gets ignored. Vague rules are treated as suggestions by the model.</div>
+      <div class="tip"><strong>✦ Include Good + Bad Examples</strong>Adding a ✓ correct example and a ✗ incorrect example dramatically improves rule adherence vs. description alone.</div>
+      <div class="tip"><strong>✦ Use XML Tags for Long Rules</strong>Group related instructions in <code>&lt;section&gt;</code> tags. LLMs follow structured XML-tagged content more reliably than flat markdown lists.</div>
+      <div class="tip"><strong>✦ Lint in CI</strong>Add <code>cursorrulespacks/cursor-lint-action</code> to GitHub Actions. Broken frontmatter silently breaks rules — catch it before it ships to the whole team.</div>
+      <div class="tip"><strong>✦ Validate with npx cursor-lint</strong>Run locally before committing. Catches malformed YAML, missing frontmatter, wrong extensions — all silent failure modes.</div>
+    </div>
+
+    <div class="card c-red">
+      <div class="card-title">❌ Anti-Patterns</div>
+      <div class="danger"><strong>⚠ Missing Closing ---</strong>The most common silent failure. YAML frontmatter must open AND close with <code>---</code>. No error, no warning — rule simply doesn't load.</div>
+      <div class="danger"><strong>⚠ Wrong File Extension</strong><code>rules.md</code> or <code>rules.txt</code> will never be picked up. Only <code>.mdc</code> files in <code>.cursor/rules/</code> are processed.</div>
+      <div class="danger"><strong>⚠ alwaysApply: true + Globs</strong>When <code>alwaysApply: true</code>, globs are completely ignored. The rule loads for every file regardless. Don't expect glob scoping to work with always-on rules.</div>
+      <div class="danger"><strong>⚠ Monolithic Rule File</strong>Putting all standards in one giant <code>rules.mdc</code> defeats glob scoping. TypeScript rules fire on Python files. Testing rules fire on config files.</div>
+      <div class="danger"><strong>⚠ Keeping .cursorrules alongside .mdc</strong>Having both causes confusion. The <code>.mdc</code> wins silently. People editing <code>.cursorrules</code> wonder why nothing changes. Delete the legacy file.</div>
+      <div class="danger"><strong>⚠ Vague Descriptions for Agent-Decision Mode</strong>Agent-decision rules rely entirely on the description for activation. "General coding help" = never activates. "Apply when writing React components with hooks" = activates correctly.</div>
+    </div>
+  </div>
+
+
+  <!-- ════════════ 09: QUICK REFERENCE ═════════════ -->
+  <div class="section-label" data-n="09">Complete Quick Reference</div>
+
+  <div class="card c-cyan fw">
+    <div class="card-title">📋 Cursor Rules Master Reference</div>
+    <table>
+      <thead>
+        <tr><th>Aspect</th><th>Detail</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Project location</td><td><code>.cursor/rules/*.mdc</code></td><td>Version-controlled — commit to git</td></tr>
+        <tr><td>Global location</td><td>Cursor Settings → Rules for AI</td><td>Plain text, no frontmatter, all projects</td></tr>
+        <tr><td>Subdirectory scope</td><td><code>subdir/.cursor/rules/*.mdc</code></td><td>Only active inside that subdirectory</td></tr>
+        <tr><td>File extension</td><td><code>.mdc</code> only</td><td><code>.md</code> or <code>.txt</code> are silently ignored</td></tr>
+        <tr><td>Legacy format</td><td><code>.cursorrules</code></td><td>Deprecated. .mdc wins on conflict. Migrate.</td></tr>
+        <tr><td>description field</td><td>string, optional</td><td>Used for agent-decision mode &amp; Settings UI</td></tr>
+        <tr><td>globs field</td><td>comma-separated string</td><td>Ignored when <code>alwaysApply: true</code></td></tr>
+        <tr><td>alwaysApply field</td><td>boolean (default: false)</td><td><code>true</code> = always loaded regardless of file</td></tr>
+        <tr><td>Always mode</td><td><code>alwaysApply: true</code></td><td>Universal standards, security non-negotiables</td></tr>
+        <tr><td>Auto-attach mode</td><td><code>globs:</code> + <code>alwaysApply: false</code></td><td>File-type or directory scoped rules</td></tr>
+        <tr><td>Manual mode</td><td>No globs, no alwaysApply</td><td>Invoke with <code>@rule-name</code> in chat/Cmd-K</td></tr>
+        <tr><td>Agent decision</td><td><code>description:</code> set</td><td>AI decides based on task relevance</td></tr>
+        <tr><td>Create via CLI</td><td><code>/rules</code> in CLI session</td><td>Added Jan 8 2026 CLI release</td></tr>
+        <tr><td>Lint locally</td><td><code>npx cursor-lint</code></td><td>Catches silent frontmatter failures</td></tr>
+        <tr><td>Lint in CI</td><td><code>cursorrulespacks/cursor-lint-action</code></td><td>GitHub Action — fails PR on broken rules</td></tr>
+        <tr><td>Conflict resolution</td><td>.mdc beats .cursorrules</td><td>No error emitted — silent override</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <span>CURSOR RULES CHEATSHEET &nbsp;·&nbsp; V1.0 → 2.4+ &nbsp;·&nbsp; FEB 2026 BY DTRAN + CLAUDE SONNET 4.6</span>
+    <span>cursor.com/docs/context/rules &nbsp;·&nbsp; .cursor/rules/ &nbsp;·&nbsp; npx cursor-lint</span>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cursor Agent Skills — Complete Cheatsheet</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bricolage+Grotesque:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root, [data-theme="dark"] {
+    --bg:       #070b10;
+    --bg2:      #0b1118;
+    --bg3:      #111820;
+    --bg4:      #161f2a;
+    --border:   #1c2635;
+    --border2:  #263345;
+    --text:     #ccd6e0;
+    --muted:    #607585;
+    --dim:      #2d3f52;
+    --cyan:     #00d4f5;
+    --purple:   #a78bfa;
+    --green:    #2eeba8;
+    --orange:   #f59e42;
+    --yellow:   #fcd34d;
+    --pink:     #f472b6;
+    --red:      #f87171;
+    --blue:     #60a5fa;
+    --code-bg:  #060a0f;
+    --heading:  #fff;
+    --scanline-color: rgba(0,212,245,0.012);
+    --glow1:    rgba(0,212,245,0.04);
+    --glow2:    rgba(167,139,250,0.04);
+  }
+  [data-theme="light"] {
+    --bg:       #f8fafc;
+    --bg2:      #f1f5f9;
+    --bg3:      #e2e8f0;
+    --bg4:      #cbd5e1;
+    --border:   #cbd5e1;
+    --border2:  #94a3b8;
+    --text:     #1e293b;
+    --muted:    #64748b;
+    --dim:      #94a3b8;
+    --cyan:     #0891b2;
+    --purple:   #7c3aed;
+    --green:    #059669;
+    --orange:   #d97706;
+    --yellow:   #ca8a04;
+    --pink:     #db2777;
+    --red:      #dc2626;
+    --blue:     #2563eb;
+    --code-bg:  #e2e8f0;
+    --heading:  #0f172a;
+    --scanline-color: rgba(0,0,0,0.02);
+    --glow1:    rgba(0,0,0,0.02);
+    --glow2:    rgba(0,0,0,0.02);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.65;
+    padding: 36px 20px 80px;
+  }
+
+  /* Scanline overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,212,245,0.012) 2px,
+      rgba(0,212,245,0.012) 4px
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Ambient glow */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 10% 0%,   rgba(0,212,245,0.04)   0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 90% 100%,  rgba(167,139,250,0.04) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 1280px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── HEADER ──────────────────────────────────── */
+  .header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 24px;
+    margin-bottom: 36px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  .eyebrow {
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .eyebrow::before { content: ''; width: 20px; height: 1px; background: var(--cyan); }
+
+  h1 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: clamp(32px, 5vw, 58px);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    color: #fff;
+  }
+  h1 em { font-style: normal; color: var(--cyan); }
+
+  .header-sub {
+    margin-top: 12px;
+    font-size: 11.5px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    max-width: 580px;
+  }
+
+  .meta-pills {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-end;
+  }
+
+  .pill {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    padding: 6px 14px;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    color: var(--muted);
+  }
+  .pill strong { color: var(--green); }
+
+  /* ── SECTION LABELS ──────────────────────────── */
+  .section-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 32px 0 14px;
+  }
+  .section-label::before { content: attr(data-n); color: var(--cyan); font-size: 11px; }
+  .section-label::after  { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ── GRIDS ───────────────────────────────────── */
+  .g2  { display: grid; grid-template-columns: repeat(auto-fit, minmax(520px, 1fr)); gap: 14px; margin-bottom: 14px; }
+  .g3  { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 14px; margin-bottom: 14px; }
+  .g4  { display: grid; grid-template-columns: repeat(auto-fit, minmax(255px, 1fr)); gap: 14px; margin-bottom: 14px; }
+  .fw  { margin-bottom: 14px; }
+
+  /* ── CARDS ───────────────────────────────────── */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--ac), transparent);
+  }
+
+  .c-cyan   { --ac: var(--cyan); }
+  .c-purple { --ac: var(--purple); }
+  .c-green  { --ac: var(--green); }
+  .c-orange { --ac: var(--orange); }
+  .c-yellow { --ac: var(--yellow); }
+  .c-pink   { --ac: var(--pink); }
+  .c-red    { --ac: var(--red); }
+  .c-blue   { --ac: var(--blue); }
+
+  .card-title {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ac);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .card-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ── CODE BLOCKS ─────────────────────────────── */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--ac, var(--cyan));
+    padding: 13px 16px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11.5px;
+    line-height: 1.75;
+    overflow-x: auto;
+    margin-bottom: 10px;
+  }
+  pre:last-child { margin-bottom: 0; }
+
+  .pre-label {
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 5px;
+    display: block;
+  }
+
+  /* token colours — matching previous sheets exactly */
+  .t-cm  { color: var(--muted); font-style: italic; }
+  .t-kw  { color: var(--pink); }
+  .t-st  { color: var(--green); }
+  .t-nm  { color: var(--orange); }
+  .t-fn  { color: var(--blue); }
+  .t-op  { color: var(--cyan); }
+  .t-h1  { color: #fff; font-weight: 700; }
+  .t-h2  { color: var(--cyan); }
+  .t-h3  { color: var(--purple); }
+  .t-bi  { color: var(--yellow); }
+  .t-sl  { color: var(--green); font-weight: 700; }
+  .hl    { background: rgba(0,212,245,0.06); display: block; margin: 0 -16px; padding: 0 16px; }
+
+  /* ── INLINE CODE ─────────────────────────────── */
+  code {
+    background: var(--bg4);
+    border: 1px solid var(--border2);
+    padding: 1px 5px;
+    font-size: 11px;
+    color: var(--cyan);
+  }
+
+  /* ── CALLOUTS ────────────────────────────────── */
+  .tip, .warn, .info {
+    padding: 9px 13px;
+    font-size: 11px;
+    margin-bottom: 8px;
+    border-left: 2px solid;
+    line-height: 1.7;
+  }
+  .tip  { background: rgba(46,235,168,0.04);  border-color: var(--green); }
+  .warn { background: rgba(248,113,113,0.04); border-color: var(--red); }
+  .info { background: rgba(0,212,245,0.04);   border-color: var(--cyan); }
+
+  .tip strong, .warn strong, .info strong {
+    display: block;
+    font-size: 8.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  .tip strong  { color: var(--green); }
+  .warn strong { color: var(--red); }
+  .info strong { color: var(--cyan); }
+
+  /* ── TABLE ───────────────────────────────────── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11.5px;
+    margin-bottom: 10px;
+  }
+  th {
+    text-align: left;
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--border2);
+  }
+  td {
+    padding: 7px 10px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.55;
+  }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { color: var(--cyan); white-space: nowrap; font-weight: 700; }
+  td:nth-child(2) { color: var(--muted); }
+  .req { color: var(--orange) !important; }
+  .opt { color: var(--muted) !important; }
+  .exp { color: var(--purple) !important; }
+
+  /* ── TAGS ────────────────────────────────────── */
+  .tag {
+    display: inline-block;
+    padding: 2px 7px;
+    font-size: 8.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 700;
+    border: 1px solid;
+    margin: 2px 3px 2px 0;
+  }
+  .tc { color: var(--cyan);   border-color: var(--cyan); }
+  .tp { color: var(--purple); border-color: var(--purple); }
+  .tg { color: var(--green);  border-color: var(--green); }
+  .to { color: var(--orange); border-color: var(--orange); }
+  .ty { color: var(--yellow); border-color: var(--yellow); }
+  .tk { color: var(--pink);   border-color: var(--pink); }
+  .tr { color: var(--red);    border-color: var(--red); }
+  .tb { color: var(--blue);   border-color: var(--blue); }
+
+  /* ── THREE-COLUMN COMPARE ────────────────────── */
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+  .compare-cell {
+    background: var(--code-bg);
+    padding: 12px 14px;
+  }
+  .compare-cell h4 {
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .compare-cell ul {
+    list-style: none;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.9;
+  }
+  .compare-cell ul li::before { content: '·  '; color: var(--dim); }
+
+  /* ── PROGRESSIVE DISCLOSURE TIERS ────────────── */
+  .tier-stack {
+    border: 1px solid var(--border);
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .tier {
+    display: flex;
+    align-items: stretch;
+    border-bottom: 1px solid var(--border);
+  }
+  .tier:last-child { border-bottom: none; }
+  .tier-num {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    padding: 8px 7px;
+    font-size: 8px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    color: #000;
+    font-weight: 700;
+  }
+  .tier-body {
+    padding: 10px 14px;
+    flex: 1;
+  }
+  .tier-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 3px;
+  }
+  .tier-desc { font-size: 11px; color: var(--muted); }
+  .tier-cost {
+    padding: 10px 14px;
+    border-left: 1px solid var(--border);
+    min-width: 130px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 2px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .tier-cost strong { color: var(--text); font-size: 12px; }
+
+  /* ── FILE TREE BOX ───────────────────────────── */
+  .tree-box {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--ac, var(--cyan));
+    padding: 13px 16px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11.5px;
+    line-height: 2;
+    margin-bottom: 10px;
+    overflow-x: auto;
+  }
+  .td { color: var(--orange); }        /* dir */
+  .tf { color: var(--green); }         /* file */
+  .ts { color: var(--cyan); }          /* script/special */
+  .tc2 { color: var(--muted); font-style: italic; } /* comment */
+
+  /* ── FLOW ROW ────────────────────────────────── */
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+    margin: 10px 0;
+  }
+  .fnode {
+    padding: 6px 12px;
+    font-size: 11px;
+    border: 1px solid var(--border2);
+    background: var(--bg3);
+    white-space: nowrap;
+  }
+  .fnode.c1 { border-color: var(--cyan);   color: var(--cyan); }
+  .fnode.c2 { border-color: var(--green);  color: var(--green); }
+  .fnode.c3 { border-color: var(--purple); color: var(--purple); }
+  .fnode.c4 { border-color: var(--orange); color: var(--orange); }
+  .farrow   { color: var(--dim); padding: 0 6px; font-size: 14px; }
+
+  /* ── CMD GRID (for quick reference) ─────────── */
+  .cmd-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .cmd-item {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 10px 13px;
+  }
+  .cmd-slash {
+    color: var(--cyan);
+    font-weight: 700;
+    font-size: 13px;
+    display: block;
+    margin-bottom: 3px;
+  }
+  .cmd-desc {
+    color: var(--muted);
+    font-size: 10.5px;
+    line-height: 1.55;
+  }
+
+  /* ── FOOTER ──────────────────────────────────── */
+  .footer {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 0.08em;
+  }
+
+  /* ── RESPONSIVE ──────────────────────────────── */
+  @media (max-width: 620px) {
+    .g2, .g3, .g4 { grid-template-columns: 1fr; }
+    .compare       { grid-template-columns: 1fr; }
+    .header        { grid-template-columns: 1fr; }
+    .meta-pills    { align-items: flex-start; }
+    .tier-cost     { display: none; }
+  }
+
+  /* ── THEME TOGGLE ────────────────────────────── */
+  .theme-link { color: var(--cyan); cursor: pointer; font-weight: 700; transition: all 0.2s ease; }
+  .theme-link:hover { color: var(--purple); }
+
+  /* ── ANIMATION ───────────────────────────────── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .card { animation: fadeUp 0.4s ease both; }
+  .card:nth-child(1){animation-delay:.04s}
+  .card:nth-child(2){animation-delay:.08s}
+  .card:nth-child(3){animation-delay:.12s}
+  .card:nth-child(4){animation-delay:.16s}
+</style>
+</head>
+<body>
+<script>
+(function(){
+  var t=localStorage.getItem('theme')||'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  window.addEventListener('DOMContentLoaded', function() {
+    var link=document.getElementById('theme-link');
+    if(link) link.textContent = t.toUpperCase();
+  });
+})();
+function toggleTheme() {
+  var h=document.documentElement;
+  var c=h.getAttribute('data-theme')||'dark';
+  var n=c==='light'?'dark':'light';
+  h.setAttribute('data-theme',n);
+  localStorage.setItem('theme',n);
+  var link=document.getElementById('theme-link');
+  if(link) link.textContent = n.toUpperCase();
+}
+</script>
+<div class="container">
+
+  <!-- ═══════════════════ HEADER ═════════════════════ -->
+  <div class="header">
+    <div>
+      <div class="eyebrow">Reference Sheet · Open Standard · v2.4+ · <span id="theme-link" class="theme-link" onclick="toggleTheme()">DARK</span></div>
+      <h1>Cursor <em>Agent Skills</em></h1>
+      <p class="header-sub">// Complete cheatsheet · SKILL.md spec · All frontmatter fields · Progressive disclosure · All scenario templates · Multi-platform portability</p>
+    </div>
+    <div class="meta-pills">
+      <div class="pill">Open standard <strong>Dec 18 2025</strong></div>
+      <div class="pill">Cursor native <strong>v2.4 · Jan 22 2026</strong></div>
+      <div class="pill">Works in <strong>20+ agents</strong></div>
+      <div class="pill">.cursor/skills/ · ~/.cursor/skills/</div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════ 01: WHAT ARE SKILLS ════════════ -->
+  <div class="section-label" data-n="01">What Are Agent Skills?</div>
+
+  <div class="g2 fw">
+
+    <!-- Skills vs Rules vs Commands -->
+    <div class="card c-cyan">
+      <div class="card-title">📐 Skills vs Rules vs Commands</div>
+      <p style="color:var(--muted);font-size:11.5px;margin-bottom:14px;">Skills are <strong style="color:var(--text)">domain-specific procedural knowledge</strong> — they teach the agent <em style="color:var(--cyan)">how</em> to perform a task. Unlike Rules (always-on constraints) or Commands (prompt templates), skills load <strong style="color:var(--text)">on-demand</strong> when relevant.</p>
+
+      <div class="compare">
+        <div class="compare-cell">
+          <h4 style="color:var(--cyan);">Skills</h4>
+          <ul>
+            <li>SKILL.md + dirs</li>
+            <li>On-demand (lazy)</li>
+            <li>How-to knowledge</li>
+            <li>Auto + /slash menu</li>
+            <li>Has scripts/ dir</li>
+            <li>Open standard</li>
+            <li>20+ agents</li>
+          </ul>
+        </div>
+        <div class="compare-cell">
+          <h4 style="color:var(--purple);">Rules</h4>
+          <ul>
+            <li>.cursor/rules/*.mdc</li>
+            <li>Always-on / matched</li>
+            <li>Style standards</li>
+            <li>Auto-applied</li>
+            <li>No scripts</li>
+            <li>Cursor only</li>
+            <li>Frontmatter driven</li>
+          </ul>
+        </div>
+        <div class="compare-cell">
+          <h4 style="color:var(--green);">Commands</h4>
+          <ul>
+            <li>.cursor/commands/*.md</li>
+            <li>Manual invoke</li>
+            <li>Saved prompts</li>
+            <li>Type /name</li>
+            <li>No scripts</li>
+            <li>Cursor only</li>
+            <li>No frontmatter</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="flow-row">
+        <div class="fnode c1">type /skill</div>
+        <div class="farrow">→</div>
+        <div class="fnode c2">agent matches description</div>
+        <div class="farrow">→</div>
+        <div class="fnode c3">SKILL.md body loaded</div>
+        <div class="farrow">→</div>
+        <div class="fnode c4">executes with knowledge</div>
+      </div>
+    </div>
+
+    <!-- Progressive Disclosure -->
+    <div class="card c-purple">
+      <div class="card-title">⚡ Progressive Disclosure — 3-Tier Loading</div>
+      <p style="color:var(--muted);font-size:11.5px;margin-bottom:12px;">Only what's needed gets loaded. Even with many skills installed, context windows stay lean.</p>
+
+      <div class="tier-stack">
+        <div class="tier">
+          <div class="tier-num" style="background:var(--cyan);">Tier 1</div>
+          <div class="tier-body">
+            <div class="tier-title">Discovery — Metadata always loaded at startup</div>
+            <div class="tier-desc">Agent reads <code>name</code> + <code>description</code> for <strong>all</strong> installed skills. Used to match skills to tasks automatically.</div>
+          </div>
+          <div class="tier-cost"><strong>~100 tokens</strong><span style="font-size:9px;">per skill, always</span></div>
+        </div>
+        <div class="tier">
+          <div class="tier-num" style="background:var(--green);">Tier 2</div>
+          <div class="tier-body">
+            <div class="tier-title">Activation — Full SKILL.md body loaded on match</div>
+            <div class="tier-desc">When description matches the task, the full instructions body is loaded. Keep this under 500 lines / 5 000 tokens.</div>
+          </div>
+          <div class="tier-cost"><strong>&lt;5 000 tokens</strong><span style="font-size:9px;">recommended max</span></div>
+        </div>
+        <div class="tier">
+          <div class="tier-num" style="background:var(--orange);">Tier 3</div>
+          <div class="tier-body">
+            <div class="tier-title">Resources — scripts/, references/, assets/ on demand</div>
+            <div class="tier-desc">Files referenced in the body are loaded only when explicitly needed. Small focused files = less context used.</div>
+          </div>
+          <div class="tier-cost"><strong>as needed</strong><span style="font-size:9px;">demand-loaded</span></div>
+        </div>
+      </div>
+
+      <div class="tip">
+        <strong>✦ Dual activation</strong>
+        Auto: agent keyword-matches description to your task. Manual: type <code>/skill-name</code> in Cursor v2.4+ slash menu, or say "use the X skill" explicitly.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════ 02: DIRECTORY STRUCTURE ══════════ -->
+  <div class="section-label" data-n="02">Directory Structure &amp; File Locations</div>
+
+  <div class="g2 fw">
+
+    <div class="card c-green">
+      <div class="card-title">📁 Skill Directory Layouts</div>
+      <span class="pre-label">Minimal — required only</span>
+      <div class="tree-box">
+<span class="td">skill-name/</span>
+└── <span class="tf">SKILL.md</span>          <span class="tc2"># Required · YAML front + instructions</span>
+      </div>
+
+      <span class="pre-label">Full — all optional directories</span>
+      <div class="tree-box">
+<span class="td">feature-release/</span>
+├── <span class="tf">SKILL.md</span>               <span class="tc2"># Entry point (required)</span>
+├── <span class="td">scripts/</span>               <span class="tc2"># Executable code</span>
+│   ├── <span class="ts">pre-release-check.sh</span>   <span class="tc2"># Bash, Python, JS</span>
+│   ├── <span class="ts">bump-version.sh</span>
+│   └── <span class="ts">tag-and-push.sh</span>
+├── <span class="td">references/</span>            <span class="tc2"># Detailed docs — loaded on demand</span>
+│   ├── <span class="ts">versioning-policy.md</span>
+│   ├── <span class="ts">release-checklist.md</span>
+│   └── <span class="ts">rollback-runbook.md</span>
+└── <span class="td">assets/</span>                <span class="tc2"># Templates, schemas, data</span>
+    ├── <span class="ts">changelog-template.md</span>
+    ├── <span class="ts">openapi-base.yaml</span>
+    └── <span class="ts">schema.json</span>
+      </div>
+
+      <div class="tip">
+        <strong>✦ name must match folder</strong>
+        <code>name: feature-release</code> must live in a folder <em>also</em> called <code>feature-release/</code>. Mismatch = silent failure.
+      </div>
+    </div>
+
+    <div class="card c-orange">
+      <div class="card-title">📍 Where to Place Skills</div>
+      <span class="pre-label">Project-level — version controlled with repo</span>
+      <div class="tree-box">
+<span class="td">your-project/</span>
+└── <span class="td">.cursor/</span>
+    └── <span class="td">skills/</span>           <span class="tc2"># Cursor v2.4 skills dir</span>
+        ├── <span class="td">deploy-preview/</span>
+        │   └── <span class="tf">SKILL.md</span>
+        ├── <span class="td">code-review/</span>
+        │   └── <span class="tf">SKILL.md</span>
+        └── <span class="td">db-migration/</span>
+            ├── <span class="tf">SKILL.md</span>
+            └── <span class="td">scripts/</span>
+      </div>
+
+      <span class="pre-label">Global — available across all projects</span>
+      <div class="tree-box">
+<span class="td">~/.cursor/</span>
+└── <span class="td">skills/</span>             <span class="tc2"># Personal global skills</span>
+    ├── <span class="td">security-audit/</span>
+    │   └── <span class="tf">SKILL.md</span>
+    └── <span class="td">weekly-report/</span>
+        └── <span class="tf">SKILL.md</span>
+      </div>
+
+      <span class="pre-label">Monorepo — scoped to subdirectory</span>
+      <div class="tree-box">
+<span class="td">frontend/</span>
+└── <span class="td">.cursor/skills/</span>   <span class="tc2"># Only active inside frontend/</span>
+    └── <span class="td">component-gen/</span>
+        └── <span class="tf">SKILL.md</span>
+      </div>
+
+      <div class="info">
+        <strong>ℹ Install CLI</strong>
+        <code>npx skills add pdf-processing</code> — auto-detects your agent and installs to the correct directory.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════ 03: SKILL.MD ANATOMY ════════════ -->
+  <div class="section-label" data-n="03">SKILL.md — Complete Anatomy</div>
+
+  <div class="g2 fw">
+
+    <!-- Full template -->
+    <div class="card c-cyan">
+      <div class="card-title">📄 Full SKILL.md Template</div>
+      <span class="pre-label">📁 .cursor/skills/my-skill/SKILL.md</span>
+      <pre><span class="t-cm">─── YAML FRONTMATTER (required) ──────────────────</span>
+<span class="t-op">---</span>
+<span class="t-nm">name</span>: <span class="t-st">my-skill-name</span>         <span class="t-cm"># kebab-case, 1-64 chars</span>
+                              <span class="t-cm"># MUST match parent folder name</span>
+<span class="t-nm">description</span>: <span class="t-st">&gt;-</span>              <span class="t-cm"># 1-1024 chars  ← CRITICAL</span>
+  <span class="t-st">What this skill does AND when to use it.</span>
+  <span class="t-st">Include trigger keywords: e.g. "Use when</span>
+  <span class="t-st">working with PDF files, forms, or document</span>
+  <span class="t-st">extraction tasks."</span>
+<span class="t-nm">license</span>: <span class="t-st">MIT</span>                 <span class="t-cm"># optional</span>
+<span class="t-nm">compatibility</span>: <span class="t-st">&gt;-</span>            <span class="t-cm"># optional: env requirements</span>
+  <span class="t-st">Requires git, docker, GITHUB_TOKEN env var.</span>
+  <span class="t-st">Designed for Cursor / Claude Code.</span>
+<span class="t-nm">metadata</span>:                    <span class="t-cm"># optional: arbitrary KV</span>
+  <span class="t-nm">author</span>: <span class="t-st">your-org</span>
+  <span class="t-nm">version</span>: <span class="t-st">"1.2"</span>
+  <span class="t-nm">category</span>: <span class="t-st">devops</span>
+<span class="t-nm">allowed-tools</span>: <span class="t-st">Bash(git:*) Read Write</span>  <span class="t-cm"># optional, experimental</span>
+<span class="t-op">---</span>
+<span class="t-cm">─── MARKDOWN BODY (instructions) ─────────────────</span>
+
+<span class="t-h1"># My Skill</span>
+
+<span class="t-h2">## When to Use</span>
+<span class="t-cm">Detailed trigger scenarios (backs up description).</span>
+
+<span class="t-h2">## Prerequisites</span>
+<span class="t-cm">- Tools, packages, or env vars needed</span>
+
+<span class="t-h2">## Steps</span>
+<span class="t-cm">1. First action (be specific)</span>
+<span class="t-cm">2. Second action</span>
+<span class="t-cm">3. Verification step</span>
+
+<span class="t-h2">## Rules &amp; Constraints</span>
+<span class="t-cm">- Hard rules the agent must follow</span>
+
+<span class="t-h2">## Output Format</span>
+<span class="t-cm">Exact format of expected output.</span>
+
+<span class="t-h2">## References</span>
+<span class="t-cm">See [detailed guide](references/REFERENCE.md)</span>
+<span class="t-cm">Run: scripts/execute.sh</span></pre>
+    </div>
+
+    <!-- Frontmatter fields reference -->
+    <div class="card c-yellow">
+      <div class="card-title">📋 Frontmatter Fields Reference</div>
+      <table>
+        <thead><tr><th>Field</th><th>Req?</th><th>Constraints &amp; Notes</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>name</td>
+            <td class="req">Required</td>
+            <td>1–64 chars. Lowercase + hyphens only. No leading/trailing hyphens. No <code>--</code>. Must match parent folder.</td>
+          </tr>
+          <tr>
+            <td>description</td>
+            <td class="req">Required</td>
+            <td>1–1024 chars. Describe WHAT + WHEN. Include trigger keywords. This is the routing logic — vague = never activates.</td>
+          </tr>
+          <tr>
+            <td>license</td>
+            <td class="opt">Optional</td>
+            <td>License identifier or path to bundled file. E.g. <code>MIT</code>, <code>Apache-2.0</code>, <code>LICENSE.txt</code>.</td>
+          </tr>
+          <tr>
+            <td>compatibility</td>
+            <td class="opt">Optional</td>
+            <td>1–500 chars. Environment requirements, required tools, OS, network. Omit if no special requirements.</td>
+          </tr>
+          <tr>
+            <td>metadata</td>
+            <td class="opt">Optional</td>
+            <td>Arbitrary key-value map. Use for <code>author</code>, <code>version</code>, <code>category</code>, <code>stack</code>. Unique keys to avoid collisions.</td>
+          </tr>
+          <tr>
+            <td>allowed-tools</td>
+            <td class="exp">Experimental</td>
+            <td>Space-delimited pre-approved tools. Syntax: <code>Bash(git:*)</code> <code>Read</code> <code>Write</code>. Support varies per agent.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="warn">
+        <strong>⚠ Name Validation — silent failures</strong>
+        <code>PDF-Processing</code> → invalid (uppercase) &nbsp;·&nbsp; <code>-pdf</code> → invalid (leading hyphen) &nbsp;·&nbsp; <code>pdf--proc</code> → invalid (consecutive hyphens). Validate: <code>skills-ref validate ./skill-name</code>
+      </div>
+
+      <div class="tip">
+        <strong>✦ Description is the only routing key</strong>
+        At discovery time, the agent reads <em>only</em> name + description for all skills. Include specific domain phrases users would naturally say: "migration", "deploy", "auth", "CSV", "refactor". The better the description, the more reliably the skill fires automatically.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ════════════ 04: SCENARIO TEMPLATES ═════════════ -->
+  <div class="section-label" data-n="04">Real-World Scenario Templates — All Use Cases</div>
+
+  <div class="g3 fw">
+
+    <!-- 01 Simple Knowledge -->
+    <div class="card c-cyan">
+      <div class="card-title">📚 Simple Knowledge / How-To</div>
+      <span class="tag tc">Knowledge</span><span class="tag tg">No Scripts</span>
+      <span class="pre-label" style="margin-top:10px;">.cursor/skills/git-workflow/SKILL.md</span>
+      <pre><span class="t-op">---</span>
+<span class="t-nm">name</span>: <span class="t-st">git-workflow</span>
+<span class="t-nm">description</span>: <span class="t-st">&gt;-</span>
+  <span class="t-st">Team git branching and commit</span>
+  <span class="t-st">conventions. Use when creating</span>
+  <span class="t-st">branches, writing commit messages,</span>
+  <span class="t-st">rebasing, or resolving git conflicts.</span>
+<span class="t-op">---</span>
+
+<span class="t-h1"># Git Workflow</span>
+
+<span class="t-h2">## Branch Naming</span>
+<span class="t-cm">feat/TICKET-123-short-description</span>
+<span class="t-cm">fix/TICKET-456-what-was-broken</span>
+<span class="t-cm">chore/update-deps</span>
+
+<span class="t-h2">## Commit Format</span>
+<span class="t-cm">type(scope): subject  ← 72 chars max</span>
+<span class="t-cm">Types: feat|fix|refactor|docs|chore</span>
+
+<span class="t-h2">## PR Rules</span>
+<span class="t-cm">- Squash commits before merge</span>
+<span class="t-cm">- One logical change per PR</span>
+<span class="t-cm">- Require 1 review approval</span></pre>
+      <div class="info">
+        <strong>ℹ Best for</strong>
+        Team conventions, architecture patterns, naming rules — anything you'd otherwise repeat in every prompt.
+      </div>
+    </div>
+
+    <!-- 02 Script-executing -->
+    <div class="card c-green">
+      <div class="card-title">⚙️ Script-Executing Skill</div>
+      <span class="tag tg">Scripts</span><span class="tag tc">Automation</span>
+      <span class="pre-label" style="margin-top:10px;">.cursor/skills/deploy-preview/SKILL.md</span>
+      <pre><span class="t-op">---</span>
+<span class="t-nm">name</span>: <span class="t-st">deploy-preview</span>
+<span class="t-nm">description</span>: <span class="t-st">&gt;-</span>
+  <span class="t-st">Deploy to preview / staging env.</span>
+  <span class="t-st">Use before sharing with stakeholders</span>
+  <span class="t-st">or requesting QA review.</span>
+<span class="t-nm">compatibility</span>: <span class="t-st">Requires docker, git,</span>
+  <span class="t-st">and VERCEL_TOKEN env var.</span>
+<span class="t-nm">allowed-tools</span>: <span class="t-st">Bash(git:*) Bash(docker:*) Read</span>
+<span class="t-op">---</span>
+
+<span class="t-h1"># Deploy Preview</span>
+
+<span class="t-h2">## Steps</span>
+<span class="t-cm">1. Run pre-deploy checks:</span>
+<span class="t-cm">   scripts/pre-deploy-check.sh</span>
+<span class="t-cm">2. Build the project:</span>
+<span class="t-cm">   scripts/build.sh</span>
+<span class="t-cm">3. Deploy to preview:</span>
+<span class="t-cm">   scripts/deploy-preview.sh</span>
+<span class="t-cm">4. Output the preview URL</span>
+
+<span class="t-h2">## On Failure</span>
+<span class="t-cm">- Show the failed step output</span>
+<span class="t-cm">- See references/troubleshoot.md</span>
+<span class="t-cm">- Rollback: scripts/rollback.sh</span></pre>
+    </div>
+
+    <!-- 03 Template-driven -->
+    <div class="card c-orange">
+      <div class="card-title">🗂 Template-Driven Output</div>
+      <span class="tag to">Assets</span><span class="tag tc">Templates</span>
+      <span class="pre-label" style="margin-top:10px;">.cursor/skills/pr-description/SKILL.md</span>
+      <pre><span class="t-op">---</span>
+<span class="t-nm">name</span>: <span class="t-st">pr-description</span>
+<span class="t-nm">description</span>: <span class="t-st">&gt;-</span>
+  <span class="t-st">Write detailed pull request</span>
+  <span class="t-st">descriptions. Use when creating a</span>
+  <span class="t-st">PR or documenting code changes.</span>
+<span class="t-op">---</span>
+
+<span class="t-h1"># PR Description</span>
+
+<span class="t-h2">## Steps</span>
+<span class="t-cm">1. Run `git diff main..HEAD`</span>
+<span class="t-cm">2. Analyze the change intent</span>
+<span class="t-cm">3. Fill in the PR template</span>
+
+<span class="t-h2">## Template</span>
+<span class="t-cm">Use: assets/pr-template.md</span>
+
+<span class="t-h2">## Commit Types</span>
+<span class="t-cm">See: assets/commit-types.md</span></pre>
+      <span class="pre-label" style="margin-top:10px;">📁 assets/pr-template.md</span>
+      <pre><span class="t-h2">## Summary</span>
+<span class="t-cm">[What changed and why]</span>
+
+<span class="t-h2">## Type of Change</span>
+<span class="t-cm">- [ ] feat / fix / refactor / docs</span>
+
+<span class="t-h2">## Testing</span>
+<span class="t-cm">[How this was verified]</span></pre>
+    </div>
+
+    <!-- 04 Domain-reference -->
+    <div class="card c-purple">
+      <div class="card-title">🔬 Domain-Reference Skill</div>
+      <span class="tag tp">References</span><span class="tag tc">Large Docs</span>
+      <span class="pre-label" style="margin-top:10px;">.cursor/skills/api-design/SKILL.md</span>
+      <pre><span class="t-op">---</span>
+<span class="t-nm">name</span>: <span class="t-st">api-design</span>
+<span class="t-nm">description</span>: <span class="t-st">&gt;-</span>
+  <span class="t-st">REST API design standards and OpenAPI</span>
+  <span class="t-st">documentation guidelines. Use when</span>
+  <span class="t-st">designing endpoints, writing API docs,</span>
+  <span class="t-st">or reviewing REST API structures.</span>
+<span class="t-op">---</span>
+
+<span class="t-h1"># API Design</span>
+
+<span class="t-h2">## Core Rules (inline)</span>
+<span class="t-cm">- Resources as nouns, never verbs</span>
+<span class="t-cm">- HTTP verbs for actions</span>
+<span class="t-cm">- Status: 200/201/204/400/401/404/422</span>
+
+<span class="t-h2">## Full Standards</span>
+<span class="t-cm">references/api-standards.md</span>
+
+<span class="t-h2">## OpenAPI Starter</span>
+<span class="t-cm">assets/openapi-base.yaml</span>
+
+<span class="t-h2">## Examples</span>
+<span class="t-cm">references/api-examples.md</span></pre>
+    </div>
+
+    <!-- 05 Testing workflow -->
+    <div class="card c-pink">
+      <div class="card-title">🧪 Testing Workflow</div>
+      <span class="tag tk">Testing</span><span class="tag tg">Scripts</span>
+      <span class="pre-label" style="margin-top:10px;">.cursor/skills/write-tests/SKILL.md</span>
+      <pre><span class="t-op">---</span>
+<span class="t-nm">name</span>: <span class="t-st">write-tests</span>
+<span class="t-nm">description</span>: <span class="t-st">&gt;-</span>
+  <span class="t-st">Write unit and integration tests.</span>
+  <span class="t-st">Use when adding tests, improving</span>
+  <span class="t-st">coverage, or when TDD is requested.</span>
+<span class="t-nm">metadata</span>:
+  <span class="t-nm">framework</span>: <span class="t-st">vitest</span>
+  <span class="t-nm">coverage-tool</span>: <span class="t-st">v8</span>
+<span class="t-op">---</span>
+
+<span class="t-h1"># Write Tests</span>
+
+<span class="t-h2">## Stack</span>
+<span class="t-cm">Vitest + Testing Library · MSW for mocks</span>
+
+<span class="t-h2">## Structure</span>
+<span class="t-cm">describe('Name', () => {</span>
+<span class="t-cm">  it('should [behavior]', () => {</span>
+<span class="t-cm">    // Arrange → Act → Assert</span>
+<span class="t-cm">  })</span>
+<span class="t-cm">})</span>
+
+<span class="t-h2">## Coverage Targets</span>
+<span class="t-cm">Unit:  80% line coverage</span>
+<span class="t-cm">Integ: happy + 2 error paths</span>
+<span class="t-cm">E2E:   critical user journeys</span>
+
+<span class="t-h2">## Run</span>
+<span class="t-cm">scripts/run-coverage.sh</span></pre>
+    </div>
+
+    <!-- 06 Security audit -->
+    <div class="card c-red">
+      <div class="card-title">🛡 Security Audit</div>
+      <span class="tag tr">Security</span><span class="tag tb">Read-only</span>
+      <span class="pre-label" style="margin-top:10px;">.cursor/skills/security-audit/SKILL.md</span>
+      <pre><span class="t-op">---</span>
+<span class="t-nm">name</span>: <span class="t-st">security-audit</span>
+<span class="t-nm">description</span>: <span class="t-st">&gt;-</span>
+  <span class="t-st">Security vulnerability review. Use</span>
+  <span class="t-st">when auditing auth flows, payment</span>
+  <span class="t-st">code, or before any security-sensitive</span>
+  <span class="t-st">feature merge.</span>
+<span class="t-nm">allowed-tools</span>: <span class="t-st">Read Grep Glob Bash(npm:*)</span>
+<span class="t-op">---</span>
+
+<span class="t-h1"># Security Audit</span>
+
+<span class="t-h2">## Checklist</span>
+<span class="t-cm">Full OWASP Top 10:</span>
+<span class="t-cm">references/owasp-checklist.md</span>
+
+<span class="t-h2">## Quick Scan</span>
+<span class="t-cm">scripts/quick-scan.sh</span>
+<span class="t-cm">(secrets, deps, known CVEs)</span>
+
+<span class="t-h2">## Report Format</span>
+<span class="t-cm">| Severity | Issue | File:Line | Fix |</span>
+<span class="t-cm">CRITICAL / HIGH / MEDIUM / LOW</span>
+<span class="t-cm">End: PASS or FAIL + top 3 actions</span>
+
+<span class="t-h2">## Deep Dives</span>
+<span class="t-cm">Auth:  references/auth-patterns.md</span>
+<span class="t-cm">SQLi:  references/db-safety.md</span></pre>
+    </div>
+
+    <!-- 07 DB migration -->
+    <div class="card c-blue">
+      <div class="card-title">🗄 Database Migration</div>
+      <span class="tag tb">Database</span><span class="tag tr">Careful</span>
+      <span class="pre-label" style="margin-top:10px;">.cursor/skills/db-migration/SKILL.md</span>
+      <pre><span class="t-op">---</span>
+<span class="t-nm">name</span>: <span class="t-st">db-migration</span>
+<span class="t-nm">description</span>: <span class="t-st">&gt;-</span>
+  <span class="t-st">Create and validate database schema</span>
+  <span class="t-st">migrations. Use when changing schema,</span>
+  <span class="t-st">adding tables, altering columns, or</span>
+  <span class="t-st">managing migration files.</span>
+<span class="t-nm">compatibility</span>: <span class="t-st">PostgreSQL. Needs DATABASE_URL.</span>
+<span class="t-op">---</span>
+
+<span class="t-h1"># DB Migration</span>
+
+<span class="t-h2">## Safety Rules</span>
+<span class="t-cm">- NEVER drop without 2-phase plan</span>
+<span class="t-cm">- Always write DOWN migration</span>
+<span class="t-cm">- Index every new foreign key</span>
+<span class="t-cm">- Large tables: batched approach</span>
+
+<span class="t-h2">## Template</span>
+<span class="t-cm">assets/migration-template.sql</span>
+
+<span class="t-h2">## Validate</span>
+<span class="t-cm">scripts/validate-migration.sh</span>
+
+<span class="t-h2">## Rollback</span>
+<span class="t-cm">scripts/rollback-migration.sh</span></pre>
+    </div>
+
+    <!-- 08 Code analysis -->
+    <div class="card c-cyan">
+      <div class="card-title">🔍 Code Analysis / Refactor</div>
+      <span class="tag tc">Analysis</span><span class="tag tg">Read-only</span>
+      <span class="pre-label" style="margin-top:10px;">.cursor/skills/code-analysis/SKILL.md</span>
+      <pre><span class="t-op">---</span>
+<span class="t-nm">name</span>: <span class="t-st">code-analysis</span>
+<span class="t-nm">description</span>: <span class="t-st">&gt;-</span>
+  <span class="t-st">Deep code quality analysis and</span>
+  <span class="t-st">refactoring recommendations. Use when</span>
+  <span class="t-st">reviewing architecture, identifying</span>
+  <span class="t-st">tech debt, or planning a refactor.</span>
+<span class="t-nm">allowed-tools</span>: <span class="t-st">Read Grep Glob</span>
+<span class="t-op">---</span>
+
+<span class="t-h1"># Code Analysis</span>
+
+<span class="t-h2">## Dimensions</span>
+<span class="t-cm">1. Coupling    — tight dependencies?</span>
+<span class="t-cm">2. Cohesion    — single-purpose?</span>
+<span class="t-cm">3. Complexity  — cyclomatic score?</span>
+<span class="t-cm">4. Duplication — DRY violations?</span>
+<span class="t-cm">5. Coverage    — blind spots?</span>
+
+<span class="t-h2">## Report</span>
+<span class="t-cm">## Executive Summary
+## Tech Debt Map (table)
+## Priority Refactors (top 5)
+## Estimated Effort per item</span>
+
+<span class="t-h2">## Patterns Guide</span>
+<span class="t-cm">references/refactor-patterns.md</span></pre>
+    </div>
+
+    <!-- 09 Data pipeline -->
+    <div class="card c-yellow">
+      <div class="card-title">📊 Data Processing Pipeline</div>
+      <span class="tag ty">Data</span><span class="tag tp">Scripts</span>
+      <span class="pre-label" style="margin-top:10px;">.cursor/skills/data-pipeline/SKILL.md</span>
+      <pre><span class="t-op">---</span>
+<span class="t-nm">name</span>: <span class="t-st">data-pipeline</span>
+<span class="t-nm">description</span>: <span class="t-st">&gt;-</span>
+  <span class="t-st">Data ingestion, transformation, and</span>
+  <span class="t-st">validation pipelines. Use when</span>
+  <span class="t-st">processing CSVs, ETL tasks, data</span>
+  <span class="t-st">quality checks, or BigQuery work.</span>
+<span class="t-nm">metadata</span>:
+  <span class="t-nm">stack</span>: <span class="t-st">Python, pandas, BigQuery</span>
+<span class="t-op">---</span>
+
+<span class="t-h1"># Data Pipeline</span>
+
+<span class="t-h2">## Stages</span>
+<span class="t-cm">1. Ingest  — validate source schema</span>
+<span class="t-cm">   scripts/validate-schema.py</span>
+<span class="t-cm">2. Transform — business rules</span>
+<span class="t-cm">   references/transform-rules.md</span>
+<span class="t-cm">3. Load    — write to destination</span>
+<span class="t-cm">4. QA      — data quality checks</span>
+<span class="t-cm">   scripts/dq-checks.py</span>
+
+<span class="t-h2">## Schemas</span>
+<span class="t-cm">assets/schemas/  — JSON schemas</span>
+<span class="t-cm">for all input/output formats</span></pre>
+    </div>
+
+    <!-- 10 Docs generation -->
+    <div class="card c-green">
+      <div class="card-title">📖 Documentation Generation</div>
+      <span class="tag tg">Docs</span><span class="tag tc">Read-only</span>
+      <span class="pre-label" style="margin-top:10px;">.cursor/skills/generate-docs/SKILL.md</span>
+      <pre><span class="t-op">---</span>
+<span class="t-nm">name</span>: <span class="t-st">generate-docs</span>
+<span class="t-nm">description</span>: <span class="t-st">&gt;-</span>
+  <span class="t-st">Generate API docs, READMEs, and</span>
+  <span class="t-st">inline documentation. Use when asked</span>
+  <span class="t-st">to write docs, update API reference,</span>
+  <span class="t-st">or improve JSDoc / docstrings.</span>
+<span class="t-nm">allowed-tools</span>: <span class="t-st">Read Grep Glob Write</span>
+<span class="t-op">---</span>
+
+<span class="t-h1"># Generate Docs</span>
+
+<span class="t-h2">## Detect Format</span>
+<span class="t-cm">TypeScript → TSDoc  (/** */)</span>
+<span class="t-cm">Python     → Google-style docstrings</span>
+<span class="t-cm">REST API   → OpenAPI 3.0</span>
+
+<span class="t-h2">## README Template</span>
+<span class="t-cm">assets/readme-template.md</span>
+
+<span class="t-h2">## Quality Bar</span>
+<span class="t-cm">Every export must have: purpose,</span>
+<span class="t-cm">all params with types, return type,</span>
+<span class="t-cm">1 usage example, error cases</span></pre>
+    </div>
+
+    <!-- 11 Monorepo-scoped -->
+    <div class="card c-purple">
+      <div class="card-title">🏢 Monorepo-Scoped Skill</div>
+      <span class="tag tp">Monorepo</span><span class="tag tc">Scoped</span>
+      <span class="pre-label" style="margin-top:10px;">frontend/.cursor/skills/component-gen/SKILL.md</span>
+      <pre><span class="t-op">---</span>
+<span class="t-nm">name</span>: <span class="t-st">component-gen</span>
+<span class="t-nm">description</span>: <span class="t-st">&gt;-</span>
+  <span class="t-st">Generate React components following</span>
+  <span class="t-st">this app's design system. Use when</span>
+  <span class="t-st">creating UI components, pages, or</span>
+  <span class="t-st">layouts in the frontend package.</span>
+<span class="t-nm">metadata</span>:
+  <span class="t-nm">scope</span>: <span class="t-st">frontend</span>
+  <span class="t-nm">stack</span>: <span class="t-st">React 19, Tailwind, shadcn/ui</span>
+<span class="t-op">---</span>
+
+<span class="t-h1"># Component Generator</span>
+
+<span class="t-h2">## File Structure</span>
+<span class="t-cm">src/components/[Name]/</span>
+<span class="t-cm">  index.tsx        ← export</span>
+<span class="t-cm">  [name].tsx       ← impl</span>
+<span class="t-cm">  [name].test.tsx</span>
+<span class="t-cm">  [name].stories.tsx</span>
+
+<span class="t-h2">## Templates</span>
+<span class="t-cm">assets/component-template.tsx</span>
+<span class="t-cm">references/design-tokens.md</span></pre>
+      <div class="tip">
+        <strong>✦ Monorepo scoping</strong>
+        Skills in <code>frontend/.cursor/skills/</code> are only discovered when working inside that subdirectory — perfect for per-package conventions.
+      </div>
+    </div>
+
+    <!-- 12 Composite full-featured -->
+    <div class="card c-orange">
+      <div class="card-title">🎯 Composite Full-Featured Skill</div>
+      <span class="tag to">All Dirs</span><span class="tag tr">Production</span>
+      <div class="tree-box" style="margin-top:10px;">
+<span class="td">feature-release/</span>
+├── <span class="tf">SKILL.md</span>               <span class="tc2"># Orchestrates all dirs</span>
+├── <span class="td">scripts/</span>
+│   ├── <span class="ts">pre-release-check.sh</span>
+│   ├── <span class="ts">bump-version.sh</span>
+│   ├── <span class="ts">create-changelog.sh</span>
+│   └── <span class="ts">tag-and-push.sh</span>
+├── <span class="td">references/</span>
+│   ├── <span class="ts">versioning-policy.md</span>
+│   ├── <span class="ts">release-checklist.md</span>
+│   └── <span class="ts">rollback-runbook.md</span>
+└── <span class="td">assets/</span>
+    ├── <span class="ts">changelog-template.md</span>
+    ├── <span class="ts">release-notes.md</span>
+    └── <span class="ts">semver-table.md</span>
+      </div>
+      <pre><span class="t-op">---</span>
+<span class="t-nm">name</span>: <span class="t-st">feature-release</span>
+<span class="t-nm">description</span>: <span class="t-st">&gt;-</span>
+  <span class="t-st">Full release workflow: version bump,</span>
+  <span class="t-st">changelog, tagging, and release notes.</span>
+  <span class="t-st">Use when preparing a release, tagging</span>
+  <span class="t-st">a version, or asked to "cut a release".</span>
+<span class="t-nm">compatibility</span>: <span class="t-st">Requires git, npm, GITHUB_TOKEN</span>
+<span class="t-nm">metadata</span>:
+  <span class="t-nm">category</span>: <span class="t-st">release-management</span>
+  <span class="t-nm">version</span>: <span class="t-st">"2.1"</span>
+<span class="t-nm">allowed-tools</span>: <span class="t-st">Bash(git:*) Bash(npm:*) Read Write</span>
+<span class="t-op">---</span></pre>
+    </div>
+
+  </div>
+
+
+  <!-- ════════════ 05: INSTALLATION ═══════════════════ -->
+  <div class="section-label" data-n="05">Installation &amp; Invocation</div>
+
+  <div class="g2 fw">
+
+    <div class="card c-blue">
+      <div class="card-title">📦 Installing Skills</div>
+      <pre><span class="t-cm">── Method 1: Vercel Skills CLI (recommended) ───────</span>
+<span class="t-fn">npx</span> skills                       <span class="t-cm"># interactive picker</span>
+<span class="t-fn">npx</span> skills add <span class="t-st">pdf-processing</span>    <span class="t-cm"># from registry by name</span>
+<span class="t-fn">npx</span> skills add <span class="t-st">github.com/org/repo/path</span>
+<span class="t-fn">npx</span> skills list                   <span class="t-cm"># list installed</span>
+<span class="t-fn">npx</span> skills remove <span class="t-st">pdf-processing</span>
+
+<span class="t-cm">── Method 2: agentskills.io registry ───────────────</span>
+<span class="t-fn">npx</span> <span class="t-st">@agentskills/cli</span> install <span class="t-st">pdf-processing</span>
+
+<span class="t-cm">── Method 3: Manual copy ────────────────────────── </span>
+<span class="t-fn">cp</span> -r skill-folder/ .cursor/skills/
+
+<span class="t-cm">── Method 4: Git submodule (team shared) ───────────</span>
+<span class="t-fn">git</span> submodule add \
+  https://github.com/org/skills.git \
+  .cursor/skills/org-skills
+
+<span class="t-cm">── Method 5: Validate before using ─────────────── </span>
+<span class="t-fn">skills-ref</span> validate .cursor/skills/my-skill
+<span class="t-cm"># ✓ Frontmatter valid</span>
+<span class="t-cm"># ✓ Name matches directory</span>
+<span class="t-cm"># ✓ Description non-empty</span></pre>
+    </div>
+
+    <div class="card c-green">
+      <div class="card-title">🔁 Invocation Patterns</div>
+      <pre><span class="t-cm">── Auto-activation (implicit) ──────────────────────</span>
+<span class="t-cm"># Agent reads ALL descriptions on startup.</span>
+<span class="t-cm"># Matches keywords to your request → activates.</span>
+
+<span class="t-cm">User: "Can you write tests for AuthService?"</span>
+<span class="t-cm">Agent: [activates write-tests skill]</span>
+<span class="t-cm">       description had "write unit and</span>
+<span class="t-cm">       integration tests" keywords</span>
+
+<span class="t-cm">── Explicit slash invoke (Cursor v2.4+) ────────────</span>
+<span class="t-sl">/write-tests</span>        <span class="t-cm"># forces activation</span>
+<span class="t-sl">/deploy-preview</span>     <span class="t-cm"># type / to see dropdown</span>
+<span class="t-sl">/security-audit</span>     <span class="t-cm"># explicit, always reliable</span>
+
+<span class="t-cm">── In-prompt explicit reference ────────────────────</span>
+<span class="t-cm">"Use the deploy-preview skill to push this"</span>
+<span class="t-cm">"Apply the api-design skill to this route"</span>
+<span class="t-cm">"Follow the git-workflow skill conventions"</span>
+
+<span class="t-cm">── Combining multiple skills ────────────────────── </span>
+<span class="t-cm">"Write tests (write-tests skill) then</span>
+<span class="t-cm"> document them (generate-docs skill)"</span></pre>
+      <div class="tip">
+        <strong>✦ Reliability tip</strong>
+        Implicit auto-activation requires precise keywords in the description. For guaranteed activation, always use the explicit slash command or name the skill in your prompt.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ════════════ 06: BEST PRACTICES ═════════════════ -->
+  <div class="section-label" data-n="06">Best Practices &amp; Anti-Patterns</div>
+
+  <div class="g2 fw">
+
+    <div class="card c-green">
+      <div class="card-title">✅ Best Practices</div>
+      <div class="tip"><strong>✦ Description = Routing Logic</strong>Write WHAT + WHEN. Include specific trigger keywords: "CSV", "migration", "deploy", "auth", "refactor". The agent's only signal during discovery.</div>
+      <div class="tip"><strong>✦ Keep SKILL.md under 500 lines</strong>Move long material to <code>references/</code>. Point to it explicitly. Agent loads those files only when needed, keeping context tight.</div>
+      <div class="tip"><strong>✦ Name Must Match Folder</strong>Always validate with <code>skills-ref validate ./skill-name</code> before committing. Name mismatch silently breaks loading.</div>
+      <div class="tip"><strong>✦ Reference Files Explicitly</strong>Write exact paths: "See <code>references/edge-cases.md</code>". Explicit references tell the agent the file exists and when to load it.</div>
+      <div class="tip"><strong>✦ Self-Contained Scripts</strong>Scripts should include error codes, helpful messages, and document all required env vars in the <code>compatibility</code> field.</div>
+      <div class="tip"><strong>✦ Use metadata for Discoverability</strong>Add <code>author</code>, <code>version</code>, <code>category</code> to <code>metadata</code> — makes skill libraries easier to audit and manage over time.</div>
+    </div>
+
+    <div class="card c-red">
+      <div class="card-title">❌ Anti-Patterns</div>
+      <div class="warn"><strong>⚠ Vague Description</strong>"Helps with code." → never auto-activates. Be specific about tasks, domains, and keywords users would naturally use.</div>
+      <div class="warn"><strong>⚠ Invalid Name Format</strong><code>name: PDF-Processing</code> fails silently — uppercase not allowed. Only lowercase letters and hyphens. No leading/trailing/consecutive hyphens.</div>
+      <div class="warn"><strong>⚠ Name / Folder Mismatch</strong><code>name: code-review</code> inside folder <code>codeReview/</code> → silent failure. Name must exactly match folder name.</div>
+      <div class="warn"><strong>⚠ Embedding Everything in SKILL.md</strong>A 2 000-line SKILL.md loads entirely into context on every activation. Move deep content to <code>references/</code> — load it on demand.</div>
+      <div class="warn"><strong>⚠ Scripts Without Error Handling</strong>Scripts that fail silently leave the agent confused. Always include exit codes and descriptive error messages.</div>
+      <div class="warn"><strong>⚠ Confusing Skills with Rules</strong>Always-on constraints (formatting, naming) belong in <code>.cursor/rules/</code>. Skills are for on-demand procedural know-how, not persistent standards.</div>
+    </div>
+  </div>
+
+
+  <!-- ════════════ 07: QUICK REFERENCE ════════════════ -->
+  <div class="section-label" data-n="07">Complete Quick Reference</div>
+
+  <div class="card c-cyan fw">
+    <div class="card-title">📋 Skills Master Reference Table</div>
+    <table>
+      <thead>
+        <tr><th>Aspect</th><th>Detail</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Project location</td><td><code>.cursor/skills/skill-name/SKILL.md</code></td><td>Version-controlled with repo</td></tr>
+        <tr><td>Global location</td><td><code>~/.cursor/skills/skill-name/SKILL.md</code></td><td>Available across all projects</td></tr>
+        <tr><td>name format</td><td>1–64 chars, lowercase, hyphens only</td><td>Must exactly match parent folder name</td></tr>
+        <tr><td>description</td><td>1–1024 chars, what + when</td><td>Primary routing key — be specific with keywords</td></tr>
+        <tr><td>SKILL.md size</td><td>Recommended &lt;500 lines</td><td>Larger = more context on every activation</td></tr>
+        <tr><td>Tier 1 load cost</td><td>~100 tokens per skill</td><td>Name + description, always loaded at startup</td></tr>
+        <tr><td>Tier 2 load cost</td><td>&lt;5 000 tokens recommended</td><td>Full SKILL.md body loaded on activation</td></tr>
+        <tr><td>scripts/</td><td>Python, Bash, JS supported</td><td>Self-contained; document all dependencies</td></tr>
+        <tr><td>references/</td><td>Markdown documentation files</td><td>Loaded on demand; keep files focused and small</td></tr>
+        <tr><td>assets/</td><td>Templates, schemas, data files</td><td>Loaded on demand</td></tr>
+        <tr><td>allowed-tools</td><td>Space-delimited tool list</td><td>Experimental — support varies per agent</td></tr>
+        <tr><td>Validate</td><td><code>skills-ref validate ./skill-name</code></td><td>Checks frontmatter + naming conventions</td></tr>
+        <tr><td>Install CLI</td><td><code>npx skills add &lt;name&gt;</code></td><td>Vercel Skills CLI — auto-detects agent</td></tr>
+        <tr><td>Slash invoke</td><td><code>/skill-name</code> in Cursor chat</td><td>v2.4+ only — type / to see dropdown</td></tr>
+        <tr><td>Platform support</td><td>Cursor · Claude Code · Copilot · 20+</td><td>Open standard — Dec 18 2025</td></tr>
+        <tr><td>Monorepo scope</td><td>Skills in subdirs active locally</td><td>Per-package skill libraries supported</td></tr>
+        <tr><td>Priority order</td><td>Project &gt; Global &gt; Built-in</td><td>Same-name skills: project wins</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <span>CURSOR AGENT SKILLS CHEATSHEET &nbsp;·&nbsp; OPEN STANDARD · V2.4+ · FEB 2026 BY DTRAN + CLAUDE SONNET 4.6</span>
+    <span>agentskills.io/specification &nbsp;·&nbsp; .cursor/skills/ &nbsp;·&nbsp; ~/.cursor/skills/</span>
+  </div>
+
+</div>
+</body>
+</html>

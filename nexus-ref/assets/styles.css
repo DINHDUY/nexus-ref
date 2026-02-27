@@ -140,13 +140,79 @@ body::before {
   height: 100vh;
   background: #070c1a; /* always dark */
   border-right: 1px solid rgba(0, 212, 255, 0.12);
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
   overflow: hidden;
   position: relative;
   z-index: 50;
-  transition: transform var(--t-base);
+  transition: transform var(--t-base), width var(--t-base);
 }
+
+/* Resize handle */
+.sidebar-resize-handle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 4px;
+  height: 100%;
+  cursor: ew-resize;
+  background: transparent;
+  transition: background var(--t-fast);
+  z-index: 10;
+}
+
+.sidebar-resize-handle:hover {
+  background: rgba(0,212,255,0.3);
+}
+
+/* Minimized state */
+.sidebar.minimized {
+  width: 56px !important;
+  overflow: hidden;
+}
+
+.sidebar.minimized .sidebar-logo-text,
+.sidebar.minimized .sidebar-search,
+.sidebar.minimized .nav-item-body,
+.sidebar.minimized .nav-item-count,
+.sidebar.minimized .nav-category-label,
+.sidebar.minimized .status-label {
+  display: none;
+}
+
+.sidebar.minimized .sidebar-logo {
+  justify-content: center;
+  padding: 1rem 0.5rem;
+}
+
+.sidebar.minimized .nav-category {
+  padding: 0.4rem 0.5rem;
+  justify-content: center;
+}
+
+.sidebar.minimized .nav-category-icon {
+  margin: 0;
+}
+
+.sidebar.minimized .nav-item {
+  justify-content: center;
+  padding: 0.6rem 0.5rem;
+}
+
+.sidebar.minimized .nav-item-icon {
+  margin: 0;
+}
+
+.sidebar.minimized .sidebar-footer {
+  justify-content: center;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.sidebar.minimized .sidebar-resize-handle {
+  display: none;
+}
+
 
 /* Grid texture */
 .sidebar::before {
@@ -246,21 +312,43 @@ body::before {
 /* ---- Nav ---- */
 .sidebar-nav {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding: 0.5rem 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .nav-category {
   padding: 0.6rem 1rem 0.25rem;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  transition: background var(--t-fast);
+}
+
+.nav-category:hover {
+  background: rgba(0,212,255,0.03);
+}
+
+.nav-category-icon {
+  font-size: 0.7rem;
+  color: var(--cyan);
+  width: 12px;
+  display: inline-block;
+  transition: transform var(--t-fast);
 }
 
 .nav-category-label {
   font-family: var(--font-code);
-  font-size: 0.58rem;
+  font-size: 0.68rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #4d6480;
-  display: block;
+  color: var(--text-2);
+  flex: 1;
 }
 
 .nav-item {
@@ -273,6 +361,7 @@ body::before {
   transition: background var(--t-fast), border-color var(--t-fast), color var(--t-fast);
   margin: 0.1rem 0;
   position: relative;
+  flex-shrink: 0;
 }
 
 .nav-item:hover {
@@ -331,11 +420,45 @@ body::before {
 /* ---- Sidebar Footer ---- */
 .sidebar-footer {
   padding: 0.75rem 1rem;
-  border-top: 1px solid rgba(0,212,255,0.1);
+  border-top: 1px solid rgba(0,212,255,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-family: var(--font-code);
+  font-size: 0.62rem;
+  color: #4d6480;
+  letter-spacing: 0.05em;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.sidebar-footer-status {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  flex-shrink: 0;
+}
+
+.sidebar-toggle-btn {
+  background: rgba(0,212,255,0.08);
+  border: 1px solid rgba(0,212,255,0.15);
+  color: var(--cyan);
+  padding: 0.35rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1;
+  transition: all var(--t-fast);
+  font-family: var(--font-code);
+}
+
+.sidebar-toggle-btn:hover {
+  background: rgba(0,212,255,0.15);
+  border-color: rgba(0,212,255,0.3);
+}
+
+.sidebar-toggle-btn:active {
+  transform: scale(0.95);
 }
 
 .status-dot {
@@ -568,6 +691,15 @@ body::before {
   background: var(--panel-1);
   position: relative;
   overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.sheet-header.hidden {
+  display: none;
+  height: 0;
+  padding: 0;
+  border: none;
+  overflow: hidden;
 }
 
 /* Decorative corner glow */
@@ -690,6 +822,26 @@ body::before {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
   gap: 1rem;
+}
+
+/* ---- iframe Container (for HTML sheets) ---- */
+.iframe-container {
+  grid-column: 1 / -1;
+  width: 100%;
+  height: calc(100vh - 220px);
+  min-height: 600px;
+  background: var(--panel-1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.iframe-container iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+  background: #fff;
 }
 
 /* ---- Section Card ---- */
@@ -835,11 +987,16 @@ body::before {
     height: 100vh;
     z-index: 50;
     transform: translateX(-100%);
+    width: 280px !important;
   }
 
   .sidebar.open { transform: translateX(0); }
 
   .sidebar-overlay.visible { display: block; }
+
+  .sidebar-resize-handle { display: none !important; }
+  
+  .sidebar-toggle-btn { display: none; }
 
   .main { height: 100vh; }
 

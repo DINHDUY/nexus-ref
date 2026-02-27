@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How AI Models Work — Context Window</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bricolage+Grotesque:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root, [data-theme="dark"] {
+    --bg:       #070b10;
+    --bg2:      #0b1118;
+    --bg3:      #111820;
+    --bg4:      #161f2a;
+    --border:   #1c2635;
+    --border2:  #263345;
+    --text:     #ccd6e0;
+    --muted:    #607585;
+    --dim:      #2d3f52;
+    --cyan:     #00d4f5;
+    --purple:   #a78bfa;
+    --green:    #2eeba8;
+    --orange:   #f59e42;
+    --yellow:   #fcd34d;
+    --pink:     #f472b6;
+    --red:      #f87171;
+    --blue:     #60a5fa;
+    --code-bg:  #060a0f;
+    --heading:  #fff;
+    --scanline-color: rgba(0,212,245,0.012);
+    --glow1:    rgba(0,212,245,0.04);
+    --glow2:    rgba(167,139,250,0.04);
+  }
+  [data-theme="light"] {
+    --bg:       #f8fafc;
+    --bg2:      #f1f5f9;
+    --bg3:      #e2e8f0;
+    --bg4:      #cbd5e1;
+    --border:   #cbd5e1;
+    --border2:  #94a3b8;
+    --text:     #1e293b;
+    --muted:    #64748b;
+    --dim:      #94a3b8;
+    --cyan:     #0891b2;
+    --purple:   #7c3aed;
+    --green:    #059669;
+    --orange:   #d97706;
+    --yellow:   #ca8a04;
+    --pink:     #db2777;
+    --red:      #dc2626;
+    --blue:     #2563eb;
+    --code-bg:  #e2e8f0;
+    --heading:  #0f172a;
+    --scanline-color: rgba(0,0,0,0.02);
+    --glow1:    rgba(0,0,0,0.02);
+    --glow2:    rgba(0,0,0,0.02);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.65;
+    padding: 36px 20px 80px;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 2px,
+      rgba(0,212,245,0.012) 2px, rgba(0,212,245,0.012) 4px
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 10% 0%,   rgba(0,212,245,0.04)   0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 90% 100%,  rgba(167,139,250,0.04) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 1280px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── HEADER ──────────────────────────────────── */
+  .header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 24px;
+    margin-bottom: 36px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  .eyebrow {
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .eyebrow::before { content: ''; width: 20px; height: 1px; background: var(--cyan); }
+
+  h1 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: clamp(28px, 5vw, 52px);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    color: #fff;
+  }
+  h1 em { font-style: normal; color: var(--cyan); }
+
+  .header-sub {
+    margin-top: 12px;
+    font-size: 11.5px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    max-width: 580px;
+  }
+
+  .meta-pills { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+  .pill {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    padding: 6px 14px;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    color: var(--muted);
+  }
+  .pill strong { color: var(--green); }
+
+  /* ── SECTION LABELS ──────────────────────────── */
+  .section-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 32px 0 14px;
+  }
+  .section-label::before { content: attr(data-n); color: var(--cyan); font-size: 11px; }
+  .section-label::after  { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ── GRIDS ───────────────────────────────────── */
+  .g2  { display: grid; grid-template-columns: repeat(auto-fit, minmax(520px, 1fr)); gap: 14px; margin-bottom: 14px; }
+  .g3  { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 14px; margin-bottom: 14px; }
+  .g4  { display: grid; grid-template-columns: repeat(auto-fit, minmax(255px, 1fr)); gap: 14px; margin-bottom: 14px; }
+  .fw  { margin-bottom: 14px; }
+
+  /* ── CARDS ───────────────────────────────────── */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--ac), transparent);
+  }
+
+  .c-cyan   { --ac: var(--cyan); }
+  .c-purple { --ac: var(--purple); }
+  .c-green  { --ac: var(--green); }
+  .c-orange { --ac: var(--orange); }
+  .c-yellow { --ac: var(--yellow); }
+  .c-pink   { --ac: var(--pink); }
+  .c-red    { --ac: var(--red); }
+  .c-blue   { --ac: var(--blue); }
+
+  .card-title {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ac);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .card-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ── PROSE ───────────────────────────────────── */
+  .prose {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 12px;
+  }
+  .prose strong { color: var(--text); }
+  .prose em     { color: var(--cyan); font-style: normal; }
+
+  /* ── CODE BLOCKS ─────────────────────────────── */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--ac, var(--cyan));
+    padding: 13px 16px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11.5px;
+    line-height: 1.75;
+    overflow-x: auto;
+    margin-bottom: 10px;
+  }
+  pre:last-child { margin-bottom: 0; }
+
+  .pre-label {
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 5px;
+    display: block;
+  }
+
+  .t-cm  { color: var(--muted); font-style: italic; }
+  .t-kw  { color: var(--pink); }
+  .t-st  { color: var(--green); }
+  .t-nm  { color: var(--orange); }
+  .t-fn  { color: var(--blue); }
+  .t-op  { color: var(--cyan); }
+  .t-h1  { color: #fff; font-weight: 700; }
+  .t-h2  { color: var(--cyan); }
+  .t-h3  { color: var(--purple); }
+  .t-bi  { color: var(--yellow); }
+  .t-sl  { color: var(--green); font-weight: 700; }
+  .t-er  { color: var(--red); }
+  .hl    { background: rgba(0,212,245,0.06);   display: block; margin: 0 -16px; padding: 0 16px; }
+  .hl-r  { background: rgba(248,113,113,0.06); display: block; margin: 0 -16px; padding: 0 16px; }
+  .hl-g  { background: rgba(46,235,168,0.06);  display: block; margin: 0 -16px; padding: 0 16px; }
+
+  /* ── INLINE CODE ─────────────────────────────── */
+  code {
+    background: var(--bg4);
+    border: 1px solid var(--border2);
+    padding: 1px 5px;
+    font-size: 11px;
+    color: var(--cyan);
+  }
+
+  /* ── CALLOUTS ────────────────────────────────── */
+  .tip, .warn, .info, .key {
+    padding: 9px 13px;
+    font-size: 11px;
+    margin-bottom: 8px;
+    border-left: 2px solid;
+    line-height: 1.7;
+  }
+  .tip  { background: rgba(46,235,168,0.04);   border-color: var(--green); }
+  .warn { background: rgba(245,158,66,0.05);   border-color: var(--orange); }
+  .info { background: rgba(0,212,245,0.04);    border-color: var(--cyan); }
+  .key  { background: rgba(167,139,250,0.05);  border-color: var(--purple); }
+
+  .tip strong, .warn strong, .info strong, .key strong {
+    display: block; font-size: 8.5px; letter-spacing: 0.14em;
+    text-transform: uppercase; margin-bottom: 2px;
+  }
+  .tip strong  { color: var(--green); }
+  .warn strong { color: var(--orange); }
+  .info strong { color: var(--cyan); }
+  .key strong  { color: var(--purple); }
+
+  /* ── TABLE ───────────────────────────────────── */
+  table { width: 100%; border-collapse: collapse; font-size: 11.5px; margin-bottom: 10px; }
+  th {
+    text-align: left; font-size: 9px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--muted);
+    padding: 6px 10px; border-bottom: 1px solid var(--border2);
+  }
+  td { padding: 7px 10px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.55; }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { color: var(--cyan); white-space: nowrap; font-weight: 700; }
+  td:nth-child(2) { color: var(--muted); }
+
+  /* ── TAGS ────────────────────────────────────── */
+  .tag {
+    display: inline-block; padding: 2px 7px;
+    font-size: 8.5px; letter-spacing: 0.1em;
+    text-transform: uppercase; font-weight: 700;
+    border: 1px solid; margin: 2px 3px 2px 0;
+  }
+  .tc { color: var(--cyan);   border-color: var(--cyan); }
+  .tp { color: var(--purple); border-color: var(--purple); }
+  .tg { color: var(--green);  border-color: var(--green); }
+  .to { color: var(--orange); border-color: var(--orange); }
+  .ty { color: var(--yellow); border-color: var(--yellow); }
+  .tk { color: var(--pink);   border-color: var(--pink); }
+  .tr { color: var(--red);    border-color: var(--red); }
+  .tb { color: var(--blue);   border-color: var(--blue); }
+
+  /* ── CONTEXT WINDOW VISUAL ───────────────────── */
+  .ctx-window {
+    border: 1px solid var(--border2);
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .ctx-row {
+    display: flex;
+    align-items: stretch;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .ctx-row:last-child { border-bottom: none; }
+  .ctx-label {
+    min-width: 140px;
+    padding: 9px 12px;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    border-right: 1px solid var(--border);
+  }
+  .ctx-body {
+    padding: 9px 14px;
+    flex: 1;
+    font-size: 11.5px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    line-height: 1.6;
+  }
+  .ctx-body strong { color: var(--text); }
+  .ctx-note {
+    min-width: 110px;
+    padding: 9px 12px;
+    font-size: 9.5px;
+    color: var(--dim);
+    border-left: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .row-sys    { --rc: var(--purple); }
+  .row-usr    { --rc: var(--cyan); }
+  .row-att    { --rc: var(--blue); }
+  .row-out    { --rc: var(--green); }
+  .row-hist   { --rc: var(--orange); }
+  .row-tool   { --rc: var(--yellow); }
+
+  .ctx-label { color: var(--rc, var(--muted)); background: rgba(0,0,0,0.3); }
+
+  /* ── FLOW ROW ────────────────────────────────── */
+  .flow-row {
+    display: flex; align-items: center; gap: 0;
+    flex-wrap: wrap; margin: 10px 0;
+  }
+  .fnode {
+    padding: 7px 13px; font-size: 11px;
+    border: 1px solid var(--border2);
+    background: var(--bg3); white-space: nowrap;
+  }
+  .fnode.c1 { border-color: var(--cyan);   color: var(--cyan); }
+  .fnode.c2 { border-color: var(--purple); color: var(--purple); }
+  .fnode.c3 { border-color: var(--green);  color: var(--green); }
+  .fnode.c4 { border-color: var(--orange); color: var(--orange); }
+  .fnode.c5 { border-color: var(--blue);   color: var(--blue); }
+  .farrow   { color: var(--dim); padding: 0 6px; font-size: 14px; }
+
+  /* ── ANALOGY BOX ─────────────────────────────── */
+  .analogy {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+    align-items: center;
+  }
+  .analogy-col {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    padding: 12px 14px;
+  }
+  .analogy-h {
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .analogy-col ul { list-style: none; font-size: 11px; color: var(--muted); line-height: 1.9; }
+  .analogy-col ul li::before { content: '·  '; color: var(--dim); }
+  .analogy-divider {
+    font-size: 22px;
+    color: var(--dim);
+    text-align: center;
+    font-weight: 700;
+  }
+
+  /* ── QUIZ BOX ────────────────────────────────── */
+  .quiz {
+    background: var(--code-bg);
+    border: 1px solid var(--border2);
+    border-left: 3px solid var(--purple);
+    padding: 14px 16px;
+    margin-bottom: 12px;
+  }
+  .quiz-q {
+    font-size: 11.5px;
+    color: var(--text);
+    margin-bottom: 10px;
+    font-weight: 700;
+  }
+  .quiz-sub {
+    font-size: 10px;
+    color: var(--purple);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .quiz-opts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .q-opt {
+    padding: 6px 10px;
+    font-size: 11px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .q-opt.correct {
+    border-color: var(--green);
+    color: var(--green);
+    background: rgba(46,235,168,0.04);
+  }
+  .q-opt.wrong {
+    border-color: var(--red);
+    color: var(--red);
+    opacity: 0.5;
+    text-decoration: line-through;
+  }
+  .q-mark { font-size: 10px; }
+
+  /* ── GROW VISUAL ─────────────────────────────── */
+  .grow-visual {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 12px;
+  }
+  .grow-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .grow-turn {
+    font-size: 9px;
+    color: var(--dim);
+    letter-spacing: 0.08em;
+    min-width: 38px;
+    text-align: right;
+  }
+  .grow-bar {
+    height: 20px;
+    border: 1px solid;
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    transition: width 0.3s;
+  }
+  .gb-sys  { border-color: var(--purple); color: var(--purple); background: rgba(167,139,250,0.08); width: 90px; }
+  .gb-u1   { border-color: var(--cyan);   color: var(--cyan);   background: rgba(0,212,245,0.08);   width: 80px; }
+  .gb-a1   { border-color: var(--green);  color: var(--green);  background: rgba(46,235,168,0.08);  width: 110px; }
+  .gb-u2   { border-color: var(--cyan);   color: var(--cyan);   background: rgba(0,212,245,0.08);   width: 70px; }
+  .gb-a2   { border-color: var(--green);  color: var(--green);  background: rgba(46,235,168,0.08);  width: 130px; }
+  .gb-u3   { border-color: var(--cyan);   color: var(--cyan);   background: rgba(0,212,245,0.08);   width: 90px; }
+  .gb-a3   { border-color: var(--green);  color: var(--green);  background: rgba(46,235,168,0.08);  width: 150px; }
+  .gb-lim  { border-color: var(--red); color: var(--red); background: rgba(248,113,113,0.06); padding: 0 8px; font-size: 9px; }
+  .grow-limit {
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ── FOOTER ──────────────────────────────────── */
+  .footer {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 0.08em;
+  }
+
+  @media (max-width: 620px) {
+    .g2, .g3, .g4 { grid-template-columns: 1fr; }
+    .header { grid-template-columns: 1fr; }
+    .meta-pills { align-items: flex-start; }
+    .analogy { grid-template-columns: 1fr; }
+    .analogy-divider { display: none; }
+    .quiz-opts { grid-template-columns: 1fr; }
+  }
+
+  .theme-link { color: var(--cyan); cursor: pointer; font-weight: 700; transition: all 0.2s ease; }
+  .theme-link:hover { color: var(--purple); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .card { animation: fadeUp 0.4s ease both; }
+  .card:nth-child(1){animation-delay:.04s}
+  .card:nth-child(2){animation-delay:.08s}
+  .card:nth-child(3){animation-delay:.12s}
+  .card:nth-child(4){animation-delay:.16s}
+</style>
+</head>
+<body>
+<script>
+(function(){
+  var t=localStorage.getItem('theme')||'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  window.addEventListener('DOMContentLoaded', function() {
+    var link=document.getElementById('theme-link');
+    if(link) link.textContent = t.toUpperCase();
+  });
+})();
+function toggleTheme() {
+  var h=document.documentElement;
+  var c=h.getAttribute('data-theme')||'dark';
+  var n=c==='light'?'dark':'light';
+  h.setAttribute('data-theme',n);
+  localStorage.setItem('theme',n);
+  var link=document.getElementById('theme-link');
+  if(link) link.textContent = n.toUpperCase();
+}
+</script>
+<div class="container">
+
+  <!-- ═══════════════════ HEADER ═════════════════════ -->
+  <div class="header">
+    <div>
+      <div class="eyebrow">Cursor Learn · How AI Models Work · <span id="theme-link" class="theme-link" onclick="toggleTheme()">DARK</span></div>
+      <h1>How AI Models Work:<br><em>Context</em></h1>
+      <p class="header-sub">// Working memory · System &amp; user prompts · What's included · Auto-context · Context limits · Multi-turn management</p>
+    </div>
+    <div class="meta-pills">
+      <div class="pill">Source <strong>cursor.com/learn</strong></div>
+      <div class="pill">Topic <strong>Context Management</strong></div>
+      <div class="pill">Excludes <strong>Video · Coding Agents</strong></div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════ 01: CORE MENTAL MODEL ══════════ -->
+  <div class="section-label" data-n="01">The Core Mental Model — Context as Working Memory</div>
+
+  <div class="g2 fw">
+
+    <div class="card c-cyan">
+      <div class="card-title">🍲 The Cooking Analogy</div>
+      <p class="prose">Working with AI models is fundamentally about <strong>managing the context you provide them</strong> — not just writing better prompts. Think of it like cooking a soup.</p>
+
+      <div class="analogy">
+        <div class="analogy-col">
+          <div class="analogy-h" style="color:var(--orange);">🍲 Cooking a Soup</div>
+          <ul>
+            <li>Ingredients = inputs</li>
+            <li>Recipe = plan / path</li>
+            <li>Track progress as you cook</li>
+            <li>Result: the soup</li>
+            <li>Different chefs → different taste</li>
+            <li>Same recipe → slightly different</li>
+          </ul>
+        </div>
+        <div class="analogy-divider">≈</div>
+        <div class="analogy-col">
+          <div class="analogy-h" style="color:var(--cyan);">💻 Working with AI</div>
+          <ul>
+            <li>Codebase + files + prompt = inputs</li>
+            <li>AI plan / todo list = path</li>
+            <li>Check items off as tasks complete</li>
+            <li>Result: generated code</li>
+            <li>Same prompt → slightly different output</li>
+            <li>Context quality = output quality</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="key">
+        <strong>🔑 Key Insight</strong>
+        Improving model output is <strong>not primarily about better prompts</strong> — it's about managing what context the model has access to. Better context → better output.
+      </div>
+    </div>
+
+    <div class="card c-purple">
+      <div class="card-title">🧠 Context = The Model's Working Memory</div>
+      <p class="prose" style="margin-bottom:14px;">Think of context as a <strong>long running list</strong> that the AI model uses as its working memory for the conversation. Everything the model can "see" lives in this list.</p>
+
+      <div class="ctx-window">
+        <div class="ctx-row row-sys">
+          <div class="ctx-label">System Prompt</div>
+          <div class="ctx-body"><strong>Tool creator instructions</strong> — injected at the top. Defines rules, style, behaviour nudges. Set by Cursor, not by you.</div>
+          <div class="ctx-note">start of list</div>
+        </div>
+        <div class="ctx-row row-usr">
+          <div class="ctx-label">User Message</div>
+          <div class="ctx-body"><strong>Your directions</strong> — any task or question. No perfect spelling required. Can include images.</div>
+          <div class="ctx-note">your input</div>
+        </div>
+        <div class="ctx-row row-att">
+          <div class="ctx-label">Attached Files</div>
+          <div class="ctx-body"><strong>Auto-included by Cursor</strong> — open files, terminal output, linter errors, codebase search results.</div>
+          <div class="ctx-note">auto-added</div>
+        </div>
+        <div class="ctx-row row-tool">
+          <div class="ctx-label">Tool Outputs</div>
+          <div class="ctx-body"><strong>Results of tool calls</strong> — file reads, web searches, code execution, MCP results.</div>
+          <div class="ctx-note">appended</div>
+        </div>
+        <div class="ctx-row row-out">
+          <div class="ctx-label">Model Output</div>
+          <div class="ctx-body"><strong>AI response</strong> — text, code snippets, explanations. Everything returned is also part of context.</div>
+          <div class="ctx-note">output</div>
+        </div>
+        <div class="ctx-row row-hist">
+          <div class="ctx-label">History</div>
+          <div class="ctx-body"><strong>All prior turns</strong> — every message in the conversation, both inputs and outputs, accumulates here.</div>
+          <div class="ctx-note">grows ↓</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ════════════ 02: WHAT'S INSIDE CONTEXT ═════════ -->
+  <div class="section-label" data-n="02">What Lives Inside Context</div>
+
+  <div class="g2 fw">
+
+    <div class="card c-blue">
+      <div class="card-title">📥 System Prompt vs User Prompt</div>
+
+      <span class="pre-label">How a context list begins</span>
+      <pre><span class="t-cm">─── Start of Context ─────────────────────────────</span>
+<span class="hl"><span class="t-h2">[SYSTEM PROMPT]</span>                   <span class="t-cm">← set by tool creator</span></span>
+<span class="t-cm">  You are an expert coding assistant.</span>
+<span class="t-cm">  Follow these rules: [specific rules]</span>
+<span class="t-cm">  Output format: [style preferences]</span>
+
+<span class="hl"><span class="t-h2">[AUTO-INCLUDED CONTEXT]</span>            <span class="t-cm">← Cursor adds automatically</span></span>
+<span class="t-cm">  Current file: auth.ts (open in editor)</span>
+<span class="t-cm">  Terminal output: [last N lines]</span>
+<span class="t-cm">  Linter errors: [current diagnostics]</span>
+<span class="t-cm">  Codebase search: [relevant files]</span>
+
+<span class="t-h2">[USER MESSAGE]</span>                    <span class="t-cm">← your prompt</span>
+<span class="t-cm">  "add a new route to manage user accounts"</span>
+<span class="t-cm">  <span class="t-op">(no perfect grammar needed)</span></span>
+<span class="t-cm">  <span class="t-op">(can attach images ↓)</span></span>
+
+<span class="t-h2">[ATTACHED IMAGE]</span>                  <span class="t-cm">← optional, multimodal</span>
+<span class="t-cm">  Image contents read as text representation</span>
+<span class="t-cm">  and included in context automatically</span>
+
+<span class="t-h2">[MODEL OUTPUT]</span>                    <span class="t-cm">← also part of context</span>
+<span class="t-cm">  Generated code / text / explanation</span>
+<span class="t-cm">─── Grows with each turn ──────────────────────────</span></pre>
+    </div>
+
+    <div class="card c-green">
+      <div class="card-title">⚙️ What Cursor Auto-Includes</div>
+      <p class="prose">Cursor automatically enriches your context with relevant information from your workspace — you don't need to manually attach everything.</p>
+
+      <table>
+        <thead><tr><th>Auto-included Source</th><th>What It Provides</th><th>Why It Helps</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Open files</td>
+            <td>Current file(s) visible in editor</td>
+            <td>Model sees what you're working on</td>
+          </tr>
+          <tr>
+            <td>Terminal output</td>
+            <td>Last N lines from integrated terminal</td>
+            <td>Model sees errors, build output, test results</td>
+          </tr>
+          <tr>
+            <td>Linter errors</td>
+            <td>Current diagnostics from language server</td>
+            <td>Model knows exactly what's broken and where</td>
+          </tr>
+          <tr>
+            <td>Codebase search</td>
+            <td>Relevant files found via semantic search</td>
+            <td>Model gets broader repo context without manual @files</td>
+          </tr>
+          <tr>
+            <td>Attached images</td>
+            <td>User-attached images (multimodal)</td>
+            <td>Design mockups, screenshots, diagrams understood</td>
+          </tr>
+          <tr>
+            <td>Tool outputs</td>
+            <td>Results from file reads, web, MCP</td>
+            <td>External knowledge injected into working memory</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="tip">
+        <strong>✦ Practical tip</strong>
+        Cursor includes your current file automatically. If you want the model to reason about a <em>different</em> file, open it or explicitly reference it with <code>@filename</code> — it won't guess from memory.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════ 03: MULTI-TURN GROWTH ═══════════ -->
+  <div class="section-label" data-n="03">Multi-Turn Conversations &amp; Context Growth</div>
+
+  <div class="g2 fw">
+
+    <div class="card c-orange">
+      <div class="card-title">📈 How Context Grows Each Turn</div>
+      <p class="prose" style="margin-bottom:14px;">Every message in the conversation — both <strong>inputs and outputs</strong> — is stored as part of the working memory. The list grows with every turn.</p>
+
+      <div class="grow-visual">
+        <div class="grow-row">
+          <div class="grow-turn">Start</div>
+          <div class="grow-bar gb-sys">system prompt</div>
+        </div>
+        <div class="grow-row">
+          <div class="grow-turn">Turn 1</div>
+          <div class="grow-bar gb-sys">sys</div>
+          <div class="grow-bar gb-u1">user msg</div>
+          <div class="grow-bar gb-a1">model response</div>
+        </div>
+        <div class="grow-row">
+          <div class="grow-turn">Turn 2</div>
+          <div class="grow-bar gb-sys">sys</div>
+          <div class="grow-bar gb-u1">u1</div>
+          <div class="grow-bar gb-a1">a1</div>
+          <div class="grow-bar gb-u2">u2</div>
+          <div class="grow-bar gb-a2">model response</div>
+        </div>
+        <div class="grow-row">
+          <div class="grow-turn">Turn 3</div>
+          <div class="grow-bar gb-sys">sys</div>
+          <div class="grow-bar gb-u1">u1</div>
+          <div class="grow-bar gb-a1">a1</div>
+          <div class="grow-bar gb-u2">u2</div>
+          <div class="grow-bar gb-a2">a2</div>
+          <div class="grow-bar gb-u3">u3</div>
+          <div class="grow-bar gb-a3">model response</div>
+        </div>
+        <div class="grow-limit">
+          <div class="grow-turn">Limit</div>
+          <div class="grow-bar gb-lim" style="width:420px;">⚠ context window limit — no further messages accepted</div>
+        </div>
+      </div>
+
+      <div class="warn">
+        <strong>⚠ Context accumulates — this matters</strong>
+        Just like a human conversation where it gets hard to remember things said 3 hours ago, AI models have a fixed working memory. <strong>The longer the conversation, the harder it is for the model to track early details.</strong>
+      </div>
+    </div>
+
+    <div class="card c-red">
+      <div class="card-title">🚧 Context Limits</div>
+      <p class="prose">Every AI model has a <strong>context window limit</strong> — a maximum total size of context it can hold. Once reached, the model will no longer accept further messages in the conversation.</p>
+
+      <span class="pre-label">What happens at the limit</span>
+      <pre><span class="t-cm">─── Before limit ────────────────────────────────</span>
+<span class="t-st">✓</span> Model can see and reason about all prior turns
+<span class="t-st">✓</span> Early instructions still in working memory
+<span class="t-st">✓</span> Conversation flows normally
+
+<span class="t-cm">─── Near the limit ──────────────────────────────</span>
+<span class="t-bi">⚠</span> Cursor shows context usage indicator
+<span class="t-bi">⚠</span> Early parts of conversation less reliable
+<span class="t-bi">⚠</span> Model may "forget" earlier instructions
+
+<span class="t-cm">─── At the limit ────────────────────────────────</span>
+<span class="t-er">✗</span> No further messages accepted
+<span class="t-er">✗</span> Must start new conversation OR compress
+
+<span class="t-cm">─── Managing the limit ──────────────────────────</span>
+<span class="t-fn">Option 1:</span> Compress/summarize the conversation
+<span class="t-fn">Option 2:</span> Start a new conversation
+<span class="t-fn">Option 3:</span> Use /summarize command in Cursor</pre>
+
+      <div class="info">
+        <strong>ℹ Every model has a different limit</strong>
+        Context window sizes vary significantly across models. Larger windows cost more. AI tools like Cursor show users how close they are to the limit and provide ways to compress the conversation.
+      </div>
+
+      <div class="tip">
+        <strong>✦ Practical tip</strong>
+        Don't wait until you hit the limit. For long coding sessions, start a <strong>new conversation per distinct task</strong> rather than one endless conversation. Smaller, focused contexts produce more reliable output.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════ 04: QUIZ ═════════════════════ -->
+  <div class="section-label" data-n="04">Knowledge Check — Official Quiz</div>
+
+  <div class="card c-purple fw">
+    <div class="card-title">✅ Which items are part of the model's context during a chat?</div>
+    <div class="quiz">
+      <div class="quiz-sub">Select all that apply</div>
+      <div class="quiz-q">Which of the following are included in a model's context window during a conversation?</div>
+      <div class="quiz-opts">
+        <div class="q-opt correct"><span class="q-mark">✓</span> System prompt</div>
+        <div class="q-opt correct"><span class="q-mark">✓</span> The existing conversation history</div>
+        <div class="q-opt correct"><span class="q-mark">✓</span> Attached files and tool outputs</div>
+        <div class="q-opt wrong"><span class="q-mark">✗</span> Your API key string</div>
+      </div>
+    </div>
+    <div class="prose">
+      <strong>Why "API key" is wrong:</strong> API keys are credentials used to authenticate requests — they are never part of the model's context window. Including secrets in context would be a security risk. The model has no knowledge of your authentication credentials.
+    </div>
+  </div>
+
+
+  <!-- ══════════════ 05: FULL PIPELINE ═══════════════ -->
+  <div class="section-label" data-n="05">The Full Context Pipeline</div>
+
+  <div class="card c-cyan fw">
+    <div class="card-title">🔄 End-to-End Context Flow</div>
+    <p class="prose" style="margin-bottom:16px;">Every AI interaction follows this pipeline. Understanding each stage helps you intervene at the right point to improve output quality.</p>
+
+    <div class="flow-row" style="margin-bottom:16px;">
+      <div class="fnode c1">① System Prompt<br><span style="font-size:9px;color:var(--dim);">tool creator rules</span></div>
+      <div class="farrow">→</div>
+      <div class="fnode c2">② Auto-Context<br><span style="font-size:9px;color:var(--dim);">open files, terminal, linter</span></div>
+      <div class="farrow">→</div>
+      <div class="fnode c3">③ User Message<br><span style="font-size:9px;color:var(--dim);">your prompt + images</span></div>
+      <div class="farrow">→</div>
+      <div class="fnode c5">④ Model<br><span style="font-size:9px;color:var(--dim);">processes full context</span></div>
+      <div class="farrow">→</div>
+      <div class="fnode c4">⑤ Output<br><span style="font-size:9px;color:var(--dim);">text + code → back into context</span></div>
+    </div>
+
+    <table>
+      <thead><tr><th>Stage</th><th>Who Controls It</th><th>What It Contains</th><th>How to Improve It</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>① System Prompt</td>
+          <td>Tool creator (Cursor)</td>
+          <td>AI persona, rules, output format instructions, style nudges</td>
+          <td>Use Cursor Rules to extend system prompt with project standards</td>
+        </tr>
+        <tr>
+          <td>② Auto-Context</td>
+          <td>Cursor (automated)</td>
+          <td>Open files, terminal output, linter errors, codebase search</td>
+          <td>Keep relevant files open; use <code>@file</code> to add specific context</td>
+        </tr>
+        <tr>
+          <td>③ User Message</td>
+          <td>You</td>
+          <td>Task description, constraints, attached images, @mentions</td>
+          <td>Be specific; attach relevant files; describe intent, not just action</td>
+        </tr>
+        <tr>
+          <td>④ Model Processing</td>
+          <td>AI provider</td>
+          <td>Full context list assembled and passed to model weights</td>
+          <td>Choose the right model for the task (fast vs. powerful)</td>
+        </tr>
+        <tr>
+          <td>⑤ Output</td>
+          <td>Model</td>
+          <td>Text, code snippets, explanations — added back into context</td>
+          <td>Apply changes, iterate with follow-up messages in same context</td>
+        </tr>
+        <tr>
+          <td>History</td>
+          <td>Conversation state</td>
+          <td>All prior turns, inputs and outputs accumulated</td>
+          <td>Start new conversations per task; use /summarize near limits</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+
+  <!-- ══════════════ 06: PRACTICAL TIPS ══════════════ -->
+  <div class="section-label" data-n="06">Practical Tips for Context Management</div>
+
+  <div class="g3 fw">
+
+    <div class="card c-green">
+      <div class="card-title">✅ What Good Context Looks Like</div>
+      <div class="tip"><strong>✦ Be specific about the task</strong>"Add a POST /api/users route with Zod validation and return 201 on success" beats "add a user route".</div>
+      <div class="tip"><strong>✦ Attach the right files</strong>Open the files directly relevant to your task. Cursor auto-includes open files — use this intentionally.</div>
+      <div class="tip"><strong>✦ Include error output</strong>Paste terminal errors or linter output. The model can read and reason about exact error messages far better than descriptions of them.</div>
+      <div class="tip"><strong>✦ Use images</strong>Screenshot a UI mockup, diagram, or error screen. Multimodal models include image content as text in context automatically.</div>
+      <div class="tip"><strong>✦ One task per conversation</strong>Focused conversations with tight context windows produce more reliable, on-task output than sprawling multi-hour sessions.</div>
+    </div>
+
+    <div class="card c-orange">
+      <div class="card-title">❌ Common Context Mistakes</div>
+      <div class="warn"><strong>⚠ Vague prompts</strong>"Fix my code" gives the model almost nothing to work with. Describe what's wrong, what the expected behaviour is, and what you've already tried.</div>
+      <div class="warn"><strong>⚠ Not opening the right files</strong>If the model needs to understand a type definition or utility function, open that file — don't assume it's in the codebase search results.</div>
+      <div class="warn"><strong>⚠ Ignoring context near the limit</strong>When context is nearly full, the model's reliability drops. Don't push through — compress or start fresh.</div>
+      <div class="warn"><strong>⚠ Letting history drift too far</strong>Instructions you gave 30 messages ago may effectively be "forgotten". Re-state critical constraints for long tasks.</div>
+      <div class="warn"><strong>⚠ Expecting the model to remember across sessions</strong>Each new conversation starts with an empty context. Prior sessions are not in the model's working memory.</div>
+    </div>
+
+    <div class="card c-purple">
+      <div class="card-title">🔧 Context Management Toolkit</div>
+
+      <table>
+        <thead><tr><th>Tool</th><th>When to Use It</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>@filename</td>
+            <td>Explicitly add a specific file to context</td>
+          </tr>
+          <tr>
+            <td>@codebase</td>
+            <td>Trigger semantic search across the repo</td>
+          </tr>
+          <tr>
+            <td>@terminal</td>
+            <td>Include current terminal output</td>
+          </tr>
+          <tr>
+            <td>Attach image</td>
+            <td>Include a screenshot, mockup, or diagram</td>
+          </tr>
+          <tr>
+            <td>/summarize</td>
+            <td>Compress conversation near context limit</td>
+          </tr>
+          <tr>
+            <td>New chat</td>
+            <td>Fresh context for a new distinct task</td>
+          </tr>
+          <tr>
+            <td>Cursor Rules</td>
+            <td>Extend system prompt with project standards</td>
+          </tr>
+          <tr>
+            <td>Cursor Skills</td>
+            <td>On-demand how-to knowledge injected into context</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="key">
+        <strong>🔑 Core Skill to Learn</strong>
+        <strong>Managing context</strong> is the primary skill for working effectively with AI models. Better context → more accurate output. Context limits → know when to reset.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════ 07: QUICK REFERENCE ═════════════ -->
+  <div class="section-label" data-n="07">Quick Reference — Context Concepts</div>
+
+  <div class="card c-cyan fw">
+    <div class="card-title">📋 Context Master Reference</div>
+    <table>
+      <thead><tr><th>Concept</th><th>Definition</th><th>Practical Implication</th></tr></thead>
+      <tbody>
+        <tr><td>Context</td><td>The long running list of everything the model can "see" — its working memory</td><td>Everything in context influences the output — quality in = quality out</td></tr>
+        <tr><td>System prompt</td><td>Instructions injected at the top of context by the tool creator (Cursor)</td><td>Cursor Rules extend this — use them to enforce project standards</td></tr>
+        <tr><td>User prompt</td><td>Your message / directions to the model</td><td>No perfect grammar needed; be specific about what you want</td></tr>
+        <tr><td>Auto-context</td><td>Info Cursor adds automatically: open files, terminal, linter errors</td><td>Open the files you want the model to reason about</td></tr>
+        <tr><td>Multimodal input</td><td>Images attached alongside text — model reads and includes as text</td><td>Use for UI mockups, screenshots, architecture diagrams</td></tr>
+        <tr><td>Output context</td><td>Model responses are also stored in context, not separate from it</td><td>The model can reference its own prior responses in the same conversation</td></tr>
+        <tr><td>Context growth</td><td>Every turn (input + output) accumulates in the context list</td><td>Long conversations = larger context = higher cost + lower reliability for early details</td></tr>
+        <tr><td>Context window</td><td>Maximum total size of context a model accepts</td><td>Each model has a different limit — visible in Cursor UI</td></tr>
+        <tr><td>Context limit</td><td>When the window is full — no further messages accepted</td><td>Compress with /summarize or start a new conversation</td></tr>
+        <tr><td>New conversation</td><td>Fresh context window — no history from prior sessions</td><td>Start a new chat for each distinct task to keep context focused</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <span>CURSOR LEARN · HOW AI MODELS WORK: CONTEXT &nbsp;·&nbsp; CHEATSHEET · FEB 2026 BY DTRAN + CLAUDE SONNET 4.6</span>
+    <span>cursor.com/learn/how-ai-models-work &nbsp;·&nbsp; excludes: video · coding agents section</span>
+  </div>
+
+</div>
+</body>
+</html>

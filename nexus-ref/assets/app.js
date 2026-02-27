@@ -26,6 +26,12 @@ const state = {
   searchQuery: '',
   /** @type {Map<string, SheetData>} In-memory cache for loaded sheets */
   cache: new Map(),
+  /** @type {Set<string>} Collapsed category names */
+  collapsedCategories: new Set(),
+  /** @type {number} Sidebar width in pixels */
+  sidebarWidth: 268,
+  /** @type {boolean} Whether sidebar is minimized */
+  sidebarMinimized: false,
 };
 
 /* ============================================================
@@ -69,6 +75,7 @@ function accentColor(accent) {
 }
 
 function countCommands(sheet) {
+  if (!sheet.sections) return 0; // HTML sheets don't have sections
   return sheet.sections.reduce((acc, s) => acc + s.items.length, 0);
 }
 
@@ -94,6 +101,24 @@ async function loadManifest() {
 /** Lazy-load a sheet JSON with in-memory caching */
 async function loadSheet(entry) {
   if (state.cache.has(entry.id)) return state.cache.get(entry.id);
+  
+  // For HTML files, return entry metadata directly (no fetch/parse needed)
+  if (entry.type === 'html') {
+    const htmlSheet = {
+      id: entry.id,
+      title: entry.title,
+      description: entry.description,
+      category: entry.category,
+      icon: entry.icon,
+      accent: entry.accent,
+      tags: entry.tags,
+      type: 'html',
+      path: entry.path
+    };
+    state.cache.set(entry.id, htmlSheet);
+    return htmlSheet;
+  }
+  
   const res = await fetch(entry.path);
   if (!res.ok) throw new Error(`Failed to load sheet "${entry.id}": ${res.status}`);
   const sheet = await res.json();
@@ -108,6 +133,7 @@ async function loadSheet(entry) {
 function buildSidebar() {
   const nav = document.getElementById('navList');
   if (!nav) return;
+
   nav.innerHTML = '';
 
   const q = state.searchQuery.toLowerCase();
@@ -131,10 +157,18 @@ function buildSidebar() {
   }
 
   for (const [category, entries] of Object.entries(groups)) {
-    // Category label
+    const isCollapsed = state.collapsedCategories.has(category);
+    const chevron = isCollapsed ? '▸' : '▾';
+    
+    // Category label with collapse icon
     const catEl = document.createElement('div');
     catEl.className = 'nav-category';
-    catEl.innerHTML = `<span class="nav-category-label">${esc(category)}</span>`;
+    catEl.dataset.category = category;
+    catEl.innerHTML = `
+      <span class="nav-category-icon">${chevron}</span>
+      <span class="nav-category-label">${esc(category)}</span>
+    `;
+    catEl.addEventListener('click', () => toggleCategory(category));
     nav.appendChild(catEl);
 
     // Items
@@ -146,6 +180,10 @@ function buildSidebar() {
       const item = document.createElement('div');
       item.className = 'nav-item' + (entry.id === state.activeId ? ' active' : '');
       item.dataset.id = entry.id;
+      item.dataset.category = category;
+      // Explicitly set display and visibility based on collapsed state
+      item.style.display = isCollapsed ? 'none' : 'flex';
+      item.style.visibility = isCollapsed ? 'hidden' : 'visible';
       item.innerHTML = `
         <div class="nav-item-icon">${esc(entry.icon)}</div>
         <div class="nav-item-body">
@@ -157,6 +195,16 @@ function buildSidebar() {
       nav.appendChild(item);
     }
   }
+}
+
+function toggleCategory(category) {
+  if (state.collapsedCategories.has(category)) {
+    state.collapsedCategories.delete(category);
+  } else {
+    state.collapsedCategories.add(category);
+  }
+  saveSidebarState();
+  buildSidebar();
 }
 
 /** Update just the command count badges after a sheet loads */
@@ -183,7 +231,11 @@ function updateTopbar(entry, sheet) {
   }
 
   if (sheet && statCmds) {
-    statCmds.innerHTML = `<span>${countCommands(sheet)}</span> cmds`;
+    if (entry.type === 'html') {
+      statCmds.innerHTML = `<span>—</span> cmds`;
+    } else {
+      statCmds.innerHTML = `<span>${countCommands(sheet)}</span> cmds`;
+    }
   }
 
   if (statSheets) {
@@ -205,7 +257,88 @@ function resetTopbar() {
    SHEET RENDERING
    ============================================================ */
 
+/** Render an HTML sheet in an iframe */
+function renderHtmlSheet(entry, sheet) {
+  const view      = document.getElementById('sheetView');
+  const welcome   = document.getElementById('welcomeScreen');
+  const body      = document.getElementById('sheetBody');
+  const titleEl   = document.getElementById('sheetTitle');
+  const iconEl    = document.getElementById('sheetIcon');
+  const descEl    = document.getElementById('sheetDescription');
+  const badgesEl  = document.getElementById('sheetBadges');
+  const copyAllEl = document.getElementById('copyAllBtn');
+
+  if (!view || !welcome) return;
+
+  // Switch views
+  welcome.style.display = 'none';
+  view.classList.add('active');
+
+  // Accent
+  const accent = accentKey(entry.accent);
+  view.dataset.accent = accent;
+
+  // Glow color on header
+  const headerGlow = document.querySelector('.sheet-header');
+  if (headerGlow) headerGlow.style.setProperty('--glow-color', entry.accent || 'var(--cyan)');
+
+  // Icon & title
+  if (iconEl) {
+    iconEl.textContent = entry.icon;
+    iconEl.style.background = `${entry.accent}18`;
+    iconEl.style.borderColor = `${entry.accent}30`;
+  }
+  if (titleEl) titleEl.textContent = sheet.title;
+  if (descEl)  descEl.textContent  = sheet.description;
+
+  // Badges - add "HTML Document" badge
+  if (badgesEl) {
+    badgesEl.innerHTML = `
+      <span class="badge badge-category">${esc(entry.category)}</span>
+      <span class="badge badge-tag">HTML Document</span>
+      ${(sheet.tags || []).map(t => `<span class="badge badge-tag">#${esc(t)}</span>`).join('')}
+    `;
+  }
+
+  // Hide copy-all button for HTML sheets
+  if (copyAllEl) {
+    copyAllEl.style.display = 'none';
+  }
+
+  // Handle sheet header visibility
+  const sheetHeader = document.querySelector('.sheet-header');
+  if (sheetHeader) {
+    if (entry['show-sheet-header'] === false) {
+      sheetHeader.classList.add('hidden');
+    } else {
+      sheetHeader.classList.remove('hidden');
+    }
+  }
+
+  // Render iframe
+  if (body) {
+    body.innerHTML = `
+      <div class="iframe-container">
+        <iframe src="${esc(sheet.path)}" 
+                title="${esc(sheet.title)}" 
+                allow="clipboard-write" 
+                loading="lazy"></iframe>
+      </div>
+    `;
+  }
+
+  // Scroll to top
+  const contentEl = document.getElementById('content');
+  if (contentEl) contentEl.scrollTop = 0;
+}
+
 function renderSheet(entry, sheet) {
+  // Route HTML files to iframe renderer
+  if (entry.type === 'html') {
+    renderHtmlSheet(entry, sheet);
+    return;
+  }
+  
   const view      = document.getElementById('sheetView');
   const welcome   = document.getElementById('welcomeScreen');
   const body      = document.getElementById('sheetBody');
@@ -246,9 +379,20 @@ function renderSheet(entry, sheet) {
     `;
   }
 
-  // Copy-all button
+  // Copy-all button (show for JSON sheets)
   if (copyAllEl) {
+    copyAllEl.style.display = 'flex';
     copyAllEl.onclick = () => copyAll(sheet, copyAllEl);
+  }
+
+  // Handle sheet header visibility
+  const sheetHeader = document.querySelector('.sheet-header');
+  if (sheetHeader) {
+    if (entry['show-sheet-header'] === false) {
+      sheetHeader.classList.add('hidden');
+    } else {
+      sheetHeader.classList.remove('hidden');
+    }
   }
 
   // Sections
@@ -439,6 +583,90 @@ function updateThemeBtn(theme) {
 }
 
 /* ============================================================
+   SIDEBAR STATE PERSISTENCE
+   ============================================================ */
+
+function initSidebarState() {
+  // Load sidebar width
+  try {
+    const savedWidth = localStorage.getItem('nexus-sidebar-width');
+    if (savedWidth) {
+      state.sidebarWidth = parseInt(savedWidth, 10);
+      document.documentElement.style.setProperty('--sidebar-w', `${state.sidebarWidth}px`);
+    }
+  } catch (_) { /* ignore parse errors */ }
+}
+
+function saveSidebarState() {
+  try {
+    localStorage.setItem('nexus-sidebar-width', state.sidebarWidth.toString());
+  } catch (_) { /* ignore storage errors */ }
+}
+
+/* ============================================================
+   SIDEBAR RESIZE
+   ============================================================ */
+
+function initSidebarResize() {
+  const handle = document.getElementById('sidebarResizeHandle');
+  if (!handle) return;
+
+  let isResizing = false;
+  let startX = 0;
+  let startWidth = 0;
+
+  handle.addEventListener('mousedown', (e) => {
+    isResizing = true;
+    startX = e.clientX;
+    startWidth = state.sidebarWidth;
+    document.body.style.cursor = 'ew-resize';
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isResizing) return;
+    
+    const delta = e.clientX - startX;
+    const newWidth = Math.max(180, Math.min(500, startWidth + delta));
+    
+    state.sidebarWidth = newWidth;
+    document.documentElement.style.setProperty('--sidebar-w', `${newWidth}px`);
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (isResizing) {
+      isResizing = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      saveSidebarState();
+    }
+  });
+}
+
+/* ============================================================
+   SIDEBAR MINIMIZE/MAXIMIZE
+   ============================================================ */
+
+function toggleSidebarMinimize() {
+  state.sidebarMinimized = !state.sidebarMinimized;
+  const sidebar = document.getElementById('sidebar');
+  const btn = document.getElementById('sidebarToggleBtn');
+
+  if (state.sidebarMinimized) {
+    sidebar?.classList.add('minimized');
+    if (btn) btn.innerHTML = '»';
+  } else {
+    sidebar?.classList.remove('minimized');
+    
+    if (btn) btn.innerHTML = '«';
+    buildSidebar();
+  }
+
+  saveSidebarState();
+}
+
+/* ============================================================
    MOBILE SIDEBAR
    ============================================================ */
 
@@ -511,8 +739,14 @@ async function prefetchAndCountAll() {
   const promises = state.manifest.map(async (entry) => {
     try {
       const sheet = await loadSheet(entry);
-      total += countCommands(sheet);
-      updateNavCount(entry.id, countCommands(sheet));
+      const cmdCount = countCommands(sheet);
+      total += cmdCount;
+      
+      // Only show count badge for JSON sheets with commands
+      if (entry.type !== 'html' && cmdCount > 0) {
+        updateNavCount(entry.id, cmdCount);
+      }
+      
       if (el) el.textContent = total;
     } catch (_) { /* skip failed sheets */ }
   });
@@ -528,6 +762,8 @@ async function prefetchAndCountAll() {
 async function init() {
   initTheme();
   initKeyboard();
+  initSidebarState();
+  initSidebarResize();
 
   // Wire static event listeners
   document.getElementById('themeBtn')
@@ -544,6 +780,9 @@ async function init() {
       state.searchQuery = e.target.value;
       buildSidebar();
     });
+
+  document.getElementById('sidebarToggleBtn')
+    ?.addEventListener('click', toggleSidebarMinimize);
 
   // Reset topbar
   resetTopbar();
