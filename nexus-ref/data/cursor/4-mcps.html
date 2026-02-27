@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cursor MCP &mdash; Complete Cheatsheet</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bricolage+Grotesque:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root, [data-theme="dark"] {
+    --bg:       #070b10;
+    --bg2:      #0b1118;
+    --bg3:      #111820;
+    --bg4:      #161f2a;
+    --border:   #1c2635;
+    --border2:  #263345;
+    --text:     #ccd6e0;
+    --muted:    #607585;
+    --dim:      #2d3f52;
+    --cyan:     #00d4f5;
+    --purple:   #a78bfa;
+    --green:    #2eeba8;
+    --orange:   #f59e42;
+    --yellow:   #fcd34d;
+    --pink:     #f472b6;
+    --red:      #f87171;
+    --blue:     #60a5fa;
+    --code-bg:  #060a0f;
+    --heading:  #fff;
+    --scanline-color: rgba(0,212,245,0.012);
+    --glow1:    rgba(0,212,245,0.04);
+    --glow2:    rgba(167,139,250,0.04);
+  }
+  [data-theme="light"] {
+    --bg:       #f8fafc;
+    --bg2:      #f1f5f9;
+    --bg3:      #e2e8f0;
+    --bg4:      #cbd5e1;
+    --border:   #cbd5e1;
+    --border2:  #94a3b8;
+    --text:     #1e293b;
+    --muted:    #64748b;
+    --dim:      #94a3b8;
+    --cyan:     #0891b2;
+    --purple:   #7c3aed;
+    --green:    #059669;
+    --orange:   #d97706;
+    --yellow:   #ca8a04;
+    --pink:     #db2777;
+    --red:      #dc2626;
+    --blue:     #2563eb;
+    --code-bg:  #e2e8f0;
+    --heading:  #0f172a;
+    --scanline-color: rgba(0,0,0,0.02);
+    --glow1:    rgba(0,0,0,0.02);
+    --glow2:    rgba(0,0,0,0.02);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Space Mono', monospace; font-size: 12.5px;
+    line-height: 1.65; padding: 36px 20px 80px;
+  }
+  body::before {
+    content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,212,245,0.012) 2px,rgba(0,212,245,0.012) 4px);
+    pointer-events: none; z-index: 0;
+  }
+  body::after {
+    content: ''; position: fixed; inset: 0;
+    background: radial-gradient(ellipse 80% 50% at 10% 0%,rgba(0,212,245,0.04) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 90% 100%,rgba(167,139,250,0.04) 0%,transparent 60%);
+    pointer-events: none; z-index: 0;
+  }
+  .container { max-width: 1280px; margin: 0 auto; position: relative; z-index: 1; }
+  .header { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 24px; margin-bottom: 36px; padding-bottom: 24px; border-bottom: 1px solid var(--border2); }
+  .eyebrow { font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--cyan); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .eyebrow::before { content: ''; width: 20px; height: 1px; background: var(--cyan); }
+  h1 { font-family: 'Bricolage Grotesque', sans-serif; font-size: clamp(32px, 5vw, 58px); font-weight: 800; line-height: 0.95; letter-spacing: -0.03em; color: #fff; }
+  h1 em { font-style: normal; color: var(--cyan); }
+  .header-sub { margin-top: 12px; font-size: 11.5px; color: var(--muted); letter-spacing: 0.04em; max-width: 580px; }
+  .meta-pills { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+  .pill { background: var(--bg3); border: 1px solid var(--border2); padding: 6px 14px; font-size: 10px; letter-spacing: 0.08em; white-space: nowrap; color: var(--muted); }
+  .pill strong { color: var(--green); }
+  .section-label { font-size: 9px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 10px; margin: 32px 0 14px; }
+  .section-label::before { content: attr(data-n); color: var(--cyan); font-size: 11px; }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .g2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(520px, 1fr)); gap: 14px; margin-bottom: 14px; }
+  .g3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 14px; margin-bottom: 14px; }
+  .g4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(255px, 1fr)); gap: 14px; margin-bottom: 14px; }
+  .fw { margin-bottom: 14px; }
+  .card { background: var(--bg2); border: 1px solid var(--border); padding: 20px; position: relative; overflow: hidden; }
+  .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--ac), transparent); }
+  .c-cyan   { --ac: var(--cyan); }
+  .c-purple { --ac: var(--purple); }
+  .c-green  { --ac: var(--green); }
+  .c-orange { --ac: var(--orange); }
+  .c-yellow { --ac: var(--yellow); }
+  .c-pink   { --ac: var(--pink); }
+  .c-red    { --ac: var(--red); }
+  .c-blue   { --ac: var(--blue); }
+  .card-title { font-family: 'Bricolage Grotesque', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ac); margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
+  .card-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  pre { background: var(--code-bg); border: 1px solid var(--border); border-left: 3px solid var(--ac, var(--cyan)); padding: 13px 16px; font-family: 'Space Mono', monospace; font-size: 11.5px; line-height: 1.75; overflow-x: auto; margin-bottom: 10px; }
+  pre:last-child { margin-bottom: 0; }
+  .pre-label { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); margin-bottom: 5px; display: block; }
+  .t-cm { color: var(--muted); font-style: italic; }
+  .t-kw { color: var(--pink); }
+  .t-st { color: var(--green); }
+  .t-nm { color: var(--orange); }
+  .t-fn { color: var(--blue); }
+  .t-op { color: var(--cyan); }
+  .t-h1 { color: #fff; font-weight: 700; }
+  .t-h2 { color: var(--cyan); }
+  .t-h3 { color: var(--purple); }
+  .t-bi { color: var(--yellow); }
+  .t-sl { color: var(--green); font-weight: 700; }
+  .t-er { color: var(--red); }
+  .hl   { background: rgba(0,212,245,0.06); display: block; margin: 0 -16px; padding: 0 16px; }
+  .hl-r { background: rgba(248,113,113,0.06); display: block; margin: 0 -16px; padding: 0 16px; }
+  code { background: var(--bg4); border: 1px solid var(--border2); padding: 1px 5px; font-size: 11px; color: var(--cyan); }
+  .tip, .warn, .info, .danger { padding: 9px 13px; font-size: 11px; margin-bottom: 8px; border-left: 2px solid; line-height: 1.7; }
+  .tip    { background: rgba(46,235,168,0.04);  border-color: var(--green); }
+  .warn   { background: rgba(245,158,66,0.05);  border-color: var(--orange); }
+  .info   { background: rgba(0,212,245,0.04);   border-color: var(--cyan); }
+  .danger { background: rgba(248,113,113,0.05); border-color: var(--red); }
+  .tip strong, .warn strong, .info strong, .danger strong { display: block; font-size: 8.5px; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 2px; }
+  .tip strong { color: var(--green); } .warn strong { color: var(--orange); } .info strong { color: var(--cyan); } .danger strong { color: var(--red); }
+  table { width: 100%; border-collapse: collapse; font-size: 11.5px; margin-bottom: 10px; }
+  th { text-align: left; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); padding: 6px 10px; border-bottom: 1px solid var(--border2); }
+  td { padding: 7px 10px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.55; }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { color: var(--cyan); white-space: nowrap; font-weight: 700; }
+  td:nth-child(2) { color: var(--muted); }
+  .tag { display: inline-block; padding: 2px 7px; font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; border: 1px solid; margin: 2px 3px 2px 0; }
+  .tc { color: var(--cyan); border-color: var(--cyan); } .tp { color: var(--purple); border-color: var(--purple); } .tg { color: var(--green); border-color: var(--green); } .to { color: var(--orange); border-color: var(--orange); } .ty { color: var(--yellow); border-color: var(--yellow); } .tk { color: var(--pink); border-color: var(--pink); } .tr { color: var(--red); border-color: var(--red); } .tb { color: var(--blue); border-color: var(--blue); }
+  .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .mode-cell { background: var(--code-bg); border: 1px solid var(--border); padding: 12px 14px; position: relative; }
+  .mode-cell::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--mc, var(--cyan)); }
+  .mode-title { font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mc, var(--cyan)); margin-bottom: 6px; }
+  .mode-desc { font-size: 11px; color: var(--muted); line-height: 1.6; }
+  .mode-desc code { font-size: 10.5px; }
+  .compare { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); margin-bottom: 12px; }
+  .compare-cell { background: var(--code-bg); padding: 12px 14px; }
+  .compare-cell h4 { font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; margin-bottom: 8px; }
+  .compare-cell ul { list-style: none; font-size: 11px; color: var(--muted); line-height: 1.9; }
+  .compare-cell ul li::before { content: '\203A '; color: var(--dim); }
+  .tree-box { background: var(--code-bg); border: 1px solid var(--border); border-left: 3px solid var(--ac, var(--cyan)); padding: 13px 16px; font-family: 'Space Mono', monospace; font-size: 11.5px; line-height: 2; margin-bottom: 10px; overflow-x: auto; }
+  .td { color: var(--orange); } .tf { color: var(--green); } .ts { color: var(--cyan); } .tc2 { color: var(--muted); font-style: italic; }
+  .flow-row { display: flex; align-items: center; gap: 0; flex-wrap: wrap; margin: 10px 0; }
+  .fnode { padding: 6px 12px; font-size: 11px; border: 1px solid var(--border2); background: var(--bg3); white-space: nowrap; }
+  .fnode.c1 { border-color: var(--cyan); color: var(--cyan); } .fnode.c2 { border-color: var(--green); color: var(--green); } .fnode.c3 { border-color: var(--purple); color: var(--purple); } .fnode.c4 { border-color: var(--orange); color: var(--orange); } .fnode.c5 { border-color: var(--red); color: var(--red); }
+  .farrow { color: var(--dim); padding: 0 6px; font-size: 14px; }
+  .tree pre { border-left-color: var(--purple); font-size: 11.5px; line-height: 2; }
+  .tq { color: var(--text); } .tya { color: var(--green); } .tno { color: var(--orange); } .tre { color: var(--cyan); font-weight: 700; } .tln { color: var(--dim); }
+  .footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; font-size: 10px; color: var(--dim); letter-spacing: 0.08em; }
+  @media (max-width: 620px) { .g2, .g3, .g4 { grid-template-columns: 1fr; } .compare, .mode-grid { grid-template-columns: 1fr; } .header { grid-template-columns: 1fr; } .meta-pills { align-items: flex-start; } }
+  .theme-link { color: var(--cyan); cursor: pointer; font-weight: 700; transition: all 0.2s ease; }
+  .theme-link:hover { color: var(--purple); }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .card { animation: fadeUp 0.4s ease both; }
+  .card:nth-child(1){animation-delay:.04s} .card:nth-child(2){animation-delay:.08s} .card:nth-child(3){animation-delay:.12s} .card:nth-child(4){animation-delay:.16s}
+</style>
+</head>
+<body>
+<script>
+(function(){
+  var t=localStorage.getItem('theme')||'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  window.addEventListener('DOMContentLoaded', function() {
+    var link=document.getElementById('theme-link');
+    if(link) link.textContent = t.toUpperCase();
+  });
+})();
+function toggleTheme() {
+  var h=document.documentElement;
+  var c=h.getAttribute('data-theme')||'dark';
+  var n=c==='light'?'dark':'light';
+  h.setAttribute('data-theme',n);
+  localStorage.setItem('theme',n);
+  var link=document.getElementById('theme-link');
+  if(link) link.textContent = n.toUpperCase();
+}
+</script>
+<div class="container">
+
+  <div class="header">
+    <div>
+      <div class="eyebrow">Reference Sheet &middot; v1.0 &middot; Feb 2026 &middot; <span id="theme-link" class="theme-link" onclick="toggleTheme()">DARK</span></div>
+      <h1>Cursor <em>MCP</em></h1>
+      <p class="header-sub">// Model Context Protocol &middot; transports &middot; configuration &middot; tools &middot; authentication &middot; security &middot; server catalog</p>
+    </div>
+    <div class="meta-pills">
+      <div class="pill">Protocol <strong>MCP</strong></div>
+      <div class="pill">Transports <strong>stdio &middot; SSE &middot; HTTP</strong></div>
+      <div class="pill">Features <strong>Tools &middot; Prompts &middot; Resources</strong></div>
+      <div class="pill">Config <strong>mcp.json</strong></div>
+    </div>
+  </div>
+
+  <!-- 01 -->
+  <div class="section-label" data-n="01">What Is MCP &amp; How It Works</div>
+  <div class="g2">
+    <div class="card c-cyan">
+      <div class="card-title">Overview</div>
+      <p style="margin-bottom:10px;">Model Context Protocol (MCP) connects Cursor to <strong style="color:var(--cyan)">external tools and data sources</strong>. Instead of explaining your project structure repeatedly, integrate directly with GitHub, Slack, databases, and 100+ other services.</p>
+      <p style="margin-bottom:10px;">Write MCP servers in <strong style="color:var(--green)">any language</strong> that can print to stdout or serve an HTTP endpoint &mdash; Python, JavaScript, Go, Rust, etc.</p>
+      <div class="flow-row">
+        <div class="fnode c1">Cursor Agent</div><div class="farrow">&rarr;</div>
+        <div class="fnode c2">MCP Protocol</div><div class="farrow">&rarr;</div>
+        <div class="fnode c3">MCP Server</div><div class="farrow">&rarr;</div>
+        <div class="fnode c4">External Service</div>
+      </div>
+      <div class="info"><strong>Key Idea</strong>MCP servers expose capabilities (tools, prompts, resources) through a standard protocol. Cursor discovers and calls them automatically when relevant.</div>
+    </div>
+    <div class="card c-purple">
+      <div class="card-title">Protocol Capabilities</div>
+      <table>
+        <thead><tr><th>Feature</th><th>Status</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>Tools</td><td><span class="tag tg">Supported</span></td><td>Functions the AI model can execute</td></tr>
+          <tr><td>Prompts</td><td><span class="tag tg">Supported</span></td><td>Templated messages and workflows for users</td></tr>
+          <tr><td>Resources</td><td><span class="tag tg">Supported</span></td><td>Structured data sources that can be read/referenced</td></tr>
+          <tr><td>Roots</td><td><span class="tag tg">Supported</span></td><td>Server-initiated inquiries into URI/filesystem boundaries</td></tr>
+          <tr><td>Elicitation</td><td><span class="tag tg">Supported</span></td><td>Server-initiated requests for additional info from users</td></tr>
+        </tbody>
+      </table>
+      <div class="tip"><strong>Full Spec</strong>Cursor supports all five core MCP capabilities. Most servers only expose Tools, but Resources and Prompts are powerful for richer integrations.</div>
+    </div>
+  </div>
+
+  <!-- 02 -->
+  <div class="section-label" data-n="02">Transport Methods</div>
+  <div class="fw">
+    <div class="card c-green">
+      <div class="card-title">Three Ways to Connect</div>
+      <div class="compare">
+        <div class="compare-cell">
+          <h4 style="color:var(--cyan);">stdio</h4>
+          <ul><li>Runs <strong>locally</strong></li><li>Cursor manages the process</li><li>Single-user only</li><li>Input: shell command</li><li>Auth: manual (env vars)</li><li>Best for local dev tools</li></ul>
+        </div>
+        <div class="compare-cell">
+          <h4 style="color:var(--purple);">SSE (Server-Sent Events)</h4>
+          <ul><li>Local <strong>or</strong> remote</li><li>Deploy as a server</li><li>Multi-user capable</li><li>Input: URL to SSE endpoint</li><li>Auth: OAuth supported</li><li>Best for shared/cloud tools</li></ul>
+        </div>
+        <div class="compare-cell">
+          <h4 style="color:var(--green);">Streamable HTTP</h4>
+          <ul><li>Local <strong>or</strong> remote</li><li>Deploy as a server</li><li>Multi-user capable</li><li>Input: URL to HTTP endpoint</li><li>Auth: OAuth supported</li><li>Best for modern HTTP APIs</li></ul>
+        </div>
+      </div>
+      <div class="warn"><strong>Transport Choice</strong>Use <code>stdio</code> for local-only, private tools. Use <code>SSE</code> or <code>Streamable HTTP</code> when deploying for teams or connecting to remote services. Note: <code>envFile</code> is only available for stdio servers.</div>
+    </div>
+  </div>
+
+  <!-- 03 -->
+  <div class="section-label" data-n="03">Configuration &amp; mcp.json</div>
+  <div class="g2">
+    <div class="card c-orange">
+      <div class="card-title">Config Locations</div>
+      <div class="tree-box"><span class="td">Project Config (shared with team)</span>
+<span class="ts">.cursor/</span>
+  <span class="tf">mcp.json</span>        <span class="tc2"># project-specific tools</span>
+
+<span class="td">Global Config (personal, all projects)</span>
+<span class="ts">~/.cursor/</span>
+  <span class="tf">mcp.json</span>        <span class="tc2"># available everywhere</span></div>
+      <div class="info"><strong>Priority</strong>Project-level <code>.cursor/mcp.json</code> is ideal for team-shared tools. Global <code>~/.cursor/mcp.json</code> is for personal utilities available across all projects.</div>
+    </div>
+    <div class="card c-yellow">
+      <div class="card-title">Config Interpolation Variables</div>
+      <table>
+        <thead><tr><th>Variable</th><th>Resolves To</th></tr></thead>
+        <tbody>
+          <tr><td>${env:NAME}</td><td>Environment variable value</td></tr>
+          <tr><td>${userHome}</td><td>Path to your home folder</td></tr>
+          <tr><td>${workspaceFolder}</td><td>Project root (contains .cursor/mcp.json)</td></tr>
+          <tr><td>${workspaceFolderBasename}</td><td>Name of the project root folder</td></tr>
+          <tr><td>${pathSeparator}</td><td>OS path separator (/ or \)</td></tr>
+          <tr><td>${/}</td><td>Alias for path separator</td></tr>
+        </tbody>
+      </table>
+      <div class="tip"><strong>Use Variables for Secrets</strong>Always use <code>${env:API_KEY}</code> instead of hardcoding secrets. Works in <code>command</code>, <code>args</code>, <code>env</code>, <code>url</code>, and <code>headers</code> fields.</div>
+    </div>
+  </div>
+  <div class="g2">
+    <div class="card c-pink">
+      <div class="card-title">stdio Server Config</div>
+      <span class="pre-label">mcp.json &mdash; Node.js CLI server</span>
+<pre>{
+  <span class="t-nm">"mcpServers"</span>: {
+    <span class="t-nm">"server-name"</span>: {
+      <span class="t-nm">"command"</span>: <span class="t-st">"npx"</span>,
+      <span class="t-nm">"args"</span>: [<span class="t-st">"-y"</span>, <span class="t-st">"mcp-server"</span>],
+      <span class="t-nm">"env"</span>: {
+        <span class="t-nm">"API_KEY"</span>: <span class="t-st">"${env:API_KEY}"</span>
+      }
+    }
+  }
+}</pre>
+      <span class="pre-label">mcp.json &mdash; Python server</span>
+<pre>{
+  <span class="t-nm">"mcpServers"</span>: {
+    <span class="t-nm">"server-name"</span>: {
+      <span class="t-nm">"command"</span>: <span class="t-st">"python"</span>,
+      <span class="t-nm">"args"</span>: [<span class="t-st">"mcp-server.py"</span>],
+      <span class="t-nm">"env"</span>: {
+        <span class="t-nm">"API_KEY"</span>: <span class="t-st">"${env:api-key}"</span>
+      }
+    }
+  }
+}</pre>
+      <table>
+        <thead><tr><th>Field</th><th>Required</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>command</td><td><span class="tag tg">Yes</span></td><td>Executable on PATH or full path</td></tr>
+          <tr><td>args</td><td><span class="tag to">No</span></td><td>Array of arguments</td></tr>
+          <tr><td>env</td><td><span class="tag to">No</span></td><td>Environment variables for the server</td></tr>
+          <tr><td>envFile</td><td><span class="tag to">No</span></td><td>Path to .env file (stdio only!)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card c-blue">
+      <div class="card-title">Remote Server Config</div>
+      <span class="pre-label">mcp.json &mdash; HTTP/SSE remote server</span>
+<pre>{
+  <span class="t-nm">"mcpServers"</span>: {
+    <span class="t-nm">"server-name"</span>: {
+      <span class="t-nm">"url"</span>: <span class="t-st">"http://localhost:3000/mcp"</span>,
+      <span class="t-nm">"headers"</span>: {
+        <span class="t-nm">"API_KEY"</span>: <span class="t-st">"${env:MY_TOKEN}"</span>
+      }
+    }
+  }
+}</pre>
+      <span class="pre-label">mcp.json &mdash; with static OAuth</span>
+<pre>{
+  <span class="t-nm">"mcpServers"</span>: {
+    <span class="t-nm">"oauth-server"</span>: {
+      <span class="t-nm">"url"</span>: <span class="t-st">"https://api.example.com/mcp"</span>,
+      <span class="t-nm">"auth"</span>: {
+        <span class="t-nm">"CLIENT_ID"</span>: <span class="t-st">"${env:MCP_CLIENT_ID}"</span>,
+        <span class="t-nm">"CLIENT_SECRET"</span>: <span class="t-st">"${env:MCP_CLIENT_SECRET}"</span>,
+        <span class="t-nm">"scopes"</span>: [<span class="t-st">"read"</span>, <span class="t-st">"write"</span>]
+      }
+    }
+  }
+}</pre>
+      <div class="warn"><strong>Remote Servers</strong>Remote servers (HTTP/SSE) do <strong>not</strong> support <code>envFile</code>. Use config interpolation with environment variables set in your shell profile instead.</div>
+    </div>
+  </div>
+
+  <!-- 04 -->
+  <div class="section-label" data-n="04">Authentication &amp; OAuth</div>
+  <div class="g2">
+    <div class="card c-cyan">
+      <div class="card-title">Auth Methods Overview</div>
+      <div class="mode-grid">
+        <div class="mode-cell" style="--mc:var(--cyan)"><div class="mode-title">Environment Variables</div><div class="mode-desc">Pass API keys via <code>env</code> field or <code>envFile</code>. Use <code>${env:NAME}</code> interpolation. Works for all transport types.</div></div>
+        <div class="mode-cell" style="--mc:var(--purple)"><div class="mode-title">OAuth (Dynamic)</div><div class="mode-desc">Cursor supports built-in OAuth for servers that require it. Click "Add to Cursor" for one-click OAuth setup.</div></div>
+        <div class="mode-cell" style="--mc:var(--green)"><div class="mode-title">OAuth (Static Credentials)</div><div class="mode-desc">Provide fixed <code>CLIENT_ID</code> and optional <code>CLIENT_SECRET</code> in the <code>auth</code> block. For providers requiring whitelisted redirect URLs.</div></div>
+        <div class="mode-cell" style="--mc:var(--orange)"><div class="mode-title">Header-Based Auth</div><div class="mode-desc">Set <code>Authorization</code> or custom headers in the <code>headers</code> field for remote servers. Supports interpolation.</div></div>
+      </div>
+      <div class="info"><strong>OAuth Redirect URL</strong>Cursor uses a fixed redirect URL for all MCP servers: <code>cursor://anysphere.cursor-mcp/oauth/callback</code> &mdash; register this in your OAuth provider's allowed redirect URIs.</div>
+    </div>
+    <div class="card c-green">
+      <div class="card-title">Static OAuth Fields</div>
+      <table>
+        <thead><tr><th>Field</th><th>Required</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>CLIENT_ID</td><td><span class="tag tg">Yes</span></td><td>OAuth 2.0 Client ID from provider</td></tr>
+          <tr><td>CLIENT_SECRET</td><td><span class="tag to">No</span></td><td>Client Secret (for confidential clients)</td></tr>
+          <tr><td>scopes</td><td><span class="tag to">No</span></td><td>OAuth scopes; auto-discovered via well-known endpoint if omitted</td></tr>
+        </tbody>
+      </table>
+      <div class="warn"><strong>When to Use Static OAuth</strong>Use when the provider gives you a fixed Client ID, requires whitelisting a redirect URL (e.g. Figma, Linear), or doesn't support Dynamic Client Registration.</div>
+    </div>
+  </div>
+
+  <!-- 05 -->
+  <div class="section-label" data-n="05">Using MCP in Chat</div>
+  <div class="g2">
+    <div class="card c-purple">
+      <div class="card-title">Agent &amp; Tool Usage</div>
+      <p style="margin-bottom:10px;">Agent <strong style="color:var(--purple)">automatically uses</strong> MCP tools listed under "Available Tools" when relevant &mdash; including in Plan Mode. You can also ask for a specific tool by name.</p>
+      <div class="flow-row">
+        <div class="fnode c1">User Prompt</div><div class="farrow">&rarr;</div>
+        <div class="fnode c2">Agent Selects Tool</div><div class="farrow">&rarr;</div>
+        <div class="fnode c3">Approval Check</div><div class="farrow">&rarr;</div>
+        <div class="fnode c4">Tool Executes</div><div class="farrow">&rarr;</div>
+        <div class="fnode c5">Result in Chat</div>
+      </div>
+      <div class="mode-grid">
+        <div class="mode-cell" style="--mc:var(--cyan)"><div class="mode-title">Toggle Tools</div><div class="mode-desc">Click a tool name in the tools list to enable/disable it. Disabled tools won't load into context or appear to Agent.</div></div>
+        <div class="mode-cell" style="--mc:var(--green)"><div class="mode-title">Auto-Run</div><div class="mode-desc">Enable auto-run for Agent to use MCP tools without asking for approval each time. Works like terminal command auto-run.</div></div>
+      </div>
+      <div class="tip"><strong>Image Support</strong>MCP servers can return base64-encoded images (screenshots, diagrams). Cursor attaches them to chat and the model can analyze them if it supports vision.</div>
+    </div>
+    <div class="card c-orange">
+      <div class="card-title">Tool Approval Flow</div>
+      <div class="tree">
+<pre><span class="tq">MCP tool call triggered by Agent</span>
+<span class="tln">|-- </span><span class="tq">Is auto-run enabled?</span>
+<span class="tln">|   |-- </span><span class="tya">YES</span> -&gt; <span class="tre">Execute immediately</span>
+<span class="tln">|   +-- </span><span class="tno">NO</span>  -&gt; <span class="tq">Show approval prompt</span>
+<span class="tln">|       |-- </span><span class="tya">APPROVE</span> -&gt; <span class="tre">Execute tool</span>
+<span class="tln">|       +-- </span><span class="tno">REJECT</span>  -&gt; <span class="tre">Skip tool call</span>
+<span class="tln">+-- </span><span class="tq">Tool returns result</span>
+<span class="tln">    |-- </span><span class="tya">SUCCESS</span> -&gt; <span class="tre">Show expandable response in chat</span>
+<span class="tln">    +-- </span><span class="tno">ERROR</span>   -&gt; <span class="tre">Show error message, retry available</span></pre>
+      </div>
+      <div class="info"><strong>Isolated Failures</strong>If an MCP server crashes or times out, other MCP servers continue working normally. Cursor isolates server failures to prevent cascading issues.</div>
+    </div>
+  </div>
+
+  <!-- 06 -->
+  <div class="section-label" data-n="06">Popular MCP Servers</div>
+  <div class="g3">
+    <div class="card c-cyan">
+      <div class="card-title">Development &amp; SCM</div>
+      <table>
+        <thead><tr><th>Server</th><th>Transport</th><th>Install</th></tr></thead>
+        <tbody>
+          <tr><td>GitHub</td><td>stdio</td><td><code>docker run ... github-mcp-server</code></td></tr>
+          <tr><td>GitLab</td><td>http</td><td>Self-hosted endpoint URL</td></tr>
+          <tr><td>Linear</td><td>stdio/sse</td><td>OAuth: mcp.linear.app/mcp</td></tr>
+          <tr><td>Graphite</td><td>stdio</td><td><code>gt mcp</code></td></tr>
+          <tr><td>Azure DevOps</td><td>stdio</td><td><code>npx -y @azure-devops/mcp</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card c-purple">
+      <div class="card-title">Testing &amp; Security</div>
+      <table>
+        <thead><tr><th>Server</th><th>Transport</th><th>Install</th></tr></thead>
+        <tbody>
+          <tr><td>Playwright</td><td>stdio</td><td><code>npx -y @playwright/mcp@latest</code></td></tr>
+          <tr><td>Snyk</td><td>stdio</td><td><code>npx -y snyk@latest mcp</code></td></tr>
+          <tr><td>Semgrep</td><td>stdio</td><td><code>semgrep mcp</code></td></tr>
+          <tr><td>Sentry</td><td>sse</td><td>OAuth: mcp.sentry.dev/mcp</td></tr>
+          <tr><td>SonarQube</td><td>stdio</td><td><code>docker run ... mcp/sonarqube</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card c-green">
+      <div class="card-title">Databases &amp; Data</div>
+      <table>
+        <thead><tr><th>Server</th><th>Transport</th><th>Install</th></tr></thead>
+        <tbody>
+          <tr><td>MongoDB</td><td>stdio</td><td><code>npx -y mongodb-mcp-server</code></td></tr>
+          <tr><td>Prisma</td><td>stdio/sse</td><td>OAuth: mcp.prisma.io/mcp</td></tr>
+          <tr><td>Supabase</td><td>sse</td><td>OAuth: mcp.supabase.com/mcp</td></tr>
+          <tr><td>DuckDB</td><td>stdio</td><td><code>uvx mcp-server-motherduck</code></td></tr>
+          <tr><td>Neon</td><td>sse</td><td>OAuth: mcp.neon.tech/mcp</td></tr>
+          <tr><td>Firebase</td><td>stdio</td><td><code>npx firebase-tools mcp</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="g3">
+    <div class="card c-orange">
+      <div class="card-title">Design &amp; Productivity</div>
+      <table>
+        <thead><tr><th>Server</th><th>Transport</th><th>Install</th></tr></thead>
+        <tbody>
+          <tr><td>Figma</td><td>sse</td><td>OAuth: mcp.figma.com/mcp</td></tr>
+          <tr><td>Notion</td><td>sse</td><td>OAuth: mcp.notion.com/mcp</td></tr>
+          <tr><td>Slack</td><td>sse</td><td>OAuth: mcp.slack.com/mcp</td></tr>
+          <tr><td>Atlassian</td><td>sse</td><td>OAuth: mcp.atlassian.com</td></tr>
+          <tr><td>ClickUp</td><td>http</td><td>OAuth: mcp.clickup.com/mcp</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card c-yellow">
+      <div class="card-title">Deployment &amp; Cloud</div>
+      <table>
+        <thead><tr><th>Server</th><th>Transport</th><th>Install</th></tr></thead>
+        <tbody>
+          <tr><td>Vercel</td><td>sse</td><td>OAuth: mcp.vercel.com</td></tr>
+          <tr><td>Netlify</td><td>stdio</td><td><code>npx -y @netlify/mcp</code></td></tr>
+          <tr><td>Railway</td><td>stdio</td><td><code>npx -y @railway/mcp-server</code></td></tr>
+          <tr><td>Heroku</td><td>stdio</td><td><code>npx -y @heroku/mcp-server</code></td></tr>
+          <tr><td>AWS</td><td>stdio</td><td><code>uvx mcp-proxy-for-aws@latest</code></td></tr>
+          <tr><td>Terraform</td><td>stdio</td><td><code>docker run ... terraform-mcp</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card c-pink">
+      <div class="card-title">UI Frameworks &amp; Docs</div>
+      <table>
+        <thead><tr><th>Server</th><th>Transport</th><th>Install</th></tr></thead>
+        <tbody>
+          <tr><td>shadcn/ui</td><td>stdio</td><td><code>npx shadcn@latest mcp</code></td></tr>
+          <tr><td>Context7</td><td>sse</td><td>mcp.context7.com/mcp</td></tr>
+          <tr><td>Angular</td><td>stdio</td><td><code>npx -y @angular/cli mcp</code></td></tr>
+          <tr><td>Svelte</td><td>sse</td><td>mcp.svelte.dev/mcp</td></tr>
+          <tr><td>Chakra UI</td><td>stdio</td><td><code>npx -y @chakra-ui/react-mcp</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 07 -->
+  <div class="section-label" data-n="07">Security Best Practices</div>
+  <div class="g2">
+    <div class="card c-red">
+      <div class="card-title">Security Checklist</div>
+      <div class="danger"><strong>Verify Source</strong>Only install MCP servers from trusted developers and repositories. MCP servers execute code on your behalf.</div>
+      <div class="warn"><strong>Review Permissions</strong>Check what data and APIs the server will access before installing. Understand what the server does.</div>
+      <div class="tip"><strong>Limit API Keys</strong>Use restricted API keys with minimal required permissions. Never use admin/root keys for MCP integrations.</div>
+      <div class="info"><strong>Audit Code</strong>For critical integrations, review the server's source code. Prefer open-source servers with visible repositories.</div>
+    </div>
+    <div class="card c-blue">
+      <div class="card-title">Environment Variable Safety</div>
+      <span class="pre-label">Correct: use env interpolation</span>
+<pre><span class="t-nm">"env"</span>: {
+<span class="hl">  <span class="t-nm">"API_KEY"</span>: <span class="t-st">"${env:MY_SECRET_KEY}"</span>   <span class="t-cm">// resolved at runtime</span></span>
+}</pre>
+      <span class="pre-label">Wrong: hardcoded secret</span>
+<pre><span class="t-nm">"env"</span>: {
+<span class="hl-r">  <span class="t-nm">"API_KEY"</span>: <span class="t-er">"sk-abc123hardcoded"</span>   <span class="t-cm">// NEVER do this</span></span>
+}</pre>
+      <div class="danger"><strong>Never Hardcode Secrets</strong>Always use <code>${env:NAME}</code> interpolation or <code>envFile</code> to load secrets. Hardcoded keys in mcp.json may leak to version control.</div>
+      <div class="tip"><strong>envFile for Local Servers</strong>Use <code>"envFile": "${workspaceFolder}/.env"</code> for stdio servers. Add <code>.env</code> to <code>.gitignore</code>.</div>
+    </div>
+  </div>
+
+  <!-- 08 -->
+  <div class="section-label" data-n="08">Debugging &amp; Troubleshooting</div>
+  <div class="g2">
+    <div class="card c-orange">
+      <div class="card-title">Debugging MCP Issues</div>
+      <p style="margin-bottom:10px;">View MCP logs to diagnose connection errors, authentication issues, or server crashes:</p>
+      <span class="pre-label">Steps to view MCP logs</span>
+<pre><span class="t-h2">1.</span> Open Output panel: <span class="t-fn">Cmd+Shift+U</span> (Mac) / <span class="t-fn">Ctrl+Shift+U</span> (Win)
+<span class="t-h2">2.</span> Select <span class="t-st">"MCP Logs"</span> from the dropdown
+<span class="t-h2">3.</span> Check for connection, auth, or crash errors</pre>
+      <div class="info"><strong>Server Management</strong>Toggle servers on/off without removing them: Settings (<code>Cmd+Shift+J</code>) &rarr; Features &rarr; Model Context Protocol &rarr; click toggle.</div>
+    </div>
+    <div class="card c-yellow">
+      <div class="card-title">Common Issues &amp; Fixes</div>
+      <div class="tree">
+<pre><span class="tq">MCP server not appearing in chat?</span>
+<span class="tln">|-- </span><span class="tya">Check</span> -&gt; <span class="tre">Is server enabled in Settings &rarr; Features &rarr; MCP?</span>
+<span class="tln">|-- </span><span class="tya">Check</span> -&gt; <span class="tre">Is mcp.json valid JSON? (no trailing commas)</span>
+<span class="tln">+-- </span><span class="tya">Check</span> -&gt; <span class="tre">View MCP Logs for connection errors</span>
+
+<span class="tq">MCP server crashes or times out?</span>
+<span class="tln">|-- </span><span class="tre">Error shown in chat, tool call marked as failed</span>
+<span class="tln">|-- </span><span class="tre">Other MCP servers continue working (isolated)</span>
+<span class="tln">+-- </span><span class="tre">Retry the operation or check logs for details</span>
+
+<span class="tq">Need to update an npm-based MCP server?</span>
+<span class="tln">|-- </span><span class="t-h2">1.</span> <span class="tre">Remove the server from settings</span>
+<span class="tln">|-- </span><span class="t-h2">2.</span> <span class="tre">Run: npm cache clean --force</span>
+<span class="tln">+-- </span><span class="t-h2">3.</span> <span class="tre">Re-add the server to get latest version</span></pre>
+      </div>
+      <div class="warn"><strong>Server Isolation</strong>Cursor isolates server failures &mdash; one crashing server won't affect others. If a tool call fails, you can safely retry.</div>
+    </div>
+  </div>
+
+  <!-- 09 -->
+  <div class="section-label" data-n="09">Quick Decision Guide</div>
+  <div class="fw">
+    <div class="card c-purple">
+      <div class="card-title">Which Transport &amp; Config Do I Need?</div>
+      <div class="tree">
+<pre><span class="tq">Is the MCP server for personal use only?</span>
+<span class="tln">|-- </span><span class="tya">YES</span> -&gt; <span class="tq">Does it need to run locally?</span>
+<span class="tln">|   |-- </span><span class="tya">YES</span> -&gt; <span class="tre">Use stdio + ~/.cursor/mcp.json (global)</span>
+<span class="tln">|   +-- </span><span class="tno">NO</span>  -&gt; <span class="tre">Use SSE/HTTP + ~/.cursor/mcp.json</span>
+<span class="tln">+-- </span><span class="tno">NO</span>  -&gt; <span class="tq">Is it for the whole team?</span>
+<span class="tln">    |-- </span><span class="tya">YES</span> -&gt; <span class="tre">Use .cursor/mcp.json (project) + commit to repo</span>
+<span class="tln">    +-- </span><span class="tno">NO</span>  -&gt; <span class="tre">Use global config per developer</span>
+
+<span class="tq">Does the server require authentication?</span>
+<span class="tln">|-- </span><span class="tya">API Key</span>     -&gt; <span class="tre">Use env field with ${env:NAME} interpolation</span>
+<span class="tln">|-- </span><span class="tya">OAuth</span>       -&gt; <span class="tre">Use one-click install or auth block in mcp.json</span>
+<span class="tln">+-- </span><span class="tno">None</span>        -&gt; <span class="tre">Just add command/url, no auth needed</span>
+
+<span class="tq">Want to install a server from the official catalog?</span>
+<span class="tln">|-- </span><span class="tya">YES</span> -&gt; <span class="tre">Click "Add to Cursor" on cursor.com/docs/context/mcp</span>
+<span class="tln">+-- </span><span class="tno">Custom</span> -&gt; <span class="tre">Add manually to mcp.json with command or url field</span></pre>
+      </div>
+      <div class="tip"><strong>Extension API</strong>For enterprise environments, use <code>vscode.cursor.mcp.registerServer()</code> to programmatically register MCP servers without modifying mcp.json files.</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>CURSOR MCP CHEATSHEET &middot; V1.0 &middot; FEB 2026 BY DTRAN + CLAUDE SONNET 4.6</span>
+    <span>https://cursor.com/docs/context/mcp</span>
+  </div>
+
+</div>
+</body>
+</html>

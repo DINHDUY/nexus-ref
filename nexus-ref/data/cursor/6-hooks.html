@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cursor Hooks - Complete Cheatsheet</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bricolage+Grotesque:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root,[data-theme="dark"]{--bg:#070b10;--bg2:#0b1118;--bg3:#111820;--bg4:#161f2a;--border:#1c2635;--border2:#263345;--text:#ccd6e0;--muted:#607585;--dim:#2d3f52;--cyan:#00d4f5;--purple:#a78bfa;--green:#2eeba8;--orange:#f59e42;--yellow:#fcd34d;--pink:#f472b6;--red:#f87171;--blue:#60a5fa;--code-bg:#060a0f;--heading:#fff;--scanline-color:rgba(0,212,245,0.012);--glow1:rgba(0,212,245,0.04);--glow2:rgba(167,139,250,0.04);}
+[data-theme="light"]{--bg:#f8fafc;--bg2:#f1f5f9;--bg3:#e2e8f0;--bg4:#cbd5e1;--border:#cbd5e1;--border2:#94a3b8;--text:#1e293b;--muted:#64748b;--dim:#94a3b8;--cyan:#0891b2;--purple:#7c3aed;--green:#059669;--orange:#d97706;--yellow:#ca8a04;--pink:#db2777;--red:#dc2626;--blue:#2563eb;--code-bg:#e2e8f0;--heading:#0f172a;--scanline-color:rgba(0,0,0,0.02);--glow1:rgba(0,0,0,0.02);--glow2:rgba(0,0,0,0.02);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Space Mono',monospace;font-size:12.5px;line-height:1.65;padding:36px 20px 80px;}
+body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,var(--scanline-color) 2px,var(--scanline-color) 4px);pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 10% 0%,var(--glow1) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 90% 100%,var(--glow2) 0%,transparent 60%);pointer-events:none;z-index:0;}
+.container{max-width:1280px;margin:0 auto;position:relative;z-index:1;}
+.header{display:grid;grid-template-columns:1fr auto;align-items:end;gap:24px;margin-bottom:36px;padding-bottom:24px;border-bottom:1px solid var(--border2);}
+.eyebrow{font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:var(--cyan);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.eyebrow::before{content:'';width:20px;height:1px;background:var(--cyan);}
+h1{font-family:'Bricolage Grotesque',sans-serif;font-size:clamp(32px,5vw,58px);font-weight:800;line-height:0.95;letter-spacing:-0.03em;color:var(--heading);}
+h1 em{font-style:normal;color:var(--cyan);}
+.header-sub{margin-top:12px;font-size:11.5px;color:var(--muted);letter-spacing:0.04em;max-width:580px;}
+.meta-pills{display:flex;flex-direction:column;gap:8px;align-items:flex-end;}
+.pill{background:var(--bg3);border:1px solid var(--border2);padding:6px 14px;font-size:10px;letter-spacing:0.08em;white-space:nowrap;color:var(--muted);}
+.pill strong{color:var(--green);}
+.section-label{font-size:9px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:10px;margin:32px 0 14px;}
+.section-label::before{content:attr(data-n);color:var(--cyan);font-size:11px;}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(520px,1fr));gap:14px;margin-bottom:14px;}
+.g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px;margin-bottom:14px;}
+.fw{margin-bottom:14px;}
+.card{background:var(--bg2);border:1px solid var(--border);padding:20px;position:relative;overflow:hidden;animation:fadeUp 0.4s ease both;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--ac),transparent);}
+.c-cyan{--ac:var(--cyan);}.c-purple{--ac:var(--purple);}.c-green{--ac:var(--green);}.c-orange{--ac:var(--orange);}.c-yellow{--ac:var(--yellow);}.c-pink{--ac:var(--pink);}.c-red{--ac:var(--red);}.c-blue{--ac:var(--blue);}
+.card-title{font-family:'Bricolage Grotesque',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--ac);margin-bottom:14px;display:flex;align-items:center;gap:6px;}
+.card-title::after{content:'';flex:1;height:1px;background:var(--border);}
+pre{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--ac,var(--cyan));padding:13px 16px;font-family:'Space Mono',monospace;font-size:11.5px;line-height:1.75;overflow-x:auto;margin-bottom:10px;}
+pre:last-child{margin-bottom:0;}
+.pre-label{font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--dim);margin-bottom:5px;display:block;}
+.t-cm{color:var(--muted);font-style:italic;}.t-kw{color:var(--pink);}.t-st{color:var(--green);}.t-nm{color:var(--orange);}.t-fn{color:var(--blue);}.t-op{color:var(--cyan);}.t-bi{color:var(--yellow);}.t-er{color:var(--red);}
+code{background:var(--bg4);border:1px solid var(--border2);padding:1px 5px;font-size:11px;color:var(--cyan);}
+.tip,.warn,.info,.danger{padding:9px 13px;font-size:11px;margin-bottom:8px;border-left:2px solid;line-height:1.7;}
+.tip{background:rgba(46,235,168,0.04);border-color:var(--green);}
+.warn{background:rgba(245,158,66,0.05);border-color:var(--orange);}
+.info{background:rgba(0,212,245,0.04);border-color:var(--cyan);}
+.danger{background:rgba(248,113,113,0.05);border-color:var(--red);}
+.tip strong,.warn strong,.info strong,.danger strong{display:block;font-size:8.5px;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:2px;}
+.tip strong{color:var(--green);}.warn strong{color:var(--orange);}.info strong{color:var(--cyan);}.danger strong{color:var(--red);}
+table{width:100%;border-collapse:collapse;font-size:11.5px;margin-bottom:10px;}
+th{text-align:left;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);padding:6px 10px;border-bottom:1px solid var(--border2);}
+td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.55;}
+tr:last-child td{border-bottom:none;}
+td:first-child{color:var(--cyan);white-space:nowrap;font-weight:700;}
+td:nth-child(2){color:var(--muted);}
+.tag{display:inline-block;padding:2px 7px;font-size:8.5px;letter-spacing:0.1em;text-transform:uppercase;font-weight:700;border:1px solid;margin:2px 3px 2px 0;}
+.tc{color:var(--cyan);border-color:var(--cyan);}.tp{color:var(--purple);border-color:var(--purple);}.tg{color:var(--green);border-color:var(--green);}.tr{color:var(--red);border-color:var(--red);}
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.mode-cell{background:var(--code-bg);border:1px solid var(--border);padding:12px 14px;position:relative;}
+.mode-cell::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--mc,var(--cyan));}
+.mode-title{font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--mc,var(--cyan));margin-bottom:6px;}
+.mode-desc{font-size:11px;color:var(--muted);line-height:1.6;}
+.compare{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:12px;}
+.compare-cell{background:var(--code-bg);padding:12px 14px;}
+.compare-cell h4{font-size:9px;letter-spacing:0.14em;text-transform:uppercase;font-weight:700;margin-bottom:8px;}
+.compare-cell ul{list-style:none;font-size:11px;color:var(--muted);line-height:1.9;}
+.compare-cell ul li::before{content:'> ';color:var(--dim);}
+.tree-box{background:var(--code-bg);border:1px solid var(--border);border-left:3px solid var(--ac,var(--cyan));padding:13px 16px;font-family:'Space Mono',monospace;font-size:11.5px;line-height:2;margin-bottom:10px;overflow-x:auto;}
+.td{color:var(--orange);}.tf{color:var(--green);}.tc2{color:var(--muted);font-style:italic;}
+.flow-row{display:flex;align-items:center;flex-wrap:wrap;margin:10px 0;}
+.fnode{padding:6px 12px;font-size:11px;border:1px solid var(--border2);background:var(--bg3);white-space:nowrap;}
+.fnode.c1{border-color:var(--cyan);color:var(--cyan);}.fnode.c2{border-color:var(--green);color:var(--green);}.fnode.c3{border-color:var(--purple);color:var(--purple);}.fnode.c4{border-color:var(--orange);color:var(--orange);}.fnode.c5{border-color:var(--red);color:var(--red);}
+.farrow{color:var(--dim);padding:0 6px;font-size:14px;}
+.tree pre{border-left-color:var(--purple);font-size:11.5px;line-height:2;}
+.tq{color:var(--text);}.tya{color:var(--green);}.tno{color:var(--orange);}.tre{color:var(--cyan);font-weight:700;}.tln{color:var(--dim);}
+.footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:10px;color:var(--dim);letter-spacing:0.08em;}
+@media(max-width:620px){.g2,.g3{grid-template-columns:1fr;}.compare,.mode-grid{grid-template-columns:1fr;}.header{grid-template-columns:1fr;}.meta-pills{align-items:flex-start;}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.card:nth-child(1){animation-delay:.04s}.card:nth-child(2){animation-delay:.08s}.card:nth-child(3){animation-delay:.12s}.card:nth-child(4){animation-delay:.16s}
+.theme-link{color:var(--cyan);cursor:pointer;font-weight:700;transition:all 0.2s ease;}.theme-link:hover{color:var(--purple);}
+</style>
+<script>(function(){var t=localStorage.getItem('cs-theme')||'dark';document.documentElement.setAttribute('data-theme',t);window.addEventListener('DOMContentLoaded',function(){var el=document.getElementById('theme-link');if(el)el.textContent=t.toUpperCase();});})();function toggleTheme(){var h=document.documentElement;var c=h.getAttribute('data-theme')||'dark';var n=c==='light'?'dark':'light';h.setAttribute('data-theme',n);localStorage.setItem('cs-theme',n);var el=document.getElementById('theme-link');if(el)el.textContent=n.toUpperCase();}</script>
+</head><body><div class="container"><div class="header"><div><div class="eyebrow">Reference Sheet &middot; v1.0 &rarr; Feb 2026 &middot; <span id="theme-link" class="theme-link" onclick="toggleTheme()">DARK</span></div><h1>Cursor <em>Hooks</em></h1><p class="header-sub">// Hook events &middot; Command &amp; prompt types &middot; I/O schemas &middot; Matchers &middot; Config &middot; Distribution</p></div><div class="meta-pills"><div class="pill">Config <strong>hooks.json</strong></div><div class="pill">Schema version <strong>1</strong></div><div class="pill">Surfaces <strong>Agent + Tab</strong></div><div class="pill">Priority <strong>Enterprise &rarr; Team &rarr; Project &rarr; User</strong></div></div></div>
+<div class="section-label" data-n="01">Overview &amp; Quickstart</div>
+<div class="g2 fw">
+<div class="card c-cyan">
+  <div class="card-title">What Hooks Can Do</div>
+  <div class="mode-grid">
+    <div class="mode-cell" style="--mc:var(--cyan)"><div class="mode-title">Observe</div><div class="mode-desc">Audit every tool call, shell command, file edit, and MCP execution across the agent loop.</div></div>
+    <div class="mode-cell" style="--mc:var(--orange)"><div class="mode-title">Control</div><div class="mode-desc">Block risky operations, gate SQL writes, deny reads to sensitive files, stop prompt submissions.</div></div>
+    <div class="mode-cell" style="--mc:var(--green)"><div class="mode-title">Extend</div><div class="mode-desc">Run formatters after edits, inject context at session start, auto-continue with follow-up messages.</div></div>
+    <div class="mode-cell" style="--mc:var(--purple)"><div class="mode-title">Scan</div><div class="mode-desc">Detect PII or secrets in files, scan AI-generated code for vulnerabilities before it lands.</div></div>
+  </div>
+  <div class="info"><strong>INFO: Coverage</strong>Works with both <strong>Cursor Agent</strong> (Cmd+K / Agent Chat) and <strong>Cursor Tab</strong> (inline completions). Each surface uses distinct hook event names.</div>
+</div>
+<div class="card c-green">
+  <div class="card-title">Quickstart &mdash; Project Hook</div>
+  <span class="pre-label">FILE: &lt;project&gt;/.cursor/hooks.json</span>
+  <pre>{
+  <span class="t-nm">"version"</span>: <span class="t-bi">1</span>,
+  <span class="t-nm">"hooks"</span>: {
+    <span class="t-nm">"afterFileEdit"</span>: [{ <span class="t-nm">"command"</span>: <span class="t-st">".cursor/hooks/format.sh"</span> }]
+  }
+}</pre>
+  <span class="pre-label">FILE: .cursor/hooks/format.sh</span>
+  <pre><span class="t-cm">#!/bin/bash
+# Read input, do something, exit 0</span>
+<span class="t-fn">cat</span> &gt; /dev/null
+<span class="t-kw">exit</span> <span class="t-bi">0</span></pre>
+  <div class="warn"><strong>WARNING: Working Directory</strong>Project hooks run from the <strong>project root</strong>: use <code>.cursor/hooks/script.sh</code>. User hooks (~/.cursor/) use <code>./hooks/script.sh</code>.</div>
+  <div class="tip"><strong>TIP: Restart Required</strong>After editing <code>hooks.json</code>, restart Cursor. Check the <strong>Hooks tab</strong> in Settings for active hooks.</div>
+</div>
+</div>
+<div class="section-label" data-n="02">Hook Execution Types</div>
+<div class="g2 fw">
+<div class="card c-purple">
+  <div class="card-title">Command-Based Hooks (default)</div>
+  <p style="font-size:11.5px;color:var(--muted);margin-bottom:10px;">Execute shell scripts that receive JSON via stdin and return JSON via stdout.</p>
+  <span class="pre-label">hooks.json example with matcher</span>
+  <pre>{
+  <span class="t-nm">"hooks"</span>: {
+    <span class="t-nm">"beforeShellExecution"</span>: [{
+      <span class="t-nm">"command"</span>: <span class="t-st">".cursor/hooks/approve-network.sh"</span>,
+      <span class="t-nm">"timeout"</span>: <span class="t-bi">30</span>,
+      <span class="t-nm">"matcher"</span>: <span class="t-st">"curl|wget|nc"</span>
+    }]
+  }
+}</pre>
+  <table><thead><tr><th>Exit Code</th><th>Meaning</th></tr></thead><tbody>
+    <tr><td>0</td><td style="color:var(--green)">Success &mdash; use the JSON output from stdout</td></tr>
+    <tr><td>2</td><td style="color:var(--red)">Block the action (equivalent to deny permission)</td></tr>
+    <tr><td>other</td><td style="color:var(--orange)">Hook failed &mdash; action proceeds (fail-open)</td></tr>
+  </tbody></table>
+  <div class="danger"><strong>DANGER: Fail-Closed Hooks</strong><code>beforeMCPExecution</code> and <code>beforeReadFile</code> are <strong>fail-closed</strong>: crash or timeout = action blocked. All other hooks are fail-open.</div>
+</div>
+<div class="card c-orange">
+  <div class="card-title">Prompt-Based Hooks (LLM-evaluated)</div>
+  <p style="font-size:11.5px;color:var(--muted);margin-bottom:10px;">Use a fast LLM to evaluate a natural language condition. No script required.</p>
+  <span class="pre-label">hooks.json &mdash; prompt hook</span>
+  <pre>{
+  <span class="t-nm">"hooks"</span>: {
+    <span class="t-nm">"beforeShellExecution"</span>: [{
+      <span class="t-nm">"type"</span>: <span class="t-st">"prompt"</span>,
+      <span class="t-nm">"prompt"</span>: <span class="t-st">"Does this command look safe to execute?
+Only allow read-only operations."</span>,
+      <span class="t-nm">"timeout"</span>: <span class="t-bi">10</span>
+    }]
+  }
+}</pre>
+  <table><thead><tr><th>Feature</th><th>Detail</th></tr></thead><tbody>
+    <tr><td>Returns</td><td style="color:var(--text)"><code>{ "ok": boolean, "reason": "..." }</code></td></tr>
+    <tr><td>$ARGUMENTS</td><td style="color:var(--text)">Auto-replaced with full hook input JSON</td></tr>
+    <tr><td>model</td><td style="color:var(--text)">Optional field to override the LLM model</td></tr>
+    <tr><td>Speed</td><td style="color:var(--text)">Uses a fast model for low-latency evaluation</td></tr>
+  </tbody></table>
+  <div class="tip"><strong>TIP: Use When</strong>Prompt hooks shine for policy enforcement where parsing would be complex &mdash; e.g. "Only allow read-only commands. Never delete or write."</div>
+</div>
+</div>
+<div class="section-label" data-n="03">Agent Hook Events</div>
+<div class="g3 fw">
+<div class="card c-cyan">
+  <div class="card-title">Session Lifecycle</div>
+  <table><thead><tr><th>Event</th><th>When it fires</th></tr></thead><tbody>
+    <tr><td>sessionStart</td><td style="color:var(--text)">New composer conversation created. Can inject env vars and context, or block creation.</td></tr>
+    <tr><td>sessionEnd</td><td style="color:var(--text)">Conversation ends. Fire-and-forget &mdash; response is logged but not used.</td></tr>
+  </tbody></table>
+  <span class="pre-label">sessionStart output fields</span>
+  <pre>{
+  <span class="t-nm">"env"</span>: { <span class="t-st">"KEY"</span>: <span class="t-st">"value"</span> },    <span class="t-cm">// optional env vars</span>
+  <span class="t-nm">"additional_context"</span>: <span class="t-st">"..."</span>, <span class="t-cm">// injected into sys ctx</span>
+  <span class="t-nm">"continue"</span>: <span class="t-kw">true</span>,            <span class="t-cm">// false = block session</span>
+  <span class="t-nm">"user_message"</span>: <span class="t-st">"..."</span>        <span class="t-cm">// shown if blocked</span>
+}</pre>
+</div>
+<div class="card c-purple">
+  <div class="card-title">Tool Use Hooks</div>
+  <table><thead><tr><th>Event</th><th>When it fires</th></tr></thead><tbody>
+    <tr><td>preToolUse</td><td style="color:var(--text)">Before ANY tool. Can allow/deny and modify tool input. Use matchers to filter by tool type.</td></tr>
+    <tr><td>postToolUse</td><td style="color:var(--text)">After successful tool. Can modify MCP tool output seen by the model.</td></tr>
+    <tr><td>postToolUseFailure</td><td style="color:var(--text)">When tool fails, times out, or is denied. For error tracking and recovery.</td></tr>
+  </tbody></table>
+  <span class="pre-label">preToolUse output</span>
+  <pre>{
+  <span class="t-nm">"decision"</span>: <span class="t-st">"allow"</span> | <span class="t-st">"deny"</span>,
+  <span class="t-nm">"reason"</span>:   <span class="t-st">"shown to agent if denied"</span>,
+  <span class="t-nm">"updated_input"</span>: { <span class="t-nm">"command"</span>: <span class="t-st">"npm ci"</span> }
+}</pre>
+  <div class="info"><strong>INFO: preToolUse Matchers</strong>Filter by tool type: <code>Shell</code>, <code>Read</code>, <code>Write</code>, <code>Grep</code>, <code>Delete</code>, <code>MCP</code>, <code>Task</code></div>
+</div>
+<div class="card c-green">
+  <div class="card-title">Shell and MCP Hooks</div>
+  <table><thead><tr><th>Event</th><th>Behavior</th></tr></thead><tbody>
+    <tr><td>beforeShellExecution</td><td style="color:var(--text)">Before any shell command. Returns permission: allow / deny / ask.</td></tr>
+    <tr><td>afterShellExecution</td><td style="color:var(--text)">After shell completes. Gets full output and duration (ms).</td></tr>
+    <tr><td>beforeMCPExecution</td><td style="color:var(--text)">Before MCP tool. <strong>Fail-closed</strong> &mdash; crash = blocked.</td></tr>
+    <tr><td>afterMCPExecution</td><td style="color:var(--text)">After MCP tool. Gets result JSON and duration (ms).</td></tr>
+  </tbody></table>
+  <span class="pre-label">permission output schema</span>
+  <pre>{
+  <span class="t-nm">"permission"</span>: <span class="t-st">"allow"</span> | <span class="t-st">"deny"</span> | <span class="t-st">"ask"</span>,
+  <span class="t-nm">"user_message"</span>: <span class="t-st">"shown in UI"</span>,
+  <span class="t-nm">"agent_message"</span>: <span class="t-st">"sent to agent"</span>
+}</pre>
+</div>
+<div class="card c-orange">
+  <div class="card-title">File Hooks</div>
+  <table><thead><tr><th>Event</th><th>Behavior</th></tr></thead><tbody>
+    <tr><td>beforeReadFile</td><td style="color:var(--text)">Before agent reads a file. <strong>Fail-closed.</strong> Can deny with user message.</td></tr>
+    <tr><td>afterFileEdit</td><td style="color:var(--text)">After agent edits a file. Gets path + array of {old_string, new_string} edits.</td></tr>
+  </tbody></table>
+  <span class="pre-label">beforeReadFile output</span>
+  <pre>{
+  <span class="t-nm">"permission"</span>: <span class="t-st">"allow"</span> | <span class="t-st">"deny"</span>,
+  <span class="t-nm">"user_message"</span>: <span class="t-st">"shown when denied"</span>
+}</pre>
+  <div class="warn"><strong>WARNING: Access Control</strong>Use <code>beforeReadFile</code> to block sensitive files (e.g. <code>.env</code>, private keys) from ever being sent to the model. Fail-closed for safety.</div>
+</div>
+<div class="card c-yellow">
+  <div class="card-title">Subagent Hooks</div>
+  <table><thead><tr><th>Event</th><th>Behavior</th></tr></thead><tbody>
+    <tr><td>subagentStart</td><td style="color:var(--text)">Before Task tool spawns a subagent. Can allow or deny creation.</td></tr>
+    <tr><td>subagentStop</td><td style="color:var(--text)">When subagent completes or errors. Can emit followup_message to loop.</td></tr>
+  </tbody></table>
+  <span class="pre-label">subagentStart matcher &mdash; filter by type</span>
+  <pre><span class="t-nm">"matcher"</span>: <span class="t-st">"explore|shell"</span>
+<span class="t-cm">// types: generalPurpose, explore, shell, browser-use</span></pre>
+  <div class="tip"><strong>TIP: Loop Pattern</strong>Return <code>followup_message</code> from <code>subagentStop</code> to auto-submit the next user message. Max 5 auto follow-ups via <code>loop_limit</code>.</div>
+</div>
+<div class="card c-pink">
+  <div class="card-title">Prompt, Response and Stop Hooks</div>
+  <table><thead><tr><th>Event</th><th>Behavior</th></tr></thead><tbody>
+    <tr><td>beforeSubmitPrompt</td><td style="color:var(--text)">After user hits send, before backend. Can block with user_message.</td></tr>
+    <tr><td>afterAgentResponse</td><td style="color:var(--text)">After agent completes an assistant message. Gets final text.</td></tr>
+    <tr><td>afterAgentThought</td><td style="color:var(--text)">After thinking block. Gets text + duration_ms. Observational.</td></tr>
+    <tr><td>preCompact</td><td style="color:var(--text)">Before context compaction. Cannot block. Returns optional user_message.</td></tr>
+    <tr><td>stop</td><td style="color:var(--text)">Agent loop ends. Can emit followup_message for auto-retry or looping.</td></tr>
+  </tbody></table>
+  <span class="pre-label">stop hook output &mdash; auto-loop</span>
+  <pre>{
+  <span class="t-nm">"followup_message"</span>: <span class="t-st">"Retry: check credentials."</span>
+  <span class="t-cm">// loop_count in input = auto follow-ups fired (starts 0)</span>
+}</pre>
+</div>
+</div>
+<div class="section-label" data-n="04">Tab Hooks and Full Event Reference</div>
+<div class="g2 fw">
+<div class="card c-blue">
+  <div class="card-title">Tab-Specific Events</div>
+  <div class="compare">
+    <div class="compare-cell"><h4 style="color:var(--cyan);">beforeTabFileRead</h4><ul>
+      <li>Fires only for Tab completions</li><li>Control file access before Tab reads</li>
+      <li>No attachments field</li><li>Returns permission: allow | deny</li>
+      <li>Apply stricter policy than Agent reads</li>
+    </ul></div>
+    <div class="compare-cell"><h4 style="color:var(--purple);">afterTabFileEdit</h4><ul>
+      <li>Fires only for Tab completions</li><li>Run formatters or audit Tab code</li>
+      <li>Includes precise range per edit</li><li>Includes old_line and new_line</li>
+      <li>Finer granularity than afterFileEdit</li>
+    </ul></div>
+    <div class="compare-cell"><h4 style="color:var(--green);">Why Separate?</h4><ul>
+      <li>Tab operates autonomously</li><li>Different trust level than Agent</li>
+      <li>Separate audit trails per surface</li><li>Tab edits have line-level range data</li>
+      <li>Different redaction policies needed</li>
+    </ul></div>
+  </div>
+  <span class="pre-label">afterTabFileEdit &mdash; extra fields vs afterFileEdit</span>
+  <pre>{
+  <span class="t-nm">"file_path"</span>: <span class="t-st">"/abs/path/file.ts"</span>,
+  <span class="t-nm">"edits"</span>: [{
+    <span class="t-nm">"old_string"</span>: <span class="t-st">"..."</span>, <span class="t-nm">"new_string"</span>: <span class="t-st">"..."</span>,
+    <span class="t-nm">"range"</span>: { <span class="t-nm">"start_line_number"</span>: <span class="t-bi">10</span>, <span class="t-nm">"end_line_number"</span>: <span class="t-bi">10</span> },
+    <span class="t-nm">"old_line"</span>: <span class="t-st">"line before edit"</span>, <span class="t-nm">"new_line"</span>: <span class="t-st">"line after edit"</span>
+  }]
+}</pre>
+</div>
+<div class="card c-red">
+  <div class="card-title">All Hook Events &mdash; Quick Reference</div>
+  <table><thead><tr><th>Event</th><th>Surface</th><th>Can Block?</th></tr></thead><tbody>
+    <tr><td>sessionStart</td><td><span class="tag tc">Agent</span></td><td style="color:var(--green)">Yes</td></tr>
+    <tr><td>sessionEnd</td><td><span class="tag tc">Agent</span></td><td style="color:var(--muted)">No (fire &amp; forget)</td></tr>
+    <tr><td>preToolUse</td><td><span class="tag tc">Agent</span></td><td style="color:var(--green)">Yes</td></tr>
+    <tr><td>postToolUse</td><td><span class="tag tc">Agent</span></td><td style="color:var(--muted)">No</td></tr>
+    <tr><td>postToolUseFailure</td><td><span class="tag tc">Agent</span></td><td style="color:var(--muted)">No</td></tr>
+    <tr><td>subagentStart</td><td><span class="tag tc">Agent</span></td><td style="color:var(--green)">Yes</td></tr>
+    <tr><td>subagentStop</td><td><span class="tag tc">Agent</span></td><td style="color:var(--muted)">No (can loop)</td></tr>
+    <tr><td>beforeShellExecution</td><td><span class="tag tc">Agent</span></td><td style="color:var(--green)">Yes</td></tr>
+    <tr><td>afterShellExecution</td><td><span class="tag tc">Agent</span></td><td style="color:var(--muted)">No</td></tr>
+    <tr><td>beforeMCPExecution</td><td><span class="tag tc">Agent</span></td><td style="color:var(--red)">Yes (fail-closed)</td></tr>
+    <tr><td>afterMCPExecution</td><td><span class="tag tc">Agent</span></td><td style="color:var(--muted)">No</td></tr>
+    <tr><td>beforeReadFile</td><td><span class="tag tc">Agent</span></td><td style="color:var(--red)">Yes (fail-closed)</td></tr>
+    <tr><td>afterFileEdit</td><td><span class="tag tc">Agent</span></td><td style="color:var(--muted)">No</td></tr>
+    <tr><td>beforeSubmitPrompt</td><td><span class="tag tc">Agent</span></td><td style="color:var(--green)">Yes</td></tr>
+    <tr><td>afterAgentResponse</td><td><span class="tag tc">Agent</span></td><td style="color:var(--muted)">No</td></tr>
+    <tr><td>afterAgentThought</td><td><span class="tag tc">Agent</span></td><td style="color:var(--muted)">No</td></tr>
+    <tr><td>preCompact</td><td><span class="tag tc">Agent</span></td><td style="color:var(--muted)">No (observational)</td></tr>
+    <tr><td>stop</td><td><span class="tag tc">Agent</span></td><td style="color:var(--muted)">No (can loop)</td></tr>
+    <tr><td>beforeTabFileRead</td><td><span class="tag tp">Tab</span></td><td style="color:var(--green)">Yes</td></tr>
+    <tr><td>afterTabFileEdit</td><td><span class="tag tp">Tab</span></td><td style="color:var(--muted)">No</td></tr>
+  </tbody></table>
+</div>
+</div>
+<div class="section-label" data-n="05">Input / Output Schemas</div>
+<div class="g2 fw">
+<div class="card c-green">
+  <div class="card-title">Base Input (All Hooks)</div>
+  <p style="font-size:11.5px;color:var(--muted);margin-bottom:10px;">Every hook receives these fields in addition to hook-specific ones:</p>
+  <pre>{
+  <span class="t-nm">"conversation_id"</span>: <span class="t-st">"string"</span>,  <span class="t-cm">// stable across turns</span>
+  <span class="t-nm">"generation_id"</span>:   <span class="t-st">"string"</span>,  <span class="t-cm">// changes per user message</span>
+  <span class="t-nm">"model"</span>:           <span class="t-st">"string"</span>,  <span class="t-cm">// configured composer model</span>
+  <span class="t-nm">"hook_event_name"</span>: <span class="t-st">"string"</span>,  <span class="t-cm">// which hook is running</span>
+  <span class="t-nm">"cursor_version"</span>:  <span class="t-st">"string"</span>,  <span class="t-cm">// e.g. "1.7.2"</span>
+  <span class="t-nm">"workspace_roots"</span>: [<span class="t-st">"path"</span>], <span class="t-cm">// project root(s)</span>
+  <span class="t-nm">"user_email"</span>:      <span class="t-st">"string|null"</span>,
+  <span class="t-nm">"transcript_path"</span>: <span class="t-st">"string|null"</span>
+}</pre>
+  <table><thead><tr><th>Env Variable</th><th>Description</th></tr></thead><tbody>
+    <tr><td>CURSOR_PROJECT_DIR</td><td style="color:var(--text)">Workspace root directory (always present)</td></tr>
+    <tr><td>CURSOR_VERSION</td><td style="color:var(--text)">Cursor version string (always present)</td></tr>
+    <tr><td>CURSOR_USER_EMAIL</td><td style="color:var(--text)">Authenticated user email (if logged in)</td></tr>
+    <tr><td>CURSOR_CODE_REMOTE</td><td style="color:var(--text)">Remote-aware project path (remote workspaces)</td></tr>
+    <tr><td>CLAUDE_PROJECT_DIR</td><td style="color:var(--text)">Alias for project dir (Claude Code compat.)</td></tr>
+  </tbody></table>
+  <div class="tip"><strong>TIP: Session Env Vars</strong>Env vars set in <code>sessionStart</code> output are passed to <em>all</em> subsequent hook executions within that session.</div>
+</div>
+<div class="card c-yellow">
+  <div class="card-title">Key Output Patterns</div>
+  <span class="pre-label">preToolUse &mdash; allow, deny, or modify input</span>
+  <pre>{
+  <span class="t-nm">"decision"</span>:      <span class="t-st">"allow"</span> | <span class="t-st">"deny"</span>,
+  <span class="t-nm">"reason"</span>:        <span class="t-st">"shown to agent if denied"</span>,
+  <span class="t-nm">"updated_input"</span>: { <span class="t-nm">"command"</span>: <span class="t-st">"npm ci"</span> }
+}</pre>
+  <span class="pre-label">stop / subagentStop &mdash; auto-loop</span>
+  <pre>{
+  <span class="t-nm">"followup_message"</span>: <span class="t-st">"Retry: credentials checked."</span>
+  <span class="t-cm">// loop_limit default: 5, null = unlimited</span>
+  <span class="t-cm">// loop_count in input starts at 0</span>
+}</pre>
+  <span class="pre-label">postToolUse &mdash; modify MCP output only</span>
+  <pre>{
+  <span class="t-nm">"updated_mcp_tool_output"</span>: { <span class="t-nm">"redacted"</span>: <span class="t-kw">true</span> }
+}</pre>
+  <span class="pre-label">beforeSubmitPrompt &mdash; block the prompt</span>
+  <pre>{
+  <span class="t-nm">"continue"</span>:     <span class="t-kw">false</span>,
+  <span class="t-nm">"user_message"</span>: <span class="t-st">"PII detected &mdash; remove before sending."</span>
+}</pre>
+</div>
+</div>
+<div class="section-label" data-n="06">Configuration and Matchers</div>
+<div class="g2 fw">
+<div class="card c-orange">
+  <div class="card-title">Per-Script Options</div>
+  <table><thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead><tbody>
+    <tr><td>command</td><td style="color:var(--text)">string</td><td style="color:var(--muted)">required</td><td style="color:var(--text)">Shell command, absolute, or relative path</td></tr>
+    <tr><td>type</td><td style="color:var(--text)">string</td><td style="color:var(--muted)">"command"</td><td style="color:var(--text)">"command" | "prompt"</td></tr>
+    <tr><td>timeout</td><td style="color:var(--text)">number</td><td style="color:var(--muted)">platform</td><td style="color:var(--text)">Execution timeout in seconds</td></tr>
+    <tr><td>loop_limit</td><td style="color:var(--text)">number|null</td><td style="color:var(--muted)">5</td><td style="color:var(--text)">Max auto follow-ups for stop/subagentStop hooks. null = no limit</td></tr>
+    <tr><td>matcher</td><td style="color:var(--text)">string</td><td style="color:var(--muted)">&mdash;</td><td style="color:var(--text)">Regex filter &mdash; matched field depends on hook type</td></tr>
+  </tbody></table>
+  <div class="info"><strong>INFO: Matcher Behavior by Hook</strong>
+    <strong>preToolUse</strong>: matches tool type (Shell, Read, Write, Grep, Delete, MCP, Task)<br>
+    <strong>subagentStart</strong>: matches subagent type (generalPurpose, explore, shell, browser-use)<br>
+    <strong>beforeShellExecution</strong>: regex matched against the full command string
+  </div>
+</div>
+<div class="card c-cyan">
+  <div class="card-title">Complete hooks.json Reference</div>
+  <span class="pre-label">FILE: .cursor/hooks.json (project) or ~/.cursor/hooks.json (user)</span>
+  <pre>{
+  <span class="t-nm">"version"</span>: <span class="t-bi">1</span>,
+  <span class="t-nm">"hooks"</span>: {
+    <span class="t-nm">"sessionStart"</span>:         [{ <span class="t-nm">"command"</span>: <span class="t-st">".cursor/hooks/init.sh"</span> }],
+    <span class="t-nm">"sessionEnd"</span>:           [{ <span class="t-nm">"command"</span>: <span class="t-st">".cursor/hooks/audit.sh"</span> }],
+    <span class="t-nm">"preToolUse"</span>:           [{ <span class="t-nm">"command"</span>: <span class="t-st">".cursor/hooks/validate.sh"</span>,
+                               <span class="t-nm">"matcher"</span>: <span class="t-st">"Shell|Write|Delete"</span> }],
+    <span class="t-nm">"postToolUse"</span>:          [{ <span class="t-nm">"command"</span>: <span class="t-st">".cursor/hooks/audit.sh"</span> }],
+    <span class="t-nm">"subagentStart"</span>:        [{ <span class="t-nm">"command"</span>: <span class="t-st">".cursor/hooks/audit.sh"</span> }],
+    <span class="t-nm">"subagentStop"</span>:         [{ <span class="t-nm">"command"</span>: <span class="t-st">".cursor/hooks/audit.sh"</span> }],
+    <span class="t-nm">"beforeShellExecution"</span>: [{ <span class="t-nm">"command"</span>: <span class="t-st">".cursor/hooks/shell-guard.sh"</span>,
+                               <span class="t-nm">"matcher"</span>: <span class="t-st">"curl|wget|rm -rf"</span> }],
+    <span class="t-nm">"afterShellExecution"</span>:  [{ <span class="t-nm">"command"</span>: <span class="t-st">".cursor/hooks/audit.sh"</span> }],
+    <span class="t-nm">"beforeMCPExecution"</span>:   [{ <span class="t-nm">"command"</span>: <span class="t-st">".cursor/hooks/audit.sh"</span> }],
+    <span class="t-nm">"afterMCPExecution"</span>:    [{ <span class="t-nm">"command"</span>: <span class="t-st">".cursor/hooks/audit.sh"</span> }],
+    <span class="t-nm">"beforeReadFile"</span>:       [{ <span class="t-nm">"command"</span>: <span class="t-st">".cursor/hooks/redact.sh"</span> }],
+    <span class="t-nm">"afterFileEdit"</span>:        [{ <span class="t-nm">"command"</span>: <span class="t-st">".cursor/hooks/format.sh"</span> }],
+    <span class="t-nm">"beforeSubmitPrompt"</span>:   [{ <span class="t-nm">"command"</span>: <span class="t-st">".cursor/hooks/pii-scan.sh"</span> }],
+    <span class="t-nm">"preCompact"</span>:           [{ <span class="t-nm">"command"</span>: <span class="t-st">".cursor/hooks/audit.sh"</span> }],
+    <span class="t-nm">"stop"</span>:                 [{ <span class="t-nm">"command"</span>: <span class="t-st">".cursor/hooks/retry.sh"</span>, <span class="t-nm">"loop_limit"</span>: <span class="t-bi">5</span> }],
+    <span class="t-nm">"beforeTabFileRead"</span>:    [{ <span class="t-nm">"command"</span>: <span class="t-st">".cursor/hooks/redact-tab.sh"</span> }],
+    <span class="t-nm">"afterTabFileEdit"</span>:     [{ <span class="t-nm">"command"</span>: <span class="t-st">".cursor/hooks/format-tab.sh"</span> }]
+  }
+}</pre>
+</div>
+</div>
+<div class="section-label" data-n="07">Distribution and Priority</div>
+<div class="g2 fw">
+<div class="card c-purple">
+  <div class="card-title">Config Locations and Priority Order</div>
+  <div class="flow-row" style="flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:14px;">
+    <div style="display:flex;align-items:center;gap:8px;width:100%;"><div class="fnode c5" style="min-width:165px;">1. Enterprise (MDM)</div><span style="font-size:11px;color:var(--muted);">System-wide &mdash; highest priority</span></div>
+    <div style="display:flex;align-items:center;gap:8px;width:100%;"><div class="fnode c4" style="min-width:165px;">2. Team (Cloud)</div><span style="font-size:11px;color:var(--muted);">Enterprise-only &mdash; syncs every 30 min</span></div>
+    <div style="display:flex;align-items:center;gap:8px;width:100%;"><div class="fnode c3" style="min-width:165px;">3. Project (.cursor/)</div><span style="font-size:11px;color:var(--muted);">Committed to repo &mdash; loads in trusted workspaces</span></div>
+    <div style="display:flex;align-items:center;gap:8px;width:100%;"><div class="fnode c2" style="min-width:165px;">4. User (~/.cursor/)</div><span style="font-size:11px;color:var(--muted);">Lowest priority &mdash; global personal hooks</span></div>
+  </div>
+  <table><thead><tr><th>Level</th><th>File Path</th></tr></thead><tbody>
+    <tr><td>Enterprise (Win)</td><td style="color:var(--text)"><code>C:\ProgramData\Cursor\hooks.json</code></td></tr>
+    <tr><td>Enterprise (Mac)</td><td style="color:var(--text)"><code>/Library/Application Support/Cursor/hooks.json</code></td></tr>
+    <tr><td>Enterprise (Linux)</td><td style="color:var(--text)"><code>/etc/cursor/hooks.json</code></td></tr>
+    <tr><td>Project</td><td style="color:var(--text)"><code>&lt;project&gt;/.cursor/hooks.json</code></td></tr>
+    <tr><td>User</td><td style="color:var(--text)"><code>~/.cursor/hooks.json</code></td></tr>
+  </tbody></table>
+</div>
+<div class="card c-blue">
+  <div class="card-title">File Structure</div>
+  <div class="tree-box"><span class="td">~/.cursor/</span>                     <span class="tc2"># user hooks (global)</span>
++-- <span class="tf">hooks.json</span>                  <span class="tc2"># hook definitions</span>
++-- <span class="td">hooks/</span>
+    +-- <span class="tf">audit.sh</span>              <span class="tc2"># log all events</span>
+    +-- <span class="tf">format.sh</span>             <span class="tc2"># run formatter</span>
+    +-- <span class="tf">block-git.sh</span>          <span class="tc2"># deny git commands</span>
+
+<span class="td">&lt;project&gt;/.cursor/</span>             <span class="tc2"># project hooks (team)</span>
++-- <span class="tf">hooks.json</span>                  <span class="tc2"># committed to repo</span>
++-- <span class="td">hooks/</span>
+    +-- <span class="tf">shell-guard.sh</span>
+    +-- <span class="tf">redact.sh</span>
+    +-- <span class="tf">format.sh</span></div>
+  <div class="warn"><strong>WARNING: Script Paths Differ</strong><strong>User hooks:</strong> <code>./hooks/script.sh</code> (relative to <code>~/.cursor/</code>)<br><strong>Project hooks:</strong> <code>.cursor/hooks/script.sh</code> (relative to project root)</div>
+  <div class="tip"><strong>TIP: Team Distribution</strong>Commit <code>.cursor/hooks.json</code> and scripts to share with your team via version control. All members get hooks automatically in trusted workspaces.</div>
+</div>
+</div>
+<div class="section-label" data-n="08">Practical Patterns</div>
+<div class="g3 fw">
+<div class="card c-green">
+  <div class="card-title">Audit All Events (Bash)</div>
+  <span class="pre-label">FILE: audit.sh &mdash; universal log hook</span>
+  <pre><span class="t-cm">#!/bin/bash</span>
+json_input=$(<span class="t-fn">cat</span>)
+timestamp=$(<span class="t-fn">date</span> <span class="t-st">'+%Y-%m-%d %H:%M:%S'</span>)
+<span class="t-fn">mkdir</span> -p <span class="t-st">"$(dirname /tmp/agent-audit.log)"</span>
+<span class="t-fn">echo</span> <span class="t-st">"[$timestamp] $json_input"</span> &gt;&gt; /tmp/agent-audit.log
+<span class="t-kw">exit</span> <span class="t-bi">0</span></pre>
+  <div class="tip"><strong>TIP: Universal Hook</strong>Attach to any event. Exit 0 = no-op audit. Zero logic, maximum observability. A great starting point for any hook.</div>
+</div>
+<div class="card c-red">
+  <div class="card-title">Block Git, Allow gh (Bash)</div>
+  <span class="pre-label">FILE: block-git.sh &mdash; beforeShellExecution</span>
+  <pre><span class="t-cm">#!/bin/bash</span>
+input=$(<span class="t-fn">cat</span>)
+command=$(<span class="t-fn">echo</span> <span class="t-st">"$input"</span> | <span class="t-fn">jq</span> -r <span class="t-st">'.command // empty'</span>)
+<span class="t-kw">if</span> [[ <span class="t-st">"$command"</span> =~ git[[:space:]] ]]; then
+  <span class="t-fn">echo</span> <span class="t-st">'{"permission":"deny",
+    "user_message":"Use gh CLI instead.",
+    "agent_message":"git blocked, use gh tool"}'</span>
+<span class="t-kw">else</span>
+  <span class="t-fn">echo</span> <span class="t-st">'{"permission":"allow"}'</span>
+<span class="t-kw">fi</span></pre>
+  <div class="warn"><strong>WARNING: Requires jq</strong>Install: <code>brew install jq</code> or <code>apt install jq</code></div>
+</div>
+<div class="card c-orange">
+  <div class="card-title">Auto-Retry on Error (TypeScript / Bun)</div>
+  <span class="pre-label">FILE: track-stop.ts &mdash; stop hook</span>
+  <pre><span class="t-cm">// Track error count, emit retry followup</span>
+<span class="t-kw">const</span> payload = <span class="t-kw">await</span> <span class="t-fn">parseHookInput</span>();
+entry.errorCount = payload.status === <span class="t-st">"error"</span>
+  ? entry.errorCount + <span class="t-bi">1</span> : <span class="t-bi">0</span>;
+
+<span class="t-kw">if</span> (entry.errorCount &gt;= <span class="t-bi">2</span> &amp;&amp; payload.loop_count &lt; <span class="t-bi">4</span>) {
+  response.followup_message =
+    <span class="t-st">"Retry triggered. Double-check credentials."</span>;
+}</pre>
+  <span class="pre-label">wiring in hooks.json</span>
+  <pre>{ <span class="t-nm">"stop"</span>: [{ <span class="t-nm">"command"</span>: <span class="t-st">"bun run .cursor/hooks/track-stop.ts"</span> }] }</pre>
+  <div class="info"><strong>INFO: Use TypeScript When</strong>You need typed JSON, durable file I/O, HTTP telemetry, or conditional retry logic awkward in Bash.</div>
+</div>
+<div class="card c-purple">
+  <div class="card-title">Kubernetes YAML Guard (Python)</div>
+  <span class="pre-label">FILE: kube_guard.py &mdash; beforeShellExecution</span>
+  <pre><span class="t-kw">import</span> json, shlex, sys
+<span class="t-kw">from</span> pathlib <span class="t-kw">import</span> Path
+<span class="t-kw">import</span> yaml  <span class="t-cm"># pip install pyyaml</span>
+
+SENSITIVE = {<span class="t-st">"prod"</span>, <span class="t-st">"production"</span>}
+payload = json.<span class="t-fn">load</span>(sys.stdin)
+<span class="t-cm"># parse kubectl apply -f, load YAML, check namespace</span>
+<span class="t-kw">if</span> namespace <span class="t-kw">in</span> SENSITIVE:
+    response[<span class="t-st">"permission"</span>] = <span class="t-st">"ask"</span>
+    response[<span class="t-st">"user_message"</span>] = <span class="t-st">"prod apply needs approval"</span>
+print(json.<span class="t-fn">dumps</span>(response))</pre>
+  <div class="tip"><strong>TIP: Use Python When</strong>You need rich parsing (pyyaml, lxml) painful in Bash. Run <code>pip install pyyaml</code> where hooks execute.</div>
+</div>
+<div class="card c-cyan">
+  <div class="card-title">Decision: Which Hook Event?</div>
+  <div class="tree"><pre><span class="tq">What do you want to intercept?</span>
+<span class="tln">+- </span><span class="tya">Shell commands</span>       -&gt; <span class="tre">beforeShellExecution</span>
+<span class="tln">+- </span><span class="tya">MCP tool calls</span>       -&gt; <span class="tre">beforeMCPExecution</span>  (fail-closed)
+<span class="tln">+- </span><span class="tya">File reads (agent)</span>   -&gt; <span class="tre">beforeReadFile</span>      (fail-closed)
+<span class="tln">+- </span><span class="tya">Any tool (generic)</span>   -&gt; <span class="tre">preToolUse</span> + matcher
+<span class="tln">+- </span><span class="tya">Prompt submissions</span>   -&gt; <span class="tre">beforeSubmitPrompt</span>
+<span class="tln">+- </span><span class="tya">Subagent spawning</span>    -&gt; <span class="tre">subagentStart</span>
+<span class="tln">+- </span><span class="tya">After file edit</span>      -&gt; <span class="tre">afterFileEdit</span>  (formatter)
+<span class="tln">+- </span><span class="tya">Tab completions</span>      -&gt; <span class="tre">beforeTabFileRead / afterTabFileEdit</span>
+<span class="tln">+- </span><span class="tya">Session setup</span>        -&gt; <span class="tre">sessionStart</span>
+<span class="tln">+- </span><span class="tno">Auto-retry / loop</span>    -&gt; <span class="tre">stop</span> or <span class="tre">subagentStop</span> + followup_message</pre></div>
+</div>
+<div class="card c-yellow">
+  <div class="card-title">Troubleshooting</div>
+  <table><thead><tr><th>Problem</th><th>Fix</th></tr></thead><tbody>
+    <tr><td>Hook not firing</td><td style="color:var(--text)">Restart Cursor. Check the <strong>Hooks tab</strong> in Settings and the <strong>Hooks output channel</strong>.</td></tr>
+    <tr><td>Wrong working dir</td><td style="color:var(--text)">Project hooks: use <code>.cursor/hooks/</code>. User hooks: use <code>./hooks/</code>.</td></tr>
+    <tr><td>MCP always blocked</td><td style="color:var(--text)"><code>beforeMCPExecution</code> is fail-closed. Check script syntax, exit codes, and stderr.</td></tr>
+    <tr><td>Hook output ignored</td><td style="color:var(--text)">Non-0/2 exit codes = fail-open (action proceeds). Fix the script crash.</td></tr>
+    <tr><td>Infinite loop</td><td style="color:var(--text)">Set <code>loop_limit</code> on stop/subagentStop hooks. Default max is 5 auto follow-ups.</td></tr>
+    <tr><td>Script not found</td><td style="color:var(--text)">Make executable: <code>chmod +x .cursor/hooks/script.sh</code> (not needed on Windows)</td></tr>
+  </tbody></table>
+  <div class="info"><strong>INFO: Debug Tip</strong>Write debug logs to <code>/tmp/hooks.log</code> from your scripts. The Hooks output channel shows script errors and execution traces.</div>
+</div>
+</div>
+<div class="footer">
+  <span>CURSOR HOOKS CHEATSHEET &middot; V1.0 &middot; FEB 2026</span>
+  <span>cursor.com/docs/agent/hooks</span>
+</div>
+</div>
+</body>
+</html>

@@ -790,6 +790,9 @@ async function init() {
   // Load manifest
   try {
     state.manifest = await loadManifest();
+    for (const entry of state.manifest) {
+      state.collapsedCategories.add(entry.category);
+    }
     buildSidebar();
     updateWelcomeStats();
     // Pre-warm first sheet silently so command count shows on welcome screen

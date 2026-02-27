@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cursor Subagents — Complete Cheatsheet</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root, [data-theme="dark"] {
+    --bg: #0a0c0f;
+    --bg2: #0e1116;
+    --bg3: #13181f;
+    --border: #1e2530;
+    --border2: #2a3340;
+    --text: #c9d1d9;
+    --muted: #6e7d8e;
+    --dim: #3d4f61;
+    --accent: #00e5ff;
+    --accent2: #7c3aed;
+    --green: #3dffa8;
+    --orange: #ff9f43;
+    --red: #ff4757;
+    --yellow: #ffd32a;
+    --pink: #ff6b9d;
+    --code-bg: #0d1117;
+    --scanline-color: rgba(0,229,255,0.015);
+  }
+  [data-theme="light"] {
+    --bg: #f8fafc;
+    --bg2: #f1f5f9;
+    --bg3: #e2e8f0;
+    --border: #cbd5e1;
+    --border2: #94a3b8;
+    --text: #1e293b;
+    --muted: #64748b;
+    --dim: #94a3b8;
+    --accent: #0891b2;
+    --accent2: #7c3aed;
+    --green: #059669;
+    --orange: #d97706;
+    --red: #dc2626;
+    --yellow: #ca8a04;
+    --pink: #db2777;
+    --code-bg: #e2e8f0;
+    --scanline-color: rgba(0,0,0,0.02);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    padding: 40px 20px 80px;
+  }
+
+  /* Animated scanline overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,229,255,0.015) 2px,
+      rgba(0,229,255,0.015) 4px
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  .header {
+    border-bottom: 1px solid var(--border2);
+    padding-bottom: 28px;
+    margin-bottom: 40px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .header-left {}
+
+  .badge {
+    display: inline-block;
+    background: var(--accent);
+    color: #000;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    padding: 3px 8px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 5vw, 52px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    color: #fff;
+  }
+
+  h1 span {
+    color: var(--accent);
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 10px;
+    letter-spacing: 0.05em;
+  }
+
+  .version-badge {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    padding: 8px 16px;
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .version-badge strong {
+    color: var(--green);
+  }
+
+  /* GRID */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .full-width {
+    margin-bottom: 16px;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--card-accent, var(--accent));
+    opacity: 0.8;
+  }
+
+  .card-accent { --card-accent: var(--accent); }
+  .card-green  { --card-accent: var(--green); }
+  .card-orange { --card-accent: var(--orange); }
+  .card-purple { --card-accent: var(--accent2); }
+  .card-pink   { --card-accent: var(--pink); }
+  .card-red    { --card-accent: var(--red); }
+  .card-yellow { --card-accent: var(--yellow); }
+
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--card-accent, var(--accent));
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* CODE BLOCKS */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    line-height: 1.7;
+    margin-bottom: 10px;
+    position: relative;
+  }
+
+  pre:last-child { margin-bottom: 0; }
+
+  .pre-label {
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  /* Syntax colors */
+  .cm { color: var(--muted); font-style: italic; }         /* comment */
+  .ky { color: var(--pink); }                               /* keyword */
+  .st { color: var(--green); }                              /* string */
+  .nm { color: var(--orange); }                             /* name/var */
+  .op { color: var(--accent); }                             /* operator/key */
+  .fn { color: #79c0ff; }                                   /* function */
+  .kv { color: var(--yellow); }                             /* yaml key */
+  .vl { color: var(--green); }                              /* yaml value */
+  .co { color: var(--text); }                               /* comment code */
+  .hl { background: rgba(0,229,255,0.08); display: block; margin: 0 -16px; padding: 0 16px; }
+
+  /* INLINE CODE */
+  code {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    padding: 1px 5px;
+    font-size: 11px;
+    color: var(--accent);
+  }
+
+  /* DESCRIPTION LIST */
+  .dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 4px 12px;
+    margin-bottom: 10px;
+  }
+
+  .dl dt {
+    color: var(--orange);
+    white-space: nowrap;
+    padding-top: 2px;
+  }
+
+  .dl dd {
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* FLOW DIAGRAM */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  .flow-node {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    padding: 8px 12px;
+    font-size: 11px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .flow-node.main { border-color: var(--accent); color: var(--accent); }
+  .flow-node.sub  { border-color: var(--green); color: var(--green); }
+  .flow-node.bg   { border-color: var(--muted); color: var(--muted); }
+  .flow-node.done { border-color: var(--yellow); color: var(--yellow); }
+
+  .flow-arrow {
+    color: var(--dim);
+    padding: 0 6px;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  /* PARALLEL LAYOUT */
+  .parallel-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin: 10px 0;
+  }
+
+  .parallel-node {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-top: 2px solid var(--green);
+    padding: 10px;
+    font-size: 11px;
+    color: var(--green);
+  }
+
+  .parallel-node.orange { border-top-color: var(--orange); color: var(--orange); }
+  .parallel-node.pink   { border-top-color: var(--pink); color: var(--pink); }
+
+  .center-node {
+    background: var(--code-bg);
+    border: 1px solid var(--accent);
+    padding: 10px;
+    font-size: 11px;
+    color: var(--accent);
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  .bracket {
+    text-align: center;
+    color: var(--dim);
+    font-size: 18px;
+    line-height: 1;
+    margin: 4px 0;
+  }
+
+  /* TAGS */
+  .tag {
+    display: inline-block;
+    padding: 2px 6px;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    text-transform: uppercase;
+    border: 1px solid;
+    margin-right: 4px;
+    margin-bottom: 4px;
+  }
+
+  .tag-blue   { color: var(--accent); border-color: var(--accent); }
+  .tag-green  { color: var(--green); border-color: var(--green); }
+  .tag-orange { color: var(--orange); border-color: var(--orange); }
+  .tag-pink   { color: var(--pink); border-color: var(--pink); }
+  .tag-yellow { color: var(--yellow); border-color: var(--yellow); }
+  .tag-red    { color: var(--red); border-color: var(--red); }
+  .tag-purple { color: var(--accent2); border-color: var(--accent2); }
+
+  /* WARNING / TIP BOXES */
+  .tip, .warn, .danger {
+    padding: 10px 14px;
+    font-size: 11px;
+    margin-bottom: 8px;
+    border-left: 3px solid;
+    line-height: 1.7;
+  }
+
+  .tip {
+    background: rgba(61,255,168,0.05);
+    border-color: var(--green);
+    color: var(--text);
+  }
+
+  .warn {
+    background: rgba(255,159,67,0.05);
+    border-color: var(--orange);
+    color: var(--text);
+  }
+
+  .danger {
+    background: rgba(255,71,87,0.05);
+    border-color: var(--red);
+    color: var(--text);
+  }
+
+  .tip strong, .warn strong, .danger strong {
+    display: block;
+    margin-bottom: 2px;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .tip strong { color: var(--green); }
+  .warn strong { color: var(--orange); }
+  .danger strong { color: var(--red); }
+
+  /* SECTION HEADER */
+  .section-header {
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 32px 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-header span {
+    color: var(--accent);
+  }
+
+  /* DECISION TREE */
+  .tree {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    line-height: 2;
+    color: var(--text);
+    white-space: pre;
+  }
+
+  .tree .q  { color: var(--text); }
+  .tree .y  { color: var(--green); }
+  .tree .n  { color: var(--orange); }
+  .tree .r  { color: var(--accent); font-weight: 600; }
+  .tree .ln { color: var(--dim); }
+
+  /* FOOTER */
+  .footer {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: gap;
+    gap: 12px;
+  }
+
+  .footer-text {
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 0.08em;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    .grid-3 { grid-template-columns: 1fr; }
+    .parallel-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Theme Toggle */
+  .theme-link { color: var(--accent); cursor: pointer; font-weight: 700; transition: all 0.2s ease; }
+  .theme-link:hover { color: var(--accent2); }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card {
+    animation: fadeIn 0.4s ease both;
+  }
+
+  .card:nth-child(1) { animation-delay: 0.05s; }
+  .card:nth-child(2) { animation-delay: 0.10s; }
+  .card:nth-child(3) { animation-delay: 0.15s; }
+  .card:nth-child(4) { animation-delay: 0.20s; }
+</style>
+</head>
+<body>
+<script>
+(function(){
+  var t=localStorage.getItem('theme')||'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  window.addEventListener('DOMContentLoaded', function() {
+    var link=document.getElementById('theme-link');
+    if(link) link.textContent = t.toUpperCase();
+  });
+})();
+function toggleTheme() {
+  var h=document.documentElement;
+  var c=h.getAttribute('data-theme')||'dark';
+  var n=c==='light'?'dark':'light';
+  h.setAttribute('data-theme',n);
+  localStorage.setItem('theme',n);
+  var link=document.getElementById('theme-link');
+  if(link) link.textContent = n.toUpperCase();
+}
+</script>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <div class="badge">Reference Sheet &middot; <span id="theme-link" class="theme-link" onclick="toggleTheme()">DARK</span></div>
+      <h1>Cursor <span>Subagents</span></h1>
+      <p class="subtitle">// Complete patterns cheatsheet · All execution modes · All scenarios</p>
+    </div>
+    <div class="version-badge">
+      Version <strong>≥ 2.4</strong> &nbsp;|&nbsp; Jan 2026<br>
+      .cursor/agents/ · ~/.cursor/agents/
+    </div>
+  </div>
+
+
+  <!-- SECTION 1: ANATOMY -->
+  <div class="section-header"><span>01</span> Anatomy of a Subagent File</div>
+
+  <div class="grid-2 full-width">
+    <!-- Template -->
+    <div class="card card-accent">
+      <div class="card-title">📄 Base Template</div>
+      <div class="pre-label">📁 .cursor/agents/my-agent.md &nbsp;or&nbsp; ~/.cursor/agents/my-agent.md</div>
+      <pre><span class="cm">---  # YAML Frontmatter ─────────────────────────────────</span>
+<span class="kv">name</span>:         <span class="vl">agent-name</span>           <span class="cm"># unique ID (optional, defaults to filename)</span>
+<span class="kv">description</span>:  <span class="vl">"Expert in X. Use when [specific context]."</span>
+<span class="kv">model</span>:        <span class="vl">inherit</span>              <span class="cm"># inherit | fast | sonnet | opus | haiku</span>
+<span class="kv">readonly</span>:     <span class="vl">false</span>                <span class="cm"># true = no file writes</span>
+<span class="kv">is_background</span>: <span class="vl">false</span>              <span class="cm"># true = runs non-blocking in bg</span>
+<span class="cm">---  # System Prompt ──────────────────────────────────────</span>
+
+<span class="co">You are an [expert in X] specialized in [Y].</span>
+
+<span class="co">When invoked:</span>
+<span class="co">1. [First action to take]</span>
+<span class="co">2. [Second action]</span>
+<span class="co">3. [Third action]</span>
+
+<span class="co">Report [expected result format]:</span>
+<span class="co">- [Output format or metric]</span></pre>
+    </div>
+
+    <!-- YAML Fields Reference -->
+    <div class="card card-green">
+      <div class="card-title">⚙️ YAML Fields Reference</div>
+      <dl class="dl">
+        <dt>name</dt>          <dd>Unique ID. Used for explicit invocation. Defaults to filename if omitted.</dd>
+        <dt>description</dt>   <dd><strong style="color:var(--red)">CRITICAL.</strong> This is what the Agent reads to decide delegation. Be specific about when to use.</dd>
+        <dt>model</dt>         <dd><code>inherit</code> (default) · <code>fast</code> · <code>sonnet</code> · <code>opus</code> · <code>haiku</code> · or full model ID string</dd>
+        <dt>readonly</dt>      <dd><code>false</code> (default) – full access. <code>true</code> – restricts all file write operations.</dd>
+        <dt>is_background</dt> <dd><code>false</code> (default) – foreground, blocks main. <code>true</code> – non-blocking, state in <code>~/.cursor/subagents/</code></dd>
+        <dt>tools</dt>         <dd>(allowlist) Restrict to specific tools only. See tools section.</dd>
+        <dt>disallowedTools</dt><dd>(denylist) Block specific tools while allowing everything else.</dd>
+      </dl>
+      <div class="tip">
+        <strong>✦ Tip</strong>
+        Never add comments inside YAML frontmatter — a single <code>#</code> inline can silently break recognition.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- SECTION 2: EXECUTION MODES -->
+  <div class="section-header"><span>02</span> Execution Modes</div>
+
+  <div class="grid-3 full-width">
+
+    <!-- Sequential -->
+    <div class="card card-accent">
+      <div class="card-title">▶ Sequential (Pipeline)</div>
+      <p style="color:var(--muted);font-size:11px;margin-bottom:12px;">One agent finishes → output feeds into next. Good for staged workflows.</p>
+      <div class="flow" style="flex-direction:column;align-items:flex-start;gap:4px;">
+        <div class="flow-node main">🧠 Main Agent</div>
+        <div style="color:var(--dim);padding-left:20px;font-size:12px;">↓ delegates task + context</div>
+        <div class="flow-node sub" style="margin-left:20px;">⚙ planner-agent</div>
+        <div style="color:var(--dim);padding-left:40px;font-size:12px;">↓ returns plan</div>
+        <div class="flow-node sub" style="margin-left:40px;">⚙ coder-agent</div>
+        <div style="color:var(--dim);padding-left:60px;font-size:12px;">↓ returns code</div>
+        <div class="flow-node sub" style="margin-left:60px;">⚙ reviewer-agent</div>
+        <div style="color:var(--dim);padding-left:80px;font-size:12px;">↓ returns verdict</div>
+        <div class="flow-node done" style="margin-left:80px;">✓ Final Result</div>
+      </div>
+      <pre style="margin-top:12px;"><span class="cm"># .cursor/agents/orchestrator.md</span>
+<span class="ky">---</span>
+<span class="kv">name</span>: <span class="vl">orchestrator</span>
+<span class="kv">description</span>: <span class="vl">"Coordinates complex workflows
+  across multiple specialists.
+  Use for multi-phase projects."</span>
+<span class="ky">---</span>
+
+<span class="co">You are a workflow orchestrator.
+
+Sequence:</span>
+<span class="co">1. Use planner-agent to create a plan</span>
+<span class="co">2. Pass plan → coder-agent to implement</span>
+<span class="co">3. Pass code → reviewer-agent to validate</span>
+<span class="co">4. Compile and return consolidated output</span></pre>
+    </div>
+
+    <!-- Parallel -->
+    <div class="card card-green">
+      <div class="card-title">⚡ Parallel (Fan-Out)</div>
+      <p style="color:var(--muted);font-size:11px;margin-bottom:12px;">Main agent spawns multiple subagents simultaneously via the Task tool.</p>
+      <div class="center-node">🧠 Main Agent (fan-out)</div>
+      <div class="bracket">↙ ↓ ↘</div>
+      <div class="parallel-grid">
+        <div class="parallel-node">⚙ tests-agent</div>
+        <div class="parallel-node orange">⚙ docs-agent</div>
+        <div class="parallel-node pink">⚙ lint-agent</div>
+      </div>
+      <div class="bracket">↘ ↓ ↙</div>
+      <div class="center-node">✓ Merge Results</div>
+      <pre style="margin-top:12px;"><span class="cm"># Main agent invokes all at once:</span>
+<span class="co">Run in parallel:
+- tests-agent on /src/auth/
+- docs-agent for AuthService class
+- lint-agent on modified files
+
+Merge all results and</span>
+<span class="co">report any blocking issues.</span></pre>
+      <div class="tip" style="margin-top:8px;">
+        <strong>✦ Git Worktrees</strong>
+        Use git worktrees for true parallel execution — multiple branches on filesystem simultaneously without merge conflicts.
+      </div>
+    </div>
+
+    <!-- Background -->
+    <div class="card card-orange">
+      <div class="card-title">🌙 Background (Non-blocking)</div>
+      <p style="color:var(--muted);font-size:11px;margin-bottom:12px;">Runs independently while you continue working. State persisted to disk.</p>
+      <pre><span class="kv">is_background</span>: <span class="vl">true</span></pre>
+      <div class="warn">
+        <strong>⚠ State Location</strong>
+        Background subagents write state to <code>~/.cursor/subagents/</code> during execution.
+      </div>
+      <pre><span class="cm"># .cursor/agents/bg-monitor.md</span>
+<span class="ky">---</span>
+<span class="kv">name</span>: <span class="vl">bg-monitor</span>
+<span class="kv">description</span>: <span class="vl">"Monitors test suite and logs
+  failures. Use immediately after
+  code changes."</span>
+<span class="kv">model</span>: <span class="vl">fast</span>
+<span class="kv">is_background</span>: <span class="vl">true</span>
+<span class="kv">readonly</span>: <span class="vl">true</span>
+<span class="ky">---</span>
+
+<span class="co">You run tests silently and
+report failures via a summary.
+Never block the main thread.</span></pre>
+      <p style="color:var(--muted);font-size:11px;margin-top:10px;">Good for: test watchers, linters, log analyzers, doc generators.</p>
+    </div>
+  </div>
+
+
+  <!-- SECTION 3: ADVANCED PATTERNS -->
+  <div class="section-header"><span>03</span> Advanced Patterns</div>
+
+  <div class="grid-2 full-width">
+
+    <!-- Hand-off -->
+    <div class="card card-purple">
+      <div class="card-title">🤝 Hand-off Pattern</div>
+      <p style="color:var(--muted);font-size:11px;margin-bottom:12px;">One specialized agent completes its task and hands control with structured context to the next. Clean role boundaries.</p>
+      <pre><span class="cm"># .cursor/agents/handoff-planner.md</span>
+<span class="ky">---</span>
+<span class="kv">name</span>: <span class="vl">handoff-planner</span>
+<span class="kv">description</span>: <span class="vl">"Plans feature implementation.
+  Hands off to coder-agent when plan
+  is ready. Use at project kickoff."</span>
+<span class="kv">model</span>: <span class="vl">opus</span>
+<span class="kv">readonly</span>: <span class="vl">true</span>
+<span class="ky">---</span>
+
+<span class="co">You are a planning specialist.
+
+Steps:</span>
+<span class="co">1. Analyze the codebase structure</span>
+<span class="co">2. Identify all files that need changes</span>
+<span class="co">3. Output a structured HANDOFF DOCUMENT:</span>
+
+<span class="co">## HANDOFF TO: coder-agent
+### Files to modify: [list]
+### Changes per file: [details]
+### Acceptance criteria: [list]
+### Risks: [list]
+
+Signal coder-agent to begin.</span></pre>
+      <div class="tip">
+        <strong>✦ Key Principle</strong>
+        The handoff document is the contract. Keep it structured and machine-readable so the receiving agent has zero ambiguity.
+      </div>
+    </div>
+
+    <!-- Reviewer / Verifier Loop -->
+    <div class="card card-pink">
+      <div class="card-title">🔄 Reviewer / Verifier Loop</div>
+      <p style="color:var(--muted);font-size:11px;margin-bottom:12px;">A dedicated verification agent checks output and either approves or triggers a retry cycle.</p>
+      <pre><span class="cm"># .cursor/agents/verifier.md</span>
+<span class="ky">---</span>
+<span class="kv">name</span>: <span class="vl">verifier</span>
+<span class="kv">description</span>: <span class="vl">"Validates completed work.
+  Use after tasks are marked done
+  to confirm implementations work."</span>
+<span class="kv">model</span>: <span class="vl">sonnet</span>
+<span class="kv">readonly</span>: <span class="vl">true</span>
+<span class="kv">tools</span>: <span class="vl">[Read, Bash, Grep, Glob]</span>
+<span class="ky">---</span>
+
+<span class="co">You are a verification specialist.
+
+For each completed task:</span>
+<span class="co">1. Read the implementation files</span>
+<span class="co">2. Run tests: `npm test` or equiv.</span>
+<span class="co">3. Check edge cases manually</span>
+<span class="co">4. Output one of:
+   ✓ APPROVED — [reason]
+   ✗ REJECTED — [specific issue]
+     RETRY-INSTRUCTION: [fix needed]</span></pre>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+        <span class="tag tag-green">main agent</span>
+        <span style="color:var(--dim)">→</span>
+        <span class="tag tag-blue">coder-agent</span>
+        <span style="color:var(--dim)">→</span>
+        <span class="tag tag-pink">verifier</span>
+        <span style="color:var(--dim)">→ if REJECTED →</span>
+        <span class="tag tag-blue">coder-agent</span>
+      </div>
+    </div>
+
+    <!-- Hierarchical / Sub-sub-agents -->
+    <div class="card card-yellow">
+      <div class="card-title">🌳 Hierarchical (Nested) Agents</div>
+      <p style="color:var(--muted);font-size:11px;margin-bottom:12px;">A subagent itself acts as an orchestrator and spawns its own sub-subagents via CLI.</p>
+      <pre><span class="cm"># Tier 1: Main orchestrator</span>
+<span class="kv">name</span>: <span class="vl">project-manager</span>
+
+  <span class="cm"># Tier 2: Domain coordinator</span>
+  <span class="kv">name</span>: <span class="vl">backend-lead</span>
+    <span class="cm"># Tier 3: Specialists</span>
+    <span class="kv">name</span>: <span class="vl">db-schema-agent</span>
+    <span class="kv">name</span>: <span class="vl">api-designer</span>
+    <span class="kv">name</span>: <span class="vl">auth-specialist</span>
+
+  <span class="cm"># Tier 2: Domain coordinator</span>
+  <span class="kv">name</span>: <span class="vl">frontend-lead</span>
+    <span class="cm"># Tier 3: Specialists</span>
+    <span class="kv">name</span>: <span class="vl">component-builder</span>
+    <span class="kv">name</span>: <span class="vl">stylist-agent</span></pre>
+      <div class="warn">
+        <strong>⚠ Performance Warning</strong>
+        Performance degrades beyond 8 concurrent subagents. Keep hierarchy shallow — max 2–3 tiers.
+      </div>
+    </div>
+
+    <!-- Resumable / Stateful -->
+    <div class="card card-red">
+      <div class="card-title">💾 Resumable (Stateful) Agent</div>
+      <p style="color:var(--muted);font-size:11px;margin-bottom:12px;">Long-running agents can be paused and resumed using their agent ID.</p>
+      <pre><span class="cm"># CLI: spawn and capture agent ID</span>
+<span class="fn">cursor-agent</span> <span class="st">"run migration analysis"</span> \
+  <span class="op">--agent</span> migration-analyst \
+  <span class="op">--output-id</span>
+
+<span class="cm"># Returns: agent_id=abc123</span>
+
+<span class="cm"># Resume later with preserved context</span>
+<span class="fn">cursor-agent</span> <span class="st">"continue where you left off"</span> \
+  <span class="op">--resume</span> abc123</pre>
+      <pre><span class="cm"># .cursor/agents/migration-analyst.md</span>
+<span class="ky">---</span>
+<span class="kv">name</span>: <span class="vl">migration-analyst</span>
+<span class="kv">description</span>: <span class="vl">"Analyzes DB migrations.
+  Long-running. Resumes from last
+  checkpoint if given an agent ID."</span>
+<span class="kv">model</span>: <span class="vl">sonnet</span>
+<span class="kv">is_background</span>: <span class="vl">true</span>
+<span class="ky">---</span>
+<span class="co">Checkpoint your progress after each
+migration file. Write status to
+~/.cursor/subagents/migration-state.json</span></pre>
+    </div>
+
+  </div>
+
+
+  <!-- SECTION 4: COMPLETE SCENARIO TEMPLATES -->
+  <div class="section-header"><span>04</span> Real-World Scenario Templates</div>
+
+  <div class="grid-3 full-width">
+
+    <!-- Scenario: Full PR Review -->
+    <div class="card card-accent">
+      <div class="card-title">🔍 Scenario: Automated PR Review</div>
+      <div class="tag tag-blue">Sequential</div><div class="tag tag-green">3 Agents</div>
+      <pre><span class="cm"># .cursor/agents/pr-reviewer.md</span>
+<span class="ky">---</span>
+<span class="kv">name</span>: <span class="vl">pr-reviewer</span>
+<span class="kv">description</span>: <span class="vl">"Full code review pipeline.
+  Use when reviewing PRs or before
+  merging branches."</span>
+<span class="kv">model</span>: <span class="vl">opus</span>
+<span class="kv">readonly</span>: <span class="vl">true</span>
+<span class="ky">---</span>
+
+<span class="co">Review pipeline:
+
+Step 1 — Static analysis:
+  Run lint-agent on all changed files
+
+Step 2 — Logic review:
+  Analyze business logic, edge cases,
+  error handling
+
+Step 3 — Security scan:
+  Run security-auditor on auth/payment
+  related code
+
+Aggregate findings into:
+## PR Review Summary
+- BLOCKER: [list or "none"]
+- WARNING: [list or "none"]
+- SUGGESTION: [list or "none"]
+Overall: APPROVE | REQUEST_CHANGES</span></pre>
+    </div>
+
+    <!-- Scenario: Feature Scaffold -->
+    <div class="card card-green">
+      <div class="card-title">🏗 Scenario: Feature Scaffold</div>
+      <div class="tag tag-blue">Hand-off</div><div class="tag tag-orange">Parallel</div>
+      <pre><span class="cm"># .cursor/agents/feature-builder.md</span>
+<span class="ky">---</span>
+<span class="kv">name</span>: <span class="vl">feature-builder</span>
+<span class="kv">description</span>: <span class="vl">"Builds full feature from
+  spec. Use when starting a new
+  feature with a ticket or brief."</span>
+<span class="kv">model</span>: <span class="vl">opus</span>
+<span class="ky">---</span>
+
+<span class="co">Feature build flow:
+
+Phase 1 (Sequential):
+  handoff-planner → create spec
+
+Phase 2 (Parallel, all at once):
+  ├─ backend-agent  → API endpoints
+  ├─ frontend-agent → UI components
+  └─ db-agent       → schema changes
+
+Phase 3 (Sequential):
+  integration-agent → wire all parts
+  test-writer       → write test suite
+  verifier          → run & approve
+
+Return: Feature complete report</span></pre>
+    </div>
+
+    <!-- Scenario: Codebase Refactor -->
+    <div class="card card-purple">
+      <div class="card-title">♻️ Scenario: Codebase Refactor</div>
+      <div class="tag tag-purple">Hierarchical</div><div class="tag tag-yellow">Background</div>
+      <pre><span class="cm"># .cursor/agents/refactor-lead.md</span>
+<span class="ky">---</span>
+<span class="kv">name</span>: <span class="vl">refactor-lead</span>
+<span class="kv">description</span>: <span class="vl">"Leads large-scale refactors.
+  Use for codebase-wide pattern
+  migrations or dependency updates."</span>
+<span class="kv">model</span>: <span class="vl">opus</span>
+<span class="ky">---</span>
+
+<span class="co">Refactor coordination:
+
+1. Spawn code-archaeologist
+   → map all usages of old pattern
+
+2. Fan out per module (parallel):
+   Each module gets its own
+   refactor-worker subagent
+
+3. After each worker completes:
+   → verifier checks for regressions
+   → conflict-resolver if issues
+
+4. Final: changelog-writer documents
+   all changes made
+
+Use git worktrees per module to
+enable true parallel execution.</span></pre>
+    </div>
+
+    <!-- Scenario: CI/CD Pipeline agent -->
+    <div class="card card-orange">
+      <div class="card-title">🚀 Scenario: CI/CD Assistant</div>
+      <div class="tag tag-yellow">Background</div><div class="tag tag-blue">Reactive</div>
+      <pre><span class="cm"># .cursor/agents/ci-assistant.md</span>
+<span class="ky">---</span>
+<span class="kv">name</span>: <span class="vl">ci-assistant</span>
+<span class="kv">description</span>: <span class="vl">"Monitors CI output and
+  suggests fixes. Use after pushing
+  code or when CI fails."</span>
+<span class="kv">model</span>: <span class="vl">fast</span>
+<span class="kv">is_background</span>: <span class="vl">true</span>
+<span class="kv">readonly</span>: <span class="vl">true</span>
+<span class="ky">---</span>
+
+<span class="co">When CI output is provided:
+
+1. Parse test failure messages
+2. Map failures to source files
+3. Identify root cause pattern
+4. Output:
+   ## CI Diagnosis
+   Failed: [test names]
+   Root cause: [analysis]
+   Suggested fix: [code snippet]
+   Files to change: [list]
+
+Signal: ready for coder-agent</span></pre>
+    </div>
+
+    <!-- Scenario: Doc Generator -->
+    <div class="card card-pink">
+      <div class="card-title">📖 Scenario: Doc Generator</div>
+      <div class="tag tag-green">Parallel</div><div class="tag tag-green">Read-only</div>
+      <pre><span class="cm"># .cursor/agents/doc-writer.md</span>
+<span class="ky">---</span>
+<span class="kv">name</span>: <span class="vl">doc-writer</span>
+<span class="kv">description</span>: <span class="vl">"Creates docs, READMEs, API
+  references. Use when code is
+  complete and needs documentation."</span>
+<span class="kv">model</span>: <span class="vl">sonnet</span>
+<span class="kv">readonly</span>: <span class="vl">true</span>
+<span class="ky">---</span>
+
+<span class="co">Documentation pipeline:
+
+Spawn in parallel:
+├─ readme-agent    → README.md
+├─ api-doc-agent   → API reference
+└─ example-agent   → usage examples
+
+Each agent:
+1. Reads source files (no writes)
+2. Identifies audience
+3. Writes with practical examples
+4. Uses formatted markdown
+
+Output to /docs/ directory.
+Include: purpose, usage, params,
+examples, troubleshooting.</span></pre>
+    </div>
+
+    <!-- Scenario: Security Audit -->
+    <div class="card card-red">
+      <div class="card-title">🛡 Scenario: Security Audit</div>
+      <div class="tag tag-red">Restricted</div><div class="tag tag-green">Read-only</div>
+      <pre><span class="cm"># .cursor/agents/security-auditor.md</span>
+<span class="ky">---</span>
+<span class="kv">name</span>: <span class="vl">security-auditor</span>
+<span class="kv">description</span>: <span class="vl">"Security review for auth,
+  payment, and data-access code.
+  Use before any security-sensitive
+  feature merge."</span>
+<span class="kv">model</span>: <span class="vl">opus</span>
+<span class="kv">readonly</span>: <span class="vl">true</span>
+<span class="kv">tools</span>: <span class="vl">[Read, Grep, Glob, Bash]</span>
+<span class="ky">---</span>
+
+<span class="co">Security audit checklist:
+☐ SQL injection vectors
+☐ XSS / CSRF exposure
+☐ Auth token handling
+☐ Secret/key leakage
+☐ Input validation gaps
+☐ Dependency vulnerabilities
+  (run: npm audit / pip check)
+
+Report format:
+CRITICAL / HIGH / MEDIUM / LOW
+Each: location + exploit + fix</span></pre>
+    </div>
+
+  </div>
+
+
+  <!-- SECTION 5: TOOL PERMISSIONS -->
+  <div class="section-header"><span>05</span> Tool Permissions &amp; Scoping</div>
+
+  <div class="grid-2 full-width">
+
+    <div class="card card-accent">
+      <div class="card-title">🔧 Tool Allowlist vs Denylist</div>
+      <pre><span class="cm"># Allowlist — ONLY these tools:</span>
+<span class="ky">---</span>
+<span class="kv">tools</span>: <span class="vl">[Read, Grep, Glob, Bash]</span>
+<span class="ky">---</span>
+
+<span class="cm"># Denylist — everything EXCEPT these:</span>
+<span class="ky">---</span>
+<span class="kv">disallowedTools</span>: <span class="vl">[Write, Edit, Delete]</span>
+<span class="ky">---</span>
+
+<span class="cm"># MCP Server restriction:</span>
+<span class="ky">---</span>
+<span class="kv">tools</span>: <span class="vl">[Read, mcp:playwright, mcp:github]</span>
+<span class="ky">---</span></pre>
+      <div class="dl" style="margin-top:12px;">
+        <dt>Read</dt>        <dd>File reads, search</dd>
+        <dt>Write/Edit</dt> <dd>File modifications</dd>
+        <dt>Bash</dt>       <dd>Terminal commands</dd>
+        <dt>Grep/Glob</dt>  <dd>Pattern search</dd>
+        <dt>mcp:*</dt>      <dd>Specific MCP server</dd>
+      </div>
+    </div>
+
+    <div class="card card-green">
+      <div class="card-title">👥 Role-Based Agent Design</div>
+      <pre><span class="cm"># Read-only researcher (safe)</span>
+<span class="ky">---</span>
+<span class="kv">name</span>: <span class="vl">researcher</span>
+<span class="kv">readonly</span>: <span class="vl">true</span>
+<span class="kv">tools</span>: <span class="vl">[Read, Grep, Glob, WebFetch]</span>
+<span class="ky">---</span>
+
+<span class="cm"># Write-restricted architect</span>
+<span class="ky">---</span>
+<span class="kv">name</span>: <span class="vl">architect</span>
+<span class="kv">disallowedTools</span>: <span class="vl">[Bash, Delete, mcp:database]</span>
+<span class="cm"># Can read + edit MD files only</span>
+<span class="ky">---</span>
+
+<span class="cm"># Full-access implementer</span>
+<span class="ky">---</span>
+<span class="kv">name</span>: <span class="vl">implementer</span>
+<span class="kv">readonly</span>: <span class="vl">false</span>
+<span class="cm"># inherits all tools (default)</span>
+<span class="ky">---</span>
+
+<span class="cm"># Test runner (terminal only)</span>
+<span class="ky">---</span>
+<span class="kv">name</span>: <span class="vl">test-runner</span>
+<span class="kv">tools</span>: <span class="vl">[Bash, Read]</span>
+<span class="kv">readonly</span>: <span class="vl">true</span>
+<span class="ky">---</span></pre>
+    </div>
+  </div>
+
+
+  <!-- SECTION 6: INVOCATION PATTERNS -->
+  <div class="section-header"><span>06</span> Invocation Patterns</div>
+
+  <div class="grid-2 full-width">
+
+    <div class="card card-purple">
+      <div class="card-title">💬 In-Chat Invocation</div>
+      <pre><span class="cm"># Explicit (always works — recommended)</span>
+<span class="st">"Use the security-auditor subagent on the payment module"</span>
+<span class="st">"Ask the doc-writer to generate API docs"</span>
+<span class="st">"Have verifier check the auth flow"</span>
+
+<span class="cm"># Implicit (description-driven auto-delegation)</span>
+<span class="co">The main agent reads all descriptions
+and delegates automatically when:</span>
+<span class="co">  description: "Use immediately after writing code"</span>
+<span class="co">  description: "Use proactively when tests are failing"</span>
+
+<span class="cm"># Chaining in conversation</span>
+<span class="st">"Implement login feature then have verifier check it,
+and if APPROVED run doc-writer on AuthService"</span></pre>
+      <div class="danger">
+        <strong>⚡ Pro Tip</strong>
+        Implicit auto-delegation is unreliable — explicitly name the subagent in your prompt for guaranteed invocation.
+      </div>
+    </div>
+
+    <div class="card card-orange">
+      <div class="card-title">⌨️ CLI Invocation (Headless)</div>
+      <pre><span class="cm"># Install Cursor CLI</span>
+<span class="fn">curl</span> https://cursor.com/install -fsS | bash
+
+<span class="cm"># Basic subagent spawn</span>
+<span class="fn">cursor-agent</span> <span class="st">"run full test suite analysis"</span> \
+  --agent test-runner
+
+<span class="cm"># Headless parallel execution</span>
+<span class="fn">cursor-agent</span> <span class="st">"refactor auth module"</span> \
+  --agent refactor-worker \
+  --headless
+
+<span class="cm"># Spawn subagent + capture ID for resume</span>
+<span class="fn">cursor-agent</span> <span class="st">"analyze migrations"</span> \
+  --agent migration-analyst \
+  --output-id > agent_id.txt
+
+<span class="cm"># Resume with preserved context</span>
+<span class="fn">cursor-agent</span> <span class="st">"continue analysis"</span> \
+  --resume <span class="fn">$(cat agent_id.txt)</span>
+
+<span class="cm"># Recursive subagents via shell tool</span>
+<span class="cm"># (subagents calling cursor-agent = nested)</span></pre>
+    </div>
+
+  </div>
+
+
+  <!-- SECTION 7: DECISION TREE -->
+  <div class="section-header"><span>07</span> Decision Tree — Which Pattern to Use?</div>
+
+  <div class="card card-accent full-width">
+    <div class="card-title">🌿 Pattern Selection Guide</div>
+    <pre><div class="tree"><span class="q">Is the task complex with multiple steps?</span>
+<span class="ln">├─ </span><span class="y">YES</span> → Does it require isolated context / specialized knowledge?
+<span class="ln">│  ├─ </span><span class="y">YES</span> → Are subtasks independent of each other?
+<span class="ln">│  │  ├─ </span><span class="y">YES</span> → <span class="r">PARALLEL pattern</span>  (fan-out, simultaneous execution)
+<span class="ln">│  │  └─ </span><span class="n">NO</span>  → Does output of A feed into B?
+<span class="ln">│  │     ├─ </span><span class="y">YES</span> → <span class="r">SEQUENTIAL / HAND-OFF pattern</span>  (pipeline)
+<span class="ln">│  │     └─ </span><span class="n">NO</span>  → <span class="r">HIERARCHICAL pattern</span>  (orchestrator spawns sub-orchestrators)
+<span class="ln">│  └─ </span><span class="n">NO</span>  → Is it a repeatable one-purpose action?
+<span class="ln">│     ├─ </span><span class="y">YES</span> → Use a SKILL (.cursor/skills/) not a subagent
+<span class="ln">│     └─ </span><span class="n">NO</span>  → <span class="r">Single subagent</span>  with clear scoped prompt
+<span class="ln">└─ </span><span class="n">NO</span>  → Is it a single, one-off action?
+   <span class="ln">├─ </span><span class="y">YES</span> → Is it repeatable/reusable?
+   <span class="ln">│  ├─ </span><span class="y">YES</span> → Use a SKILL or slash command
+   <span class="ln">│  └─ </span><span class="n">NO</span>  → Handle inline in main agent
+   └─ <span class="n">NO</span>  → Is it long-running / non-blocking?
+      <span class="ln">├─ </span><span class="y">YES</span> → <span class="r">BACKGROUND subagent</span>  (is_background: true)
+      └─ <span class="n">NO</span>  → <span class="r">RESUMABLE subagent</span>  (with agent ID for continuation)</div></pre>
+  </div>
+
+
+  <!-- SECTION 8: BEST PRACTICES & ANTIPATTERNS -->
+  <div class="section-header"><span>08</span> Best Practices &amp; Anti-Patterns</div>
+
+  <div class="grid-2 full-width">
+
+    <div class="card card-green">
+      <div class="card-title">✅ Best Practices</div>
+      <div class="tip">
+        <strong>✦ Specific Descriptions</strong>
+        "Use when implementing OAuth flows with external providers" beats "Use for auth tasks". The description is the routing logic.
+      </div>
+      <div class="tip">
+        <strong>✦ Single Responsibility</strong>
+        Each subagent does ONE thing well. Combine with patterns for complex tasks.
+      </div>
+      <div class="tip">
+        <strong>✦ Explicit Invocation</strong>
+        Always name the agent explicitly in prompts. Implicit auto-delegation is unreliable.
+      </div>
+      <div class="tip">
+        <strong>✦ Start Small</strong>
+        Begin with 2–3 focused subagents. Add more only when there's a genuinely distinct use case.
+      </div>
+      <div class="tip">
+        <strong>✦ Model Right-sizing</strong>
+        Use <code>fast</code>/<code>haiku</code> for simple execution agents, <code>opus</code> for planning/reasoning agents.
+      </div>
+      <div class="tip">
+        <strong>✦ Git Worktrees for Parallel</strong>
+        Enable true filesystem parallelism without conflicts when multiple subagents touch the same repo.
+      </div>
+    </div>
+
+    <div class="card card-red">
+      <div class="card-title">❌ Anti-Patterns</div>
+      <div class="danger">
+        <strong>⚠ Vague Descriptions</strong>
+        "Use for general tasks" → agent never gets auto-delegated. Be hyper-specific.
+      </div>
+      <div class="danger">
+        <strong>⚠ YAML Comments</strong>
+        Never use <code>#</code> inline comments inside the frontmatter block — silent breakage guaranteed.
+      </div>
+      <div class="danger">
+        <strong>⚠ Overly Long Prompts</strong>
+        A 2000-word system prompt is harder to maintain and slower. Target 200–400 words.
+      </div>
+      <div class="danger">
+        <strong>⚠ Too Many Subagents</strong>
+        Performance degrades past 8 concurrent. Don't create an agent for everything.
+      </div>
+      <div class="danger">
+        <strong>⚠ Duplicating Slash Commands</strong>
+        If it's a single-purpose action without context isolation → use a skill, not a subagent.
+      </div>
+      <div class="danger">
+        <strong>⚠ Mixed Responsibilities</strong>
+        "Backend + security + docs agent" → split into 3 agents. One agent, one domain.
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- SECTION 9: FILE STRUCTURE REFERENCE -->
+  <div class="section-header"><span>09</span> File Structure &amp; Locations</div>
+
+  <div class="grid-3 full-width">
+
+    <div class="card card-accent">
+      <div class="card-title">📁 Directory Structure</div>
+      <pre><span class="co">your-project/
+├── .cursor/
+│   ├── agents/         ← project agents
+│   │   ├── planner.md
+│   │   ├── coder.md
+│   │   ├── verifier.md
+│   │   └── orchestrator.md
+│   ├── rules/          ← cursor rules
+│   └── skills/         ← skills (not subagents)
+└── src/</span>
+
+<span class="co">~/ (home dir)
+└── .cursor/
+    └── agents/         ← user-global agents
+        ├── security-auditor.md
+        └── doc-writer.md</span>
+
+<span class="co">~/.cursor/subagents/    ← bg agent state
+                        (auto-generated)</span></pre>
+    </div>
+
+    <div class="card card-green">
+      <div class="card-title">🔑 Priority Order</div>
+      <div class="dl">
+        <dt>1st</dt><dd>Project agents <code>.cursor/agents/</code></dd>
+        <dt>2nd</dt><dd>User agents <code>~/.cursor/agents/</code></dd>
+        <dt>3rd</dt><dd>Built-in default agents</dd>
+      </div>
+      <div class="tip">
+        <strong>✦ Duplicates</strong>
+        When the same name exists in multiple locations, the highest-priority location wins.
+      </div>
+      <pre style="margin-top:10px;"><span class="cm"># Activate new agent without restart:</span>
+<span class="co">/agents</span>   <span class="cm"># opens management UI</span>
+
+<span class="cm"># Or restart session for auto-load</span></pre>
+    </div>
+
+    <div class="card card-orange">
+      <div class="card-title">🔄 Agent Lifecycle</div>
+      <div class="dl">
+        <dt>Load</dt>    <dd>Session start or <code>/agents</code> command</dd>
+        <dt>Invoke</dt>  <dd>Explicit name in prompt or auto-delegation</dd>
+        <dt>Execute</dt> <dd>Own context window, own thread</dd>
+        <dt>Return</dt>  <dd>Result value back to main agent only</dd>
+        <dt>Reject</dt>  <dd>If main agent rejects → result is discarded, gone</dd>
+        <dt>Resume</dt>  <dd>Background only, via agent ID</dd>
+      </div>
+      <div class="warn">
+        <strong>⚠ Context Isolation</strong>
+        Each subagent starts with a clean slate. Context from the main conversation is not automatically available — pass it explicitly.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-text">CURSOR SUBAGENTS CHEATSHEET &nbsp;·&nbsp; VERSION ≥ 2.4 &nbsp;·&nbsp; FEBRUARY 2026 BY DTRAN + CLAUDE SONNET 4.6</div>
+    <div class="footer-text">docs.cursor.com &nbsp;·&nbsp; .cursor/agents/ &nbsp;·&nbsp; ~/.cursor/agents/</div>
+  </div>
+
+</div>
+</body>
+</html>
