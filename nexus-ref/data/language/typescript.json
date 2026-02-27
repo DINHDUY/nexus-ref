@@ -1,0 +1,97 @@
+{
+  "id": "typescript",
+  "title": "TypeScript",
+  "category": "Language",
+  "icon": "🔷",
+  "accent": "#00d4ff",
+  "description": "Types, interfaces, generics, utility types, and TypeScript-specific patterns.",
+  "tags": ["typescript", "ts", "types"],
+  "sections": [
+    {
+      "title": "Types & Interfaces",
+      "items": [
+        ["type Alias = string | number", "Type alias"],
+        ["interface User { name: string }", "Interface declaration"],
+        ["interface Admin extends User { role: string }", "Interface inheritance"],
+        ["type A = B & C", "Intersection type (all properties of B and C)"],
+        ["type A = B | C", "Union type"],
+        ["readonly prop: string", "Immutable property"],
+        ["prop?: string", "Optional property"],
+        ["[key: string]: any", "Index signature (dynamic keys)"],
+        ["const obj = { x: 1 } as const", "Literal type assertion (as const)"]
+      ]
+    },
+    {
+      "title": "Generics",
+      "items": [
+        ["function fn<T>(arg: T): T", "Generic function"],
+        ["interface Box<T> { val: T }", "Generic interface"],
+        ["<T extends object>", "Constrain generic to object subtypes"],
+        ["<T extends keyof U>", "Constrain to keys of type"],
+        ["function fn<T = string>()", "Generic with default type"],
+        ["Array<T> / T[]", "Typed array"],
+        ["Promise<string>", "Typed promise"],
+        ["Record<string, number>", "Object with uniform value types"],
+        ["Map<string, User>", "Typed Map"],
+        ["keyof T", "Union of keys of type T"]
+      ]
+    },
+    {
+      "title": "Utility Types",
+      "items": [
+        ["Partial<T>", "All properties optional"],
+        ["Required<T>", "All properties required"],
+        ["Readonly<T>", "All properties readonly"],
+        ["Pick<T, 'a' | 'b'>", "Select subset of properties"],
+        ["Omit<T, 'a'>", "Exclude properties"],
+        ["Exclude<T, U>", "Remove types from union"],
+        ["Extract<T, U>", "Keep types present in both"],
+        ["ReturnType<typeof fn>", "Infer function return type"],
+        ["Parameters<typeof fn>", "Infer function parameter types"],
+        ["Awaited<Promise<T>>", "Unwrap nested promise type"],
+        ["NonNullable<T>", "Remove null and undefined"],
+        ["InstanceType<typeof Cls>", "Get instance type of class"]
+      ]
+    },
+    {
+      "title": "Narrowing & Guards",
+      "items": [
+        ["typeof x === 'string'", "Primitive type narrowing"],
+        ["x instanceof Date", "Class instance narrowing"],
+        ["'prop' in obj", "Property existence narrowing"],
+        ["function isStr(x): x is string { return typeof x === 'string' }", "User-defined type guard"],
+        ["if (x != null)", "Null/undefined narrowing"],
+        ["switch (x.kind)", "Discriminated union narrowing"],
+        ["x satisfies Type", "Ensure x satisfies type without widening"],
+        ["x!", "Non-null assertion (suppress null error)"]
+      ]
+    },
+    {
+      "title": "Advanced Types",
+      "items": [
+        ["type Keys = keyof T", "Get union of keys"],
+        ["type Val = T[keyof T]", "Get union of values"],
+        ["type Mapped = { [K in keyof T]: string }", "Mapped type"],
+        ["type Opt = { [K in keyof T]?: T[K] }", "Make all optional via mapped type"],
+        ["type Deep = T extends object ? ... : T", "Conditional type"],
+        ["infer R", "Infer type variable in conditional"],
+        ["type Flat = T extends Array<infer U> ? U : T", "Unwrap array element type"],
+        ["template literal type: `${string}Id`", "Template literal type"],
+        ["declare module '...' { ... }", "Module augmentation"]
+      ]
+    },
+    {
+      "title": "tsconfig & Compiler",
+      "items": [
+        ["\"strict\": true", "Enable all strict checks"],
+        ["\"noUncheckedIndexedAccess\": true", "Index access returns T | undefined"],
+        ["\"exactOptionalPropertyTypes\": true", "Opt props can't be set to undefined explicitly"],
+        ["\"paths\": {\"@/*\": [\"./src/*\"]}", "Path aliases"],
+        ["\"moduleResolution\": \"bundler\"", "Modern bundler resolution"],
+        ["// @ts-ignore", "Suppress next line type error"],
+        ["// @ts-expect-error", "Assert next line has an error"],
+        ["// @ts-nocheck", "Disable type checking in file"]
+      ]
+    }
+  ]
+}

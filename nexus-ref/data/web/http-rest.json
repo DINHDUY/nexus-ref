@@ -1,0 +1,96 @@
+{
+  "id": "http-rest",
+  "title": "HTTP / REST",
+  "category": "Web",
+  "icon": "🌐",
+  "accent": "#00ff9f",
+  "description": "HTTP methods, status codes, headers, caching directives, and REST conventions.",
+  "tags": ["http", "rest", "api"],
+  "sections": [
+    {
+      "title": "Methods",
+      "items": [
+        ["GET", "Retrieve resource — safe, idempotent, cacheable"],
+        ["POST", "Create new resource — not idempotent"],
+        ["PUT", "Replace resource entirely — idempotent"],
+        ["PATCH", "Partial update — not necessarily idempotent"],
+        ["DELETE", "Remove resource — idempotent"],
+        ["OPTIONS", "Describe communication options (used by CORS preflight)"],
+        ["HEAD", "Like GET but response body omitted"],
+        ["TRACE", "Echo request back (debugging, typically disabled)"]
+      ]
+    },
+    {
+      "title": "Status Codes",
+      "items": [
+        ["200 OK", "Success — general purpose"],
+        ["201 Created", "Resource created (often with Location header)"],
+        ["204 No Content", "Success with no response body"],
+        ["206 Partial Content", "Range request fulfilled"],
+        ["301 Moved Permanently", "Permanent redirect (update your links)"],
+        ["302 Found", "Temporary redirect"],
+        ["304 Not Modified", "Cached version is still valid"],
+        ["307 Temporary Redirect", "Preserve HTTP method"],
+        ["400 Bad Request", "Malformed request (client error)"],
+        ["401 Unauthorized", "Authentication required"],
+        ["403 Forbidden", "Authenticated but not authorized"],
+        ["404 Not Found", "Resource doesn't exist"],
+        ["405 Method Not Allowed", "HTTP method not supported"],
+        ["409 Conflict", "State conflict (e.g. duplicate resource)"],
+        ["410 Gone", "Resource permanently deleted"],
+        ["422 Unprocessable Entity", "Validation error"],
+        ["429 Too Many Requests", "Rate limited"],
+        ["500 Internal Server Error", "Unhandled server exception"],
+        ["502 Bad Gateway", "Invalid response from upstream"],
+        ["503 Service Unavailable", "Server overloaded or down"],
+        ["504 Gateway Timeout", "Upstream didn't respond in time"]
+      ]
+    },
+    {
+      "title": "Common Request Headers",
+      "items": [
+        ["Content-Type: application/json", "Body format being sent"],
+        ["Accept: application/json", "Expected response format"],
+        ["Authorization: Bearer <token>", "JWT or OAuth token auth"],
+        ["Authorization: Basic <base64>", "Basic auth (user:password encoded)"],
+        ["X-Request-ID: <uuid>", "Unique request identifier for tracing"],
+        ["If-None-Match: \"etag-value\"", "Conditional GET (use cached if unchanged)"],
+        ["If-Modified-Since: date", "Return 304 if not modified"],
+        ["Accept-Encoding: gzip, br", "Acceptable compression formats"],
+        ["Origin: https://example.com", "Request origin (CORS)"]
+      ]
+    },
+    {
+      "title": "Common Response Headers",
+      "items": [
+        ["Cache-Control: no-cache", "Validate before using cached copy"],
+        ["Cache-Control: no-store", "Never cache this response"],
+        ["Cache-Control: max-age=3600", "Cache for 1 hour"],
+        ["Cache-Control: public, max-age=86400, immutable", "CDN-cacheable static asset"],
+        ["ETag: \"abc123\"", "Resource version fingerprint"],
+        ["Location: /users/42", "New resource URL (with 201/301/302)"],
+        ["Retry-After: 60", "Seconds to wait before retrying (with 429/503)"],
+        ["Access-Control-Allow-Origin: *", "CORS — allow any origin"],
+        ["Access-Control-Allow-Credentials: true", "CORS — allow cookies"],
+        ["Strict-Transport-Security: max-age=31536000", "Force HTTPS for 1 year"],
+        ["Content-Security-Policy: default-src 'self'", "XSS mitigation"],
+        ["X-Content-Type-Options: nosniff", "Prevent MIME sniffing"]
+      ]
+    },
+    {
+      "title": "REST URL Conventions",
+      "items": [
+        ["GET /users", "List resources (collection)"],
+        ["POST /users", "Create new resource"],
+        ["GET /users/:id", "Get single resource"],
+        ["PUT /users/:id", "Replace resource"],
+        ["PATCH /users/:id", "Update resource fields"],
+        ["DELETE /users/:id", "Delete resource"],
+        ["GET /users/:id/posts", "Nested resource collection"],
+        ["GET /users?sort=name&page=2&limit=20", "Filter, sort, paginate"],
+        ["POST /users/:id/actions/archive", "Non-CRUD action (verb in path)"],
+        ["GET /search?q=term", "Search endpoint convention"]
+      ]
+    }
+  ]
+}

@@ -1,0 +1,122 @@
+[
+  {
+    "id": "git",
+    "path": "data/version-control/git.json",
+    "title": "Git",
+    "category": "Version Control",
+    "icon": "🌿",
+    "accent": "#00ff9f",
+    "description": "Essential Git commands for staging, branching, merging, and working with remotes.",
+    "tags": ["git", "vcs", "cli"]
+  },
+  {
+    "id": "vim",
+    "path": "data/editor/vim.json",
+    "title": "Vim / Neovim",
+    "category": "Editor",
+    "icon": "⬡",
+    "accent": "#00d4ff",
+    "description": "Motions, modes, and commands for efficient editing in Vim and Neovim.",
+    "tags": ["vim", "nvim", "editor"]
+  },
+  {
+    "id": "linux-bash",
+    "path": "data/shell/linux-bash.json",
+    "title": "Linux / Bash",
+    "category": "Shell",
+    "icon": "🐧",
+    "accent": "#00ff9f",
+    "description": "File management, permissions, process control, and everyday shell commands.",
+    "tags": ["bash", "shell", "linux"]
+  },
+  {
+    "id": "python",
+    "path": "data/language/python.json",
+    "title": "Python",
+    "category": "Language",
+    "icon": "🐍",
+    "accent": "#ffb700",
+    "description": "Core Python syntax, data structures, file I/O, and common stdlib patterns.",
+    "tags": ["python", "scripting", "dev"]
+  },
+  {
+    "id": "javascript",
+    "path": "data/language/javascript.json",
+    "title": "JavaScript",
+    "category": "Language",
+    "icon": "⚡",
+    "accent": "#ffb700",
+    "description": "Modern ES6+ syntax, async patterns, DOM manipulation, and array methods.",
+    "tags": ["js", "es6", "frontend"]
+  },
+  {
+    "id": "typescript",
+    "path": "data/language/typescript.json",
+    "title": "TypeScript",
+    "category": "Language",
+    "icon": "🔷",
+    "accent": "#00d4ff",
+    "description": "Types, interfaces, generics, utility types, and TypeScript-specific patterns.",
+    "tags": ["typescript", "ts", "types"]
+  },
+  {
+    "id": "docker",
+    "path": "data/devops/docker.json",
+    "title": "Docker",
+    "category": "DevOps",
+    "icon": "🐳",
+    "accent": "#00d4ff",
+    "description": "Build, run, manage containers, images, networks, and Docker Compose workflows.",
+    "tags": ["docker", "containers", "devops"]
+  },
+  {
+    "id": "kubernetes",
+    "path": "data/devops/kubernetes.json",
+    "title": "Kubernetes",
+    "category": "DevOps",
+    "icon": "⚙️",
+    "accent": "#00d4ff",
+    "description": "kubectl commands, resource management, scaling, debugging, and cluster operations.",
+    "tags": ["k8s", "kubernetes", "devops"]
+  },
+  {
+    "id": "css",
+    "path": "data/web/css.json",
+    "title": "CSS",
+    "category": "Web",
+    "icon": "🎨",
+    "accent": "#ff006e",
+    "description": "Flexbox, Grid, selectors, custom properties, and modern CSS patterns.",
+    "tags": ["css", "styling", "web"]
+  },
+  {
+    "id": "http-rest",
+    "path": "data/web/http-rest.json",
+    "title": "HTTP / REST",
+    "category": "Web",
+    "icon": "🌐",
+    "accent": "#00ff9f",
+    "description": "HTTP methods, status codes, headers, caching directives, and REST conventions.",
+    "tags": ["http", "rest", "api"]
+  },
+  {
+    "id": "sql",
+    "path": "data/database/sql.json",
+    "title": "SQL",
+    "category": "Database",
+    "icon": "🗄️",
+    "accent": "#ffb700",
+    "description": "Core SQL queries, joins, aggregation, indexes, and common database patterns.",
+    "tags": ["sql", "database", "query"]
+  },
+  {
+    "id": "regex",
+    "path": "data/utilities/regex.json",
+    "title": "Regex",
+    "category": "Utilities",
+    "icon": "🔍",
+    "accent": "#ff006e",
+    "description": "Regular expression syntax for matching, groups, lookaheads, and common patterns.",
+    "tags": ["regex", "pattern", "search"]
+  }
+]

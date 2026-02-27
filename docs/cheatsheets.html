@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NEXUS — Developer Reference System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=IBM+Plex+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════════════════════════════════════════════
+   DESIGN TOKENS — DARK (default)
+═══════════════════════════════════════════════ */
+:root {
+  --bg-base:       #04060f;
+  --bg-panel:      #070c1a;
+  --bg-sidebar:    #050810;
+  --bg-hover:      rgba(0,212,255,0.05);
+  --bg-active:     rgba(0,212,255,0.08);
+  --bg-card:       #0a1020;
+  --bg-code:       #060b16;
+
+  --cyan:          #00d4ff;
+  --cyan-dim:      rgba(0,212,255,0.6);
+  --cyan-glow:     rgba(0,212,255,0.15);
+  --cyan-line:     rgba(0,212,255,0.12);
+  --magenta:       #ff006e;
+  --mag-glow:      rgba(255,0,110,0.15);
+  --green:         #00ff9f;
+  --green-glow:    rgba(0,255,159,0.15);
+  --amber:         #ffb700;
+
+  --ink:           #e2eaf5;
+  --ink2:          #8ba4c4;
+  --ink3:          #4d6480;
+  --ink4:          #2a3d56;
+
+  --border:        rgba(0,212,255,0.1);
+  --border-strong: rgba(0,212,255,0.25);
+  --border-mid:    rgba(0,212,255,0.15);
+
+  --sidebar-w:     268px;
+  --topbar-h:      52px;
+
+  --font-display:  'Orbitron', monospace;
+  --font-mono:     'IBM Plex Mono', monospace;
+  --font-body:     'Outfit', sans-serif;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  --glow-cyan: 0 0 20px rgba(0,212,255,0.3), 0 0 60px rgba(0,212,255,0.1);
+  --shadow-card: 0 4px 24px rgba(0,0,0,0.5), 0 1px 4px rgba(0,0,0,0.3);
+}
+
+[data-theme="light"] {
+  --bg-base:       #eef3fc;
+  --bg-panel:      #f7faff;
+  --bg-sidebar:    #0d1b3e;
+  --bg-hover:      rgba(0,100,200,0.06);
+  --bg-active:     rgba(0,100,200,0.1);
+  --bg-card:       #ffffff;
+  --bg-code:       #f0f5ff;
+
+  --cyan:          #0066cc;
+  --cyan-dim:      rgba(0,102,204,0.7);
+  --cyan-glow:     rgba(0,102,204,0.1);
+  --cyan-line:     rgba(0,102,204,0.1);
+  --magenta:       #cc0055;
+  --mag-glow:      rgba(204,0,85,0.1);
+  --green:         #00875a;
+  --green-glow:    rgba(0,135,90,0.1);
+  --amber:         #b45309;
+
+  --ink:           #0d1b3e;
+  --ink2:          #2a3d56;
+  --ink3:          #4d6480;
+  --ink4:          #8ba4c4;
+
+  --border:        rgba(0,102,204,0.12);
+  --border-strong: rgba(0,102,204,0.3);
+  --border-mid:    rgba(0,102,204,0.18);
+
+  --glow-cyan: none;
+  --shadow-card: 0 2px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05);
+}
+
+/* sidebar always dark */
+[data-theme="light"] .sidebar { color: #c8d8f0; }
+[data-theme="light"] .nav-search input { color: #e2eaf5; background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); }
+[data-theme="light"] .nav-search input::placeholder { color: rgba(200,216,240,0.4); }
+[data-theme="light"] .nav-search input:focus { border-color: #00d4ff; box-shadow: 0 0 0 2px rgba(0,212,255,0.2); }
+[data-theme="light"] .nav-search svg { stroke: rgba(200,216,240,0.5); }
+[data-theme="light"] .search-count { color: rgba(200,216,240,0.4); }
+[data-theme="light"] .nav-section-label { color: rgba(200,216,240,0.35); }
+[data-theme="light"] .nav-item { color: rgba(200,216,240,0.6); }
+[data-theme="light"] .nav-item:hover { background: rgba(255,255,255,0.06); color: #c8d8f0; }
+[data-theme="light"] .nav-item.active { color: #00d4ff; background: rgba(0,212,255,0.08); }
+[data-theme="light"] .nav-item.active::before { background: #00d4ff; }
+[data-theme="light"] .logo-text { color: #00d4ff; }
+[data-theme="light"] .logo-sub { color: rgba(200,216,240,0.4); }
+[data-theme="light"] .sidebar-footer { border-color: rgba(255,255,255,0.08); }
+[data-theme="light"] .sidebar-footer-text { color: rgba(200,216,240,0.4); }
+[data-theme="light"] .sidebar::after { opacity: 0.15; }
+
+/* ═══════════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg-base);
+  color: var(--ink);
+  height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  transition: background 0.3s, color 0.3s;
+}
+button { cursor: pointer; border: none; background: none; font-family: inherit; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--ink4); border-radius: 99px; }
+
+/* scanline texture */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.025) 2px,rgba(0,0,0,0.025) 4px);
+  pointer-events: none;
+  z-index: 9999;
+  transition: opacity 0.3s;
+}
+[data-theme="light"] body::before { opacity: 0; }
+
+/* ═══════════════════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════════════════ */
+.sidebar {
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  height: 100dvh;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border-mid);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  transition: background 0.3s, border-color 0.3s, left 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.sidebar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,212,255,0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,255,0.07) 1px, transparent 1px);
+  background-size: 32px 32px;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* Logo */
+.sidebar-logo {
+  padding: 0 18px;
+  height: var(--topbar-h);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid rgba(0,212,255,0.12);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+.logo-mark svg { width: 30px; height: 30px; }
+.logo-text {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  color: #00d4ff;
+  text-shadow: 0 0 20px rgba(0,212,255,0.4);
+  line-height: 1;
+}
+.logo-sub {
+  font-family: var(--font-mono);
+  font-size: 0.48rem;
+  letter-spacing: 0.18em;
+  color: rgba(0,212,255,0.35);
+  margin-top: 2px;
+}
+
+/* Nav search */
+.nav-search {
+  padding: 12px 12px 8px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+.nav-search-inner { position: relative; }
+.nav-search svg {
+  position: absolute; left: 9px; top: 50%; transform: translateY(-50%);
+  width: 13px; height: 13px; stroke: var(--ink3); fill: none;
+  stroke-width: 2; stroke-linecap: round; pointer-events: none;
+}
+.nav-search input {
+  width: 100%;
+  padding: 6px 8px 6px 28px;
+  background: rgba(0,212,255,0.04);
+  border: 1px solid rgba(0,212,255,0.15);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--ink);
+  outline: none;
+  letter-spacing: 0.03em;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.nav-search input::placeholder { color: var(--ink3); }
+.nav-search input:focus { border-color: #00d4ff; box-shadow: 0 0 0 2px rgba(0,212,255,0.15); }
+.search-count {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  color: var(--ink3);
+  padding: 3px 2px 0;
+  letter-spacing: 0.05em;
+}
+
+/* Nav scroll */
+.nav-scroll { flex: 1; overflow-y: auto; padding: 4px 0 16px; position: relative; z-index: 1; }
+
+.nav-section { margin-bottom: 2px; }
+.nav-section-label {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  padding: 10px 16px 3px;
+  display: flex; align-items: center; gap: 6px;
+}
+.nav-section-label::before {
+  content: '';
+  display: inline-block;
+  width: 14px; height: 1px;
+  background: var(--border-strong);
+  flex-shrink: 0;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 12px 5px 16px;
+  font-size: 0.78rem; font-weight: 400;
+  color: var(--ink2);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  position: relative;
+  border: none; width: 100%; text-align: left;
+  letter-spacing: 0.01em;
+}
+.nav-item:hover { background: var(--bg-hover); color: var(--ink); }
+.nav-item.active { color: #00d4ff; background: rgba(0,212,255,0.07); }
+.nav-item.active::before {
+  content: ''; position: absolute;
+  left: 0; top: 0; bottom: 0; width: 2px;
+  background: #00d4ff;
+  box-shadow: 0 0 8px rgba(0,212,255,0.6);
+}
+.nav-item-icon { width: 18px; height: 18px; flex-shrink: 0; font-size: 0.85rem; display:flex;align-items:center;justify-content:center; }
+.nav-item-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nav-item-count { font-family: var(--font-mono); font-size: 0.55rem; color: var(--ink3); letter-spacing: 0.06em; flex-shrink:0; }
+
+/* Sidebar footer */
+.sidebar-footer {
+  padding: 8px 14px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+  position: relative; z-index: 1;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.sidebar-footer-text { font-family: var(--font-mono); font-size: 0.52rem; color: var(--ink3); letter-spacing: 0.1em; }
+.status-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #00ff9f;
+  box-shadow: 0 0 6px rgba(0,255,159,0.7);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.35} }
+
+/* ═══════════════════════════════════════════════
+   MAIN
+═══════════════════════════════════════════════ */
+.main {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column;
+  height: 100dvh; overflow: hidden;
+}
+
+.topbar {
+  height: var(--topbar-h);
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 24px; gap: 12px;
+  background: var(--bg-panel);
+  transition: background 0.3s, border-color 0.3s;
+}
+.topbar-breadcrumb {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono); font-size: 0.65rem;
+  color: var(--ink3); letter-spacing: 0.08em;
+}
+.topbar-breadcrumb .sep { color: var(--ink4); }
+.topbar-breadcrumb .current { color: var(--cyan); font-weight: 500; }
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+.theme-btn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 12px;
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.1em;
+  color: var(--ink3); background: transparent;
+  transition: all 0.2s;
+}
+.theme-btn:hover { border-color: var(--cyan); color: var(--cyan); background: var(--cyan-glow); }
+.theme-btn svg { width: 11px; height: 11px; fill: currentColor; }
+
+.topbar-stat {
+  display: flex; align-items: center; gap: 5px;
+  font-family: var(--font-mono); font-size: 0.58rem;
+  color: var(--ink3); letter-spacing: 0.06em;
+  padding: 3px 9px;
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+}
+.topbar-stat .val { color: var(--cyan); font-weight: 600; }
+
+.mob-toggle {
+  display: none; width: 32px; height: 32px;
+  align-items: center; justify-content: center;
+  border: 1px solid var(--border-mid); border-radius: var(--radius-sm);
+  background: var(--bg-card);
+}
+.mob-toggle svg { width: 15px; height: 15px; stroke: var(--ink2); fill: none; stroke-width: 2; stroke-linecap: round; }
+
+.content-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; }
+
+/* ═══════════════════════════════════════════════
+   WELCOME
+═══════════════════════════════════════════════ */
+.welcome {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  min-height: calc(100dvh - var(--topbar-h));
+  padding: 3rem 2rem; text-align: center;
+  position: relative;
+}
+.welcome-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 48px 48px;
+  opacity: 0.5; pointer-events: none;
+}
+.welcome-glow {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 50% 40% at 50% 55%, rgba(0,212,255,0.05) 0%, transparent 70%);
+  pointer-events: none;
+}
+.welcome-hex { position: relative; width: 88px; height: 88px; margin-bottom: 2rem; }
+.welcome-hex svg { width: 88px; height: 88px; }
+
+.welcome-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 4vw, 2.4rem);
+  font-weight: 900; letter-spacing: 0.1em;
+  color: var(--ink); margin-bottom: 0.4rem; position: relative;
+}
+.welcome-title span { color: var(--cyan); text-shadow: var(--glow-cyan); }
+.welcome-sub {
+  font-family: var(--font-mono);
+  font-size: 0.7rem; color: var(--ink3);
+  letter-spacing: 0.15em; text-transform: uppercase;
+  margin-bottom: 2.5rem;
+}
+.welcome-stats {
+  display: flex; gap: 1px;
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius-md); overflow: hidden;
+  margin-bottom: 2.5rem;
+}
+.wstat { padding: 14px 28px; background: var(--bg-card); text-align: center; }
+.wstat + .wstat { border-left: 1px solid var(--border-mid); }
+.wstat-num {
+  font-family: var(--font-display); font-size: 1.6rem; font-weight: 700;
+  color: var(--cyan); text-shadow: var(--glow-cyan); line-height: 1;
+}
+.wstat-label { font-family: var(--font-mono); font-size: 0.52rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink3); margin-top: 4px; }
+.welcome-hint {
+  font-family: var(--font-mono); font-size: 0.68rem; color: var(--ink3);
+  letter-spacing: 0.08em; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center;
+}
+.welcome-hint kbd {
+  padding: 2px 7px;
+  border: 1px solid var(--border-mid); border-radius: var(--radius-sm);
+  background: var(--bg-card); color: var(--cyan);
+  font-family: var(--font-mono); font-size: 0.62rem;
+}
+
+/* ═══════════════════════════════════════════════
+   SHEET VIEW
+═══════════════════════════════════════════════ */
+#sheet-view { display: none; }
+#sheet-view.visible { display: block; }
+
+.sheet-header {
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-panel);
+  display: flex; align-items: flex-start; gap: 18px;
+  position: relative; overflow: hidden;
+}
+.sheet-header::after {
+  content: ''; position: absolute;
+  bottom: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, var(--cyan), transparent 55%);
+  opacity: 0.35;
+}
+.sheet-header::before {
+  content: ''; position: absolute; top: 0; right: 0;
+  width: 240px; height: 100%;
+  background: radial-gradient(ellipse at right top, rgba(0,212,255,0.06), transparent 65%);
+  pointer-events: none;
+}
+.sheet-icon {
+  width: 56px; height: 56px; border-radius: var(--radius-md);
+  display: grid; place-items: center; font-size: 1.7rem;
+  flex-shrink: 0; border: 1px solid var(--border-mid); background: var(--bg-card);
+  position: relative; z-index: 1;
+}
+.sheet-meta { flex: 1; min-width: 0; position: relative; z-index: 1; }
+.sheet-title {
+  font-family: var(--font-display); font-size: 1.25rem; font-weight: 700;
+  letter-spacing: 0.07em; color: var(--ink); margin-bottom: 4px;
+}
+.sheet-desc { font-size: 0.8rem; color: var(--ink2); font-weight: 300; line-height: 1.6; max-width: 580px; margin-bottom: 10px; }
+.sheet-badges { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
+.badge {
+  font-family: var(--font-mono); font-size: 0.58rem; letter-spacing: 0.1em;
+  padding: 2px 9px; border-radius: 2px; border: 1px solid; text-transform: uppercase;
+}
+.badge-cat { border-color: var(--cyan); color: var(--cyan); background: var(--cyan-glow); }
+.badge-tag { border-color: var(--border-mid); color: var(--ink3); }
+
+.sheet-actions { display: flex; gap: 7px; position: relative; z-index: 1; }
+.action-btn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 13px;
+  border: 1px solid var(--border-mid); border-radius: var(--radius-sm);
+  font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.1em;
+  color: var(--ink3); background: var(--bg-card);
+  transition: all 0.18s; white-space: nowrap;
+}
+.action-btn:hover { border-color: var(--cyan); color: var(--cyan); background: var(--cyan-glow); }
+.action-btn svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
+
+/* Sheet body */
+.sheet-body { padding: 24px 28px 48px; }
+.sections-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 16px; }
+
+/* Section block */
+.sec-block {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md); overflow: hidden;
+  transition: border-color 0.2s;
+  animation: sec-in 0.3s ease both;
+}
+.sec-block:hover { border-color: var(--border-mid); }
+@keyframes sec-in { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+.sec-block-header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 13px;
+  background: rgba(0,212,255,0.03);
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.sec-block-header::before {
+  content: ''; position: absolute;
+  left: 0; top: 0; bottom: 0; width: 2px;
+  background: var(--sec-accent, var(--cyan));
+  opacity: 0.7;
+}
+.sec-block-title {
+  font-family: var(--font-display); font-size: 0.58rem; font-weight: 600;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--sec-accent, var(--cyan));
+}
+.sec-block-count {
+  margin-left: auto; font-family: var(--font-mono);
+  font-size: 0.52rem; color: var(--ink3); letter-spacing: 0.1em;
+}
+
+/* Command rows */
+.cmd-row {
+  display: grid; grid-template-columns: auto 1fr auto;
+  align-items: stretch;
+  border-bottom: 1px solid var(--border);
+  position: relative; transition: background 0.12s;
+}
+.cmd-row:last-child { border-bottom: none; }
+.cmd-row:hover { background: var(--bg-hover); }
+
+.cmd-key {
+  font-family: var(--font-mono); font-size: 0.7rem; font-weight: 500;
+  color: var(--green); padding: 6px 12px;
+  white-space: nowrap; letter-spacing: 0.01em;
+  min-width: 150px; max-width: 185px;
+  overflow: hidden; text-overflow: ellipsis;
+  border-right: 1px solid var(--border);
+  display: flex; align-items: center;
+}
+.cmd-val {
+  font-size: 0.73rem; color: var(--ink2);
+  padding: 6px 8px 6px 11px; font-weight: 300;
+  line-height: 1.4; display: flex; align-items: center;
+}
+.cmd-copy {
+  width: 30px; display: grid; place-items: center;
+  opacity: 0; margin: 3px; border: 1px solid transparent;
+  border-radius: var(--radius-sm); transition: all 0.12s;
+  flex-shrink: 0; align-self: center;
+}
+.cmd-row:hover .cmd-copy { opacity: 1; }
+.cmd-copy:hover { background: var(--cyan-glow); border-color: var(--border-mid); }
+.cmd-copy svg { width: 10px; height: 10px; stroke: var(--ink3); fill: none; stroke-width: 2; stroke-linecap: round; }
+.cmd-copy:hover svg { stroke: var(--cyan); }
+
+/* ═══════════════════════════════════════════════
+   MOBILE
+═══════════════════════════════════════════════ */
+.mob-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.65); z-index: 500;
+  backdrop-filter: blur(3px);
+}
+@media(max-width: 768px) {
+  .sidebar {
+    position: fixed; left: -100%; top: 0; height: 100dvh;
+    z-index: 600; width: min(var(--sidebar-w), 88vw);
+  }
+  .sidebar.open { left: 0; }
+  .mob-toggle { display: flex; }
+  .mob-overlay.show { display: block; }
+  .sections-grid { grid-template-columns: 1fr; }
+  .sheet-header { flex-wrap: wrap; padding: 16px; }
+  .sheet-body { padding: 16px 14px 48px; }
+  .topbar { padding: 0 14px; gap: 8px; }
+  .welcome-stats { flex-wrap: wrap; gap: 1px; }
+  .wstat { padding: 12px 18px; }
+}
+</style>
+</head>
+<body>
+
+<div class="mob-overlay" id="mobOverlay"></div>
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 30 30" fill="none">
+        <polygon points="15,2 27,8.5 27,21.5 15,28 3,21.5 3,8.5" stroke="#00d4ff" stroke-width="1" fill="rgba(0,212,255,0.05)"/>
+        <polygon points="15,7 22,11 22,19 15,23 8,19 8,11" stroke="#00d4ff" stroke-width="0.5" fill="rgba(0,212,255,0.04)" opacity="0.6"/>
+        <circle cx="15" cy="15" r="2.5" fill="#00d4ff" opacity="0.85"/>
+      </svg>
+    </div>
+    <div>
+      <div class="logo-text">NEXUS</div>
+      <div class="logo-sub">REF SYSTEM v2.0</div>
+    </div>
+  </div>
+
+  <div class="nav-search">
+    <div class="nav-search-inner">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="navSearch" placeholder="search sheets…" autocomplete="off"/>
+    </div>
+    <div class="search-count" id="searchCount"></div>
+  </div>
+
+  <nav class="nav-scroll" id="navScroll"></nav>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-footer-text" id="footerText">SYSTEM ONLINE</div>
+    <div class="status-dot"></div>
+  </div>
+</aside>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-breadcrumb">
+      <span>NEXUS</span>
+      <span class="sep">/</span>
+      <span id="topbarCurrent" class="current">SELECT SHEET</span>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-stat"><span>SHEETS</span><span class="val" id="statSheets">12</span></div>
+      <div class="topbar-stat"><span>CMDS</span><span class="val" id="statCmds">—</span></div>
+      <button class="theme-btn" id="themeBtn">
+        <svg id="themeIconSun" viewBox="0 0 24 24"><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42M12 7a5 5 0 1 1 0 10A5 5 0 0 1 12 7z" fill="currentColor"/></svg>
+        <svg id="themeIconMoon" viewBox="0 0 24 24" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="currentColor"/></svg>
+        <span id="themeLabel">LIGHT</span>
+      </button>
+      <button class="mob-toggle" id="mobToggle">
+        <svg viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="content-scroll" id="contentScroll">
+
+    <!-- Welcome -->
+    <div id="welcomeScreen">
+      <div class="welcome">
+        <div class="welcome-grid"></div>
+        <div class="welcome-glow"></div>
+        <div class="welcome-hex">
+          <svg viewBox="0 0 88 88" fill="none">
+            <polygon points="44,4 81,23.5 81,62.5 44,82 7,62.5 7,23.5" stroke="#00d4ff" stroke-width="1.2" fill="rgba(0,212,255,0.03)"/>
+            <polygon points="44,16 70,30.5 70,57.5 44,72 18,57.5 18,30.5" stroke="#00d4ff" stroke-width="0.5" fill="rgba(0,212,255,0.03)" opacity="0.5"/>
+            <text x="44" y="50" text-anchor="middle" font-family="Orbitron" font-size="22" font-weight="900" fill="#00d4ff" opacity="0.9">⌨</text>
+          </svg>
+        </div>
+        <h1 class="welcome-title">DEVELOPER <span>NEXUS</span></h1>
+        <p class="welcome-sub">Advanced Reference System — Browse &amp; Navigate</p>
+        <div class="welcome-stats">
+          <div class="wstat"><div class="wstat-num">12</div><div class="wstat-label">Cheat Sheets</div></div>
+          <div class="wstat"><div class="wstat-num" id="wTotalCmds">0</div><div class="wstat-label">Commands</div></div>
+          <div class="wstat"><div class="wstat-num">6</div><div class="wstat-label">Categories</div></div>
+        </div>
+        <p class="welcome-hint">
+          <kbd>↑↓</kbd> navigate &nbsp;·&nbsp;
+          <kbd>Enter</kbd> open &nbsp;·&nbsp;
+          <kbd>/</kbd> search
+        </p>
+      </div>
+    </div>
+
+    <!-- Sheet View -->
+    <div id="sheet-view">
+      <div class="sheet-header">
+        <div class="sheet-icon" id="sheetIcon"></div>
+        <div class="sheet-meta">
+          <div class="sheet-title" id="sheetTitle"></div>
+          <div class="sheet-desc" id="sheetDesc"></div>
+          <div class="sheet-badges" id="sheetBadges"></div>
+        </div>
+        <div class="sheet-actions">
+          <button class="action-btn" id="copyAllBtn">
+            <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            COPY ALL
+          </button>
+        </div>
+      </div>
+      <div class="sheet-body">
+        <div class="sections-grid" id="sectionsGrid"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const SHEETS = [
+  {
+    id:'git', title:'Git', category:'Version Control', icon:'🌿', accent:'#00ff9f',
+    desc:'Complete Git reference: staging, branching, merging, remotes, stashing and history rewriting.',
+    tags:['git','vcs','cli'],
+    sections:[
+      {title:'Setup & Init',items:[
+        ['git init','Initialize a new local repository'],
+        ['git clone <url>','Clone a remote repo locally'],
+        ['git clone --depth 1 <url>','Shallow clone, latest commit only'],
+        ['git config --global user.name "Name"','Set global username'],
+        ['git config --global user.email "e@x"','Set global email'],
+        ['git config --list','Show all config values'],
+      ]},
+      {title:'Staging & Committing',items:[
+        ['git status','Show working tree status'],
+        ['git add .','Stage all changes'],
+        ['git add -p','Stage changes interactively (hunks)'],
+        ['git commit -m "msg"','Commit with message'],
+        ['git commit --amend --no-edit','Amend last commit, keep message'],
+        ['git diff','Show unstaged changes'],
+        ['git diff --staged','Show staged changes'],
+        ['git reset HEAD <file>','Unstage a file'],
+        ['git restore <file>','Discard working tree changes'],
+        ['git stash','Stash dirty working state'],
+        ['git stash pop','Apply most recent stash'],
+        ['git stash list','List all stashes'],
+      ]},
+      {title:'Branching & Merging',items:[
+        ['git branch','List local branches'],
+        ['git branch -a','List all branches incl. remote'],
+        ['git checkout -b <n>','Create and switch to branch'],
+        ['git switch -c <n>','Modern: create and switch'],
+        ['git merge <branch>','Merge branch into current'],
+        ['git merge --no-ff <branch>','Merge with explicit merge commit'],
+        ['git rebase <branch>','Rebase current onto branch'],
+        ['git rebase -i HEAD~3','Interactive rebase last 3 commits'],
+        ['git cherry-pick <hash>','Apply a specific commit'],
+        ['git branch -d <n>','Delete merged branch'],
+        ['git branch -D <n>','Force delete branch'],
+      ]},
+      {title:'Remotes & Publishing',items:[
+        ['git remote -v','List remotes with URLs'],
+        ['git remote add origin <url>','Add remote named origin'],
+        ['git push -u origin <branch>','Push and set upstream tracking'],
+        ['git push --force-with-lease','Safe force push'],
+        ['git pull --rebase','Pull, rebase instead of merge'],
+        ['git fetch --prune','Fetch and prune stale remote refs'],
+        ['git tag v1.0.0','Create lightweight tag'],
+        ['git push origin --tags','Push all tags to remote'],
+      ]},
+      {title:'History & Inspection',items:[
+        ['git log --oneline --graph','Visual branch commit graph'],
+        ['git log -p <file>','Full history of a file with diffs'],
+        ['git blame <file>','Show who changed each line'],
+        ['git show <hash>','Inspect a specific commit'],
+        ['git bisect start','Begin binary search for a bug'],
+        ['git reflog','Show all HEAD movements'],
+        ['git shortlog -sn','Commit count per author'],
+      ]},
+    ]
+  },
+  {
+    id:'vim', title:'Vim / Neovim', category:'Editor', icon:'⬡', accent:'#00d4ff',
+    desc:'Motions, modes, operators, macros, splits and essential Vim/Neovim commands.',
+    tags:['vim','nvim','editor','modal'],
+    sections:[
+      {title:'Modes',items:[
+        ['i / I','Insert before cursor / line start'],
+        ['a / A','Append after cursor / line end'],
+        ['o / O','New line below / above, enter Insert'],
+        ['s / S','Delete char / line, enter Insert'],
+        ['R','Replace mode (overwrite)'],
+        ['v / V / Ctrl+v','Visual / Line / Block mode'],
+        ['Esc / Ctrl+[','Return to Normal mode'],
+        [':','Enter Command-line mode'],
+      ]},
+      {title:'Navigation',items:[
+        ['h j k l','Left / Down / Up / Right'],
+        ['w / W / b / B','Next/prev word (w=small, W=WORD)'],
+        ['e / ge','End of next / prev word'],
+        ['0 / ^ / $','Col 0 / first non-blank / end of line'],
+        ['gg / G / :n','Top / Bottom / Line n'],
+        ['Ctrl+d / Ctrl+u','Half-page down / up'],
+        ['{ / }','Prev / Next paragraph'],
+        ['%','Jump to matching bracket'],
+        ['* / #','Search word under cursor fwd / back'],
+        ['zz / zt / zb','Center / top / bottom cursor on screen'],
+      ]},
+      {title:'Editing Operators',items:[
+        ['d{motion} / dd','Delete motion / entire line'],
+        ['y{motion} / yy','Yank motion / entire line'],
+        ['p / P','Paste after / before cursor'],
+        ['c{motion}','Change (delete + enter Insert)'],
+        ['ciw / ci"','Change inner word / quoted string'],
+        ['di( / da[','Delete inside / around bracket'],
+        ['>> / << / ==','Indent / de-indent / auto-indent'],
+        ['.','Repeat last change'],
+        ['u / Ctrl+r','Undo / Redo'],
+        ['J','Join line below to current line'],
+      ]},
+      {title:'Search & Substitute',items:[
+        ['/pattern','Search forward'],
+        ['?pattern','Search backward'],
+        ['n / N','Next / previous match'],
+        [':%s/old/new/gc','Replace all with confirm'],
+        [':g/pattern/d','Delete all matching lines'],
+        ['* then cgn','Change next occurrence in sequence'],
+      ]},
+      {title:'Files, Splits & Macros',items:[
+        [':e file / :w / :q!','Open / write / force quit'],
+        [':split / :vsplit','Horizontal / vertical split'],
+        ['Ctrl+w hjkl','Navigate between splits'],
+        ['Ctrl+w =','Equalize split sizes'],
+        ['q{reg} … q','Record macro into register'],
+        ['@{reg} / @@','Play macro / repeat last macro'],
+        ['m{a-z} / \'{a-z}','Set / jump to mark'],
+      ]},
+    ]
+  },
+  {
+    id:'bash', title:'Linux / Bash', category:'Shell', icon:'🐧', accent:'#00ff9f',
+    desc:'File management, permissions, process control, text processing and networking from the shell.',
+    tags:['bash','shell','linux','cli'],
+    sections:[
+      {title:'Navigation & Files',items:[
+        ['ls -lAh --color','List files with sizes, show hidden'],
+        ['cd -','Jump to previous directory'],
+        ['find . -name "*.log" -mtime -7','Find .log files modified in last 7 days'],
+        ['find . -type f -size +100M','Find files larger than 100MB'],
+        ['cp -rv src/ dst/','Copy directory recursively, verbose'],
+        ['rsync -avz src/ dst/','Sync dirs, faster than cp'],
+        ['ln -s /path/to/file link','Create a symbolic link'],
+        ['du -sh */ | sort -h','Directory sizes, human-sorted'],
+      ]},
+      {title:'Text Processing',items:[
+        ['grep -rn "pattern" . --include="*.py"','Recursive grep in .py files'],
+        ['grep -v "pattern"','Inverse match (exclude pattern)'],
+        ['sed -i "s/old/new/g" file','In-place sed replacement'],
+        ['awk \'{print $1,$3}\'','Print columns 1 and 3'],
+        ['cut -d: -f1 /etc/passwd','Cut by delimiter, extract field 1'],
+        ['sort -t, -k2 -n file','Sort CSV by column 2 numerically'],
+        ['sort | uniq -c | sort -rn','Count and rank unique occurrences'],
+        ['jq \'.[] | .name\'','Parse JSON with jq'],
+      ]},
+      {title:'Permissions & Processes',items:[
+        ['chmod 755 file / chmod +x','Set permissions / make executable'],
+        ['chown -R user:group dir/','Recursive change ownership'],
+        ['ps aux | grep nginx','Find a process by name'],
+        ['kill -9 $(lsof -t -i:8080)','Kill process running on port 8080'],
+        ['htop / top','Interactive process monitor'],
+        ['systemctl status|start|stop svc','Manage a systemd service'],
+        ['journalctl -fu svc','Follow a service\'s live logs'],
+        ['nohup cmd &','Run command immune to hangup'],
+      ]},
+      {title:'Networking',items:[
+        ['curl -fsSL <url> -o file','Download silently, fail on error'],
+        ['curl -X POST -H "Content-Type: application/json" -d \'{}\'','POST JSON data'],
+        ['ssh -L 8080:localhost:80 user@host','SSH local port forward'],
+        ['scp -r dir user@host:~/dest','Secure copy a directory to remote'],
+        ['netstat -tlnp / ss -tlnp','Show listening ports'],
+        ['dig +short domain','Quick DNS lookup'],
+      ]},
+      {title:'Shell Tricks',items:[
+        ['cmd1 && cmd2 || cmd3','Chain: AND / OR logic'],
+        ['cmd | tee file','Pipe AND write to file simultaneously'],
+        ['cmd 2>&1 | less','Redirect stderr into stdout pipe'],
+        ['$(cmd)','Command substitution'],
+        ['${var:-default}','Parameter with default value'],
+        ['Ctrl+r','Reverse-search command history'],
+        ['set -euo pipefail','Strict mode for shell scripts'],
+      ]},
+    ]
+  },
+  {
+    id:'python', title:'Python', category:'Language', icon:'🐍', accent:'#ffb700',
+    desc:'Modern Python patterns: comprehensions, dataclasses, async/await, typing, pathlib, and stdlib essentials.',
+    tags:['python','py','scripting'],
+    sections:[
+      {title:'Data Structures',items:[
+        ['[x*2 for x in lst if x > 0]','List comprehension with filter'],
+        ['{k: v for k,v in d.items()}','Dict comprehension'],
+        ['{x**2 for x in range(10)}','Set comprehension'],
+        ['(x*2 for x in lst)','Generator expression (lazy eval)'],
+        ['sorted(lst, key=lambda x: x.val)','Sort objects by attribute'],
+        ['collections.Counter(lst)','Count element frequencies'],
+        ['collections.defaultdict(list)','Dict with default factory'],
+        ['zip(a, b, strict=True)','Pair iterables, strict mode'],
+      ]},
+      {title:'Functions & Decorators',items:[
+        ['def fn(a, /, b, *, c):','Positional-only / keyword-only args'],
+        ['*args, **kwargs','Variable positional / keyword args'],
+        ['functools.partial(fn, x=1)','Partially apply a function'],
+        ['@functools.lru_cache(maxsize=128)','Memoize function results'],
+        ['@functools.wraps(fn)','Preserve metadata in decorators'],
+        ['@contextlib.contextmanager','Create a context manager from generator'],
+        ['lambda x: x+1','Anonymous function'],
+      ]},
+      {title:'Classes & Dataclasses',items:[
+        ['@dataclass','Auto-generate __init__, __repr__'],
+        ['@dataclass(frozen=True)','Immutable dataclass'],
+        ['field(default_factory=list)','Mutable default field value'],
+        ['__slots__ = (\'x\', \'y\')','Restrict instance attributes'],
+        ['@property / @x.setter','Property getter / setter'],
+        ['@classmethod / @staticmethod','Class method / static method'],
+        ['super().__init__(*args)','Call parent __init__'],
+      ]},
+      {title:'Async & Concurrency',items:[
+        ['async def fn(): ...','Define a coroutine function'],
+        ['await asyncio.sleep(1)','Non-blocking sleep'],
+        ['asyncio.gather(*coros)','Run coroutines concurrently'],
+        ['asyncio.run(main())','Entry point for async code'],
+        ['async with aiohttp.ClientSession()','Async HTTP session'],
+        ['async for item in aiter:','Iterate an async generator'],
+        ['concurrent.futures.ThreadPoolExecutor','Thread pool for I/O-bound work'],
+      ]},
+      {title:'Types & File I/O',items:[
+        ['pathlib.Path(".").glob("**/*.py")','Recursive glob with pathlib'],
+        ['Path(f).read_text(encoding="utf-8")','Read file contents easily'],
+        ['json.dumps(obj, indent=2, default=str)','Pretty JSON with type fallback'],
+        ['list[str] | None','Modern union type (Python 3.10+)'],
+        ['TypeVar("T", bound=int)','Bounded type variable'],
+        ['Protocol','Structural subtyping (duck-typing)'],
+        ['os.environ.get("KEY", "default")','Read env var with default value'],
+      ]},
+    ]
+  },
+  {
+    id:'docker', title:'Docker', category:'DevOps', icon:'🐳', accent:'#00d4ff',
+    desc:'Complete Docker reference: images, containers, volumes, networking, multi-stage builds and Compose.',
+    tags:['docker','containers','devops','oci'],
+    sections:[
+      {title:'Images',items:[
+        ['docker build -t name:tag .','Build image from Dockerfile'],
+        ['docker build --no-cache -t name .','Build without layer cache'],
+        ['docker build --target stage .','Multi-stage build: stop at stage'],
+        ['docker images','List all local images'],
+        ['docker pull image:tag','Pull image from registry'],
+        ['docker push registry/image:tag','Push image to registry'],
+        ['docker image prune -a','Remove all unused images'],
+      ]},
+      {title:'Containers',items:[
+        ['docker run -d -p 8080:80 --name c img','Run detached, map port, name it'],
+        ['docker run -it --rm img bash','Interactive, auto-remove on exit'],
+        ['docker run -e KEY=val img','Pass environment variable'],
+        ['docker ps -a','List all containers'],
+        ['docker stop c && docker rm c','Stop then remove container'],
+        ['docker exec -it c bash','Open shell in running container'],
+        ['docker logs -f --tail 100 c','Follow last 100 log lines'],
+        ['docker stats','Real-time container resource usage'],
+        ['docker cp c:/path/file ./local','Copy file from container to host'],
+      ]},
+      {title:'Volumes & Networks',items:[
+        ['docker volume create vol','Create a named volume'],
+        ['-v vol:/app/data','Mount named volume into container'],
+        ['-v $(pwd):/app','Bind-mount current directory'],
+        ['docker volume inspect vol','Volume details and mount point'],
+        ['docker network create --driver bridge net','Create a bridge network'],
+        ['docker run --network net img','Connect container to network'],
+        ['docker network inspect net','Show containers on network'],
+      ]},
+      {title:'Compose',items:[
+        ['docker compose up -d','Start all services detached'],
+        ['docker compose up --build','Rebuild images then start'],
+        ['docker compose down -v','Stop + remove containers and volumes'],
+        ['docker compose logs -f svc','Follow a service\'s logs'],
+        ['docker compose exec svc bash','Shell into a service container'],
+        ['docker compose ps','List service containers and status'],
+        ['docker compose config','Validate and view merged config'],
+        ['docker compose scale svc=3','Scale service to 3 replicas'],
+      ]},
+      {title:'Dockerfile Directives',items:[
+        ['FROM base AS stage','Multi-stage base with alias'],
+        ['COPY --from=stage /src /dst','Copy artifact from build stage'],
+        ['RUN --mount=type=cache,target=/root/.npm','Cached RUN mount'],
+        ['ENV KEY=value','Set build + runtime env variable'],
+        ['ARG BUILD_ENV=production','Build argument with default'],
+        ['ENTRYPOINT ["node","index.js"]','Container entry point'],
+        ['CMD ["--port","8080"]','Default command arguments'],
+        ['HEALTHCHECK --interval=30s CMD curl -f http://localhost/','Container health check'],
+      ]},
+    ]
+  },
+  {
+    id:'css', title:'CSS / Tailwind', category:'Web', icon:'🎨', accent:'#ff006e',
+    desc:'Modern CSS: Flexbox, Grid, custom properties, container queries, animations and Tailwind utilities.',
+    tags:['css','tailwind','styling','web'],
+    sections:[
+      {title:'Flexbox',items:[
+        ['display: flex; gap: 1rem;','Enable flex layout with gap'],
+        ['justify-content: space-between','Main-axis distribution'],
+        ['align-items: center','Cross-axis alignment'],
+        ['flex-wrap: wrap','Allow items to wrap to next row'],
+        ['flex: 1 1 0','Grow, shrink, zero basis'],
+        ['align-self: flex-end','Override cross-axis for one item'],
+        ['order: -1','Move item before siblings'],
+      ]},
+      {title:'Grid',items:[
+        ['grid-template-columns: repeat(auto-fill, minmax(200px,1fr))','Responsive auto-fill columns'],
+        ['grid-column: 1 / -1','Span full row width'],
+        ['grid-template-areas: "header" "main"','Named template areas'],
+        ['grid-area: header','Place element into named area'],
+        ['place-items: center','Center items in both axes'],
+        ['subgrid','Participate in parent grid tracks'],
+      ]},
+      {title:'Custom Properties & Cascade',items:[
+        [':root { --color: oklch(60% .2 250) }','Define custom property (OKLCH)'],
+        ['var(--color, fallback)','Use property with fallback'],
+        ['@layer base, components, utilities','Define ordered cascade layers'],
+        ['@property --angle { }','Register typed custom property'],
+        ['color-mix(in oklch, red 40%, blue)','Color mixing function'],
+        ['light-dark(#fff, #000)','Color scheme adaptive value'],
+      ]},
+      {title:'Modern Selectors',items:[
+        [':is(h1, h2, h3) a','Forgiving selector list'],
+        [':has(> img)','Parent selector: has child img'],
+        [':not(.active):hover','Negate selector with hover'],
+        ['@container (min-width: 400px)','Container size query'],
+        ['@container style(--variant: large)','Container style query'],
+        ['::view-transition-old(root)','View transitions pseudo-element'],
+      ]},
+      {title:'Animation & Effects',items:[
+        ['transition: all 0.3s cubic-bezier(.4,0,.2,1)','Smooth ease-in-out transition'],
+        ['animation: name 1s ease infinite','Apply keyframe animation'],
+        ['@keyframes slide { from { } to { } }','Define animation keyframes'],
+        ['backdrop-filter: blur(10px)','Frosted glass blur effect'],
+        ['clip-path: polygon(...)','Non-rectangular clipping shape'],
+        ['view-transition-name: hero','Assign view transition name'],
+      ]},
+      {title:'Tailwind Utilities',items:[
+        ['flex items-center gap-4','Flex with centering and gap'],
+        ['grid grid-cols-[1fr_2fr]','Arbitrary column widths'],
+        ['text-[clamp(1rem,5vw,3rem)]','Arbitrary fluid typography'],
+        ['hover:scale-105 transition-transform','Scale on hover with transition'],
+        ['@apply flex items-center','Extract utilities into class'],
+        ['dark:bg-slate-900','Dark mode variant'],
+        ['[&:nth-child(3)]:hidden','Arbitrary variant selector'],
+      ]},
+    ]
+  },
+  {
+    id:'sql', title:'SQL', category:'Database', icon:'🗄️', accent:'#ffb700',
+    desc:'Queries, joins, aggregation, window functions, CTEs, indexes and common SQL patterns.',
+    tags:['sql','database','query','postgres'],
+    sections:[
+      {title:'Basic Queries',items:[
+        ['SELECT col1, col2 FROM tbl WHERE ...','Basic select with filter'],
+        ['ORDER BY col DESC NULLS LAST','Sort descending, nulls at end'],
+        ['LIMIT 20 OFFSET 40','Paginate: page 3 of 20'],
+        ['COALESCE(col, \'default\')','Null-safe fallback value'],
+        ['NULLIF(a, b)','Return NULL if a equals b'],
+        ['CASE WHEN x > 0 THEN \'pos\' ELSE \'neg\' END','Inline conditional expression'],
+      ]},
+      {title:'Joins',items:[
+        ['INNER JOIN b ON a.id = b.a_id','Only matching rows from both'],
+        ['LEFT JOIN b ON a.id = b.a_id','All left rows + matched right rows'],
+        ['FULL OUTER JOIN','All rows from both tables'],
+        ['CROSS JOIN','Cartesian product of all rows'],
+        ['JOIN b USING (id)','Join on identical column name'],
+        ['LATERAL JOIN','Correlated subquery in FROM clause'],
+      ]},
+      {title:'Aggregation',items:[
+        ['COUNT(*) FILTER (WHERE active)','Conditional aggregate count'],
+        ['STRING_AGG(name, \', \')','Aggregate values into string'],
+        ['GROUP BY col HAVING COUNT(*) > 5','Group and filter groups'],
+        ['ROLLUP(a, b)','Subtotals + grand total'],
+        ['PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY val)','Calculate median'],
+      ]},
+      {title:'Window Functions',items:[
+        ['ROW_NUMBER() OVER (PARTITION BY col ORDER BY id)','Row number per partition'],
+        ['RANK() / DENSE_RANK()','Rank with / without gaps'],
+        ['LAG(col, 1) / LEAD(col, 1)','Previous / next row value'],
+        ['SUM(col) OVER (ORDER BY date ROWS UNBOUNDED PRECEDING)','Running total'],
+        ['NTILE(4) OVER (ORDER BY score)','Split rows into quartile buckets'],
+      ]},
+      {title:'CTEs & Subqueries',items:[
+        ['WITH cte AS (SELECT ...) SELECT ...','Common Table Expression'],
+        ['WITH RECURSIVE cte AS (...)','Recursive CTE for tree structures'],
+        ['WHERE id IN (SELECT id FROM ...)','Subquery in WHERE clause'],
+        ['EXISTS (SELECT 1 FROM ...)','Existence check (fast)'],
+        ['EXCEPT / INTERSECT','Set difference / intersection'],
+      ]},
+      {title:'DDL & Performance',items:[
+        ['CREATE INDEX CONCURRENTLY ON t(col)','Non-blocking index creation'],
+        ['CREATE INDEX ON t USING gin(col)','GIN index for JSON or arrays'],
+        ['EXPLAIN ANALYZE SELECT ...','Show query execution plan + timing'],
+        ['VACUUM ANALYZE tbl','Reclaim space and update stats'],
+        ['ALTER TABLE t ADD COLUMN n type DEFAULT val','Add column with default value'],
+      ]},
+    ]
+  },
+  {
+    id:'js', title:'JavaScript', category:'Language', icon:'⚡', accent:'#ffb700',
+    desc:'Modern ES2024+ syntax, array methods, async patterns, destructuring, modules and browser APIs.',
+    tags:['js','es6','frontend','node'],
+    sections:[
+      {title:'Array Methods',items:[
+        ['arr.map(fn).filter(fn)','Transform then filter in chain'],
+        ['arr.reduce((acc, x) => acc + x, 0)','Accumulate to a single value'],
+        ['arr.flatMap(fn)','Map then flatten one level deep'],
+        ['arr.findIndex(fn)','Index of first match, -1 if none'],
+        ['arr.at(-1)','Last element (ES2022)'],
+        ['arr.toSorted() / arr.toReversed()','Non-mutating sort / reverse (ES2023)'],
+        ['arr.with(2, \'x\')','Non-mutating index update (ES2023)'],
+        ['[...new Set(arr)]','Deduplicate with Set spread'],
+        ['Object.groupBy(arr, fn)','Group array by key (ES2024)'],
+      ]},
+      {title:'Async & Promises',items:[
+        ['await Promise.all([p1, p2])','Wait all, fail fast on rejection'],
+        ['await Promise.allSettled([p1, p2])','Wait all, get every outcome'],
+        ['await Promise.any([p1, p2])','First to resolve wins'],
+        ['const ac = new AbortController()','Create abort controller'],
+        ['fetch(url, { signal: ac.signal })','Cancellable fetch request'],
+        ['for await (const chunk of stream)','Consume an async iterable'],
+      ]},
+      {title:'Destructuring & Spread',items:[
+        ['const { a: alias = default } = obj','Rename and set default'],
+        ['const [first, ...rest] = arr','Array rest element'],
+        ['const { nested: { x } } = obj','Deep nested destructure'],
+        ['fn({ name, age = 18 } = {})','Destructured params with defaults'],
+        ['const merged = { ...a, ...b, c: 1 }','Spread objects and override'],
+      ]},
+      {title:'Modern Syntax',items:[
+        ['obj?.prop?.sub ?? \'fallback\'','Optional chain + nullish coalesce'],
+        ['x ??= defaultVal','Assign only if nullish (ES2021)'],
+        ['class X { #private = 0 }','Private class field (ES2022)'],
+        ['const { default: mod } = await import(\'./m.js\')','Dynamic import with rename'],
+        ['Object.hasOwn(obj, \'key\')','Safe own property check'],
+        ['structuredClone(obj)','Deep clone natively'],
+        ['crypto.randomUUID()','Generate UUID (Web Crypto API)'],
+      ]},
+      {title:'DOM & Browser APIs',items:[
+        ['el.closest(\'.parent\')','Walk up tree to matching selector'],
+        ['el.querySelectorAll(\':scope > .child\')','Scoped child selector'],
+        ['new ResizeObserver(fn)','Watch element size changes'],
+        ['new IntersectionObserver(fn)','Detect viewport visibility'],
+        ['history.pushState({}, \'\', \'/new-url\')','Update URL without reload'],
+        ['navigator.clipboard.writeText(str)','Write text to clipboard'],
+        ['document.startViewTransition(fn)','Animated page transitions API'],
+      ]},
+    ]
+  },
+  {
+    id:'ts', title:'TypeScript', category:'Language', icon:'🔷', accent:'#00d4ff',
+    desc:'Types, interfaces, generics, utility types, template literals, satisfies and advanced TypeScript patterns.',
+    tags:['typescript','ts','types','static'],
+    sections:[
+      {title:'Types & Interfaces',items:[
+        ['type ID = string | number','Union type alias'],
+        ['interface User { name: string; age?: number }','Interface with optional prop'],
+        ['interface Admin extends User { role: string }','Interface extension'],
+        ['type A = B & C','Intersection type'],
+        ['readonly prop: string','Immutable property'],
+        ['[key: string]: unknown','Index signature'],
+        ['type Tuple = [string, number]','Tuple type'],
+      ]},
+      {title:'Generics',items:[
+        ['function fn<T extends object>(arg: T): T','Constrained generic function'],
+        ['interface Repo<T> { find(id: string): T }','Generic interface'],
+        ['type Pair<A, B = string> = [A, B]','Generic with default type'],
+        ['ReadonlyArray<T>','Immutable typed array'],
+        ['infer R','Conditional type inference'],
+        ['keyof T / T[keyof T]','Key union / value union of type'],
+      ]},
+      {title:'Utility Types',items:[
+        ['Partial<T> / Required<T>','All optional / all required'],
+        ['Pick<T, "a" | "b">','Select subset of properties'],
+        ['Omit<T, "secret">','Exclude properties'],
+        ['Exclude<T, U> / Extract<T, U>','Filter union types'],
+        ['ReturnType<typeof fn>','Infer function return type'],
+        ['Parameters<typeof fn>','Infer function parameter tuple'],
+        ['Awaited<T>','Unwrap nested Promise type'],
+        ['NoInfer<T>','Prevent type inference (TS 5.4+)'],
+      ]},
+      {title:'Template Literals & Narrowing',items:[
+        ['type EventName = `on${Capitalize<string>}`','Template literal type'],
+        ['satisfies Record<string, unknown>','Type-check without widening'],
+        ['as const satisfies Config','Narrow literal + validate shape'],
+        ['x is T','Type predicate return type'],
+        ['asserts x is T','Assertion-style type predicate'],
+        ['// @ts-expect-error','Suppress expected error (preferred)'],
+      ]},
+      {title:'tsconfig Essentials',items:[
+        ['"strict": true','Enable all strict checks'],
+        ['"noUncheckedIndexedAccess": true','Safer array / object indexing'],
+        ['"exactOptionalPropertyTypes": true','Stricter optional property types'],
+        ['"moduleResolution": "bundler"','Modern ESM resolution mode'],
+        ['"verbatimModuleSyntax": true','Explicit type-only imports required'],
+        ['"target": "ES2022"','Output modern JS syntax'],
+      ]},
+    ]
+  },
+  {
+    id:'k8s', title:'Kubernetes', category:'DevOps', icon:'☸️', accent:'#00d4ff',
+    desc:'kubectl commands, resource management, scaling, debugging, RBAC and cluster operations.',
+    tags:['k8s','kubernetes','devops','cloud'],
+    sections:[
+      {title:'Querying Resources',items:[
+        ['kubectl get pods -A -o wide','All pods cluster-wide with node info'],
+        ['kubectl get all -n namespace','All resources in a namespace'],
+        ['kubectl describe pod <n> -n ns','Detailed pod info and events'],
+        ['kubectl get events --sort-by=.lastTimestamp','Recent events time-sorted'],
+        ['kubectl get pod -o jsonpath=\'{.spec.containers[*].image}\'','Extract container images'],
+        ['kubectl explain pod.spec.containers','Inline field documentation'],
+      ]},
+      {title:'Managing Resources',items:[
+        ['kubectl apply -f manifest.yaml','Apply or update a resource'],
+        ['kubectl apply -k ./kustomize/','Apply a Kustomize overlay'],
+        ['kubectl delete -f manifest.yaml','Delete resources from manifest'],
+        ['kubectl scale deploy/app --replicas=3','Scale deployment to 3 replicas'],
+        ['kubectl set image deploy/app c=img:v2','Update a container image'],
+        ['kubectl rollout status deploy/app','Watch rollout progress'],
+        ['kubectl rollout undo deploy/app --to-revision=2','Rollback to a specific revision'],
+        ['kubectl label pod <n> env=prod','Add a label to a pod'],
+      ]},
+      {title:'Debugging',items:[
+        ['kubectl logs -f deploy/app --tail=100','Follow deployment logs, last 100'],
+        ['kubectl logs pod -c container','Logs from a specific container'],
+        ['kubectl exec -it pod -- bash','Interactive shell inside pod'],
+        ['kubectl debug pod -it --image=busybox','Ephemeral debug container'],
+        ['kubectl port-forward svc/app 8080:80','Forward service port locally'],
+        ['kubectl top pods --sort-by=memory','Resource usage sorted by memory'],
+        ['kubectl cp pod:/var/log/app.log ./app.log','Copy log file from pod to host'],
+      ]},
+      {title:'Config & Security',items:[
+        ['kubectl create secret generic sec --from-literal=k=v','Create a secret from literal'],
+        ['kubectl create configmap cm --from-file=config.yaml','Create configmap from file'],
+        ['kubectl get secret sec -o jsonpath=\'{.data.k}\' | base64 -d','Decode a secret value'],
+        ['kubectl auth can-i create pods','Check RBAC permission'],
+        ['kubectl config use-context ctx','Switch cluster context'],
+        ['kubectl config set-context --current --namespace=ns','Set default namespace for context'],
+      ]},
+    ]
+  },
+  {
+    id:'regex', title:'Regex', category:'Utilities', icon:'🔍', accent:'#ff006e',
+    desc:'Regular expression syntax for anchors, quantifiers, groups, lookarounds and common patterns.',
+    tags:['regex','pattern','search','grep'],
+    sections:[
+      {title:'Anchors & Boundaries',items:[
+        ['^abc / abc$','Start / end of string'],
+        ['\\bword\\b','Whole word boundary match'],
+        ['\\B','Non-word-boundary position'],
+        ['(?m)^line','Multiline: ^ matches line starts'],
+        ['(?s).+','Dotall: dot matches newline too'],
+        ['\\A / \\Z','Absolute string start / end (Python)'],
+      ]},
+      {title:'Quantifiers',items:[
+        ['a* / a+ / a?','Zero-or-more / one-or-more / optional'],
+        ['a{3} / a{2,5}','Exact count / min-max range'],
+        ['.*? / .+?','Non-greedy (lazy) match'],
+        ['a++ / a*+','Possessive: no backtracking'],
+        ['(?:pattern){2,}','Quantify a non-capturing group'],
+      ]},
+      {title:'Character Classes',items:[
+        ['[a-zA-Z0-9_]','Alphanumeric and underscore'],
+        ['[^aeiou]','Any character except vowels'],
+        ['\\d / \\D','Digit [0-9] / non-digit'],
+        ['\\w / \\W','Word char / non-word char'],
+        ['\\s / \\S','Whitespace / non-whitespace'],
+        ['\\p{L} / \\p{N}','Unicode letter / number class'],
+      ]},
+      {title:'Groups & Lookarounds',items:[
+        ['(abc)','Capturing group'],
+        ['(?:abc)','Non-capturing group'],
+        ['(?<n>abc)','Named capture group'],
+        ['\\1 / \\k<n>','Backreference to numbered / named group'],
+        ['(?=abc)','Positive lookahead: followed by'],
+        ['(?!abc)','Negative lookahead: not followed by'],
+        ['(?<=abc)','Positive lookbehind: preceded by'],
+        ['(?<!abc)','Negative lookbehind: not preceded by'],
+      ]},
+      {title:'Common Patterns',items:[
+        ['^[\\w.+-]+@[\\w-]+\\.[\\w.]{2,}$','Email address'],
+        ['https?://[^\\s/$.?#].[^\\s]*','URL (permissive)'],
+        ['#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$','Hex color code'],
+        ['\\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\\d|3[01])','ISO 8601 date YYYY-MM-DD'],
+        ['^(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$]).{12,}$','Strong password policy'],
+        ['^([01]?\\d|2[0-3]):[0-5]\\d$','HH:MM time format'],
+      ]},
+    ]
+  },
+  {
+    id:'http', title:'HTTP / REST', category:'Web', icon:'🌐', accent:'#00ff9f',
+    desc:'HTTP methods, status codes, security headers, caching, auth and REST resource conventions.',
+    tags:['http','rest','api','web'],
+    sections:[
+      {title:'Methods',items:[
+        ['GET','Retrieve resource — safe, idempotent'],
+        ['POST','Create new resource — not idempotent'],
+        ['PUT','Replace resource entirely — idempotent'],
+        ['PATCH','Partial update — not necessarily idempotent'],
+        ['DELETE','Remove resource — idempotent'],
+        ['HEAD','GET response without body'],
+        ['OPTIONS','List allowed methods / CORS preflight'],
+      ]},
+      {title:'Status Codes',items:[
+        ['200 OK / 201 Created / 204 No Content','Success responses'],
+        ['301 Moved Permanently / 302 Found','Permanent / temporary redirect'],
+        ['304 Not Modified','Cached version still valid'],
+        ['400 Bad Request','Malformed or invalid client input'],
+        ['401 Unauthorized / 403 Forbidden','Unauthenticated / access denied'],
+        ['404 Not Found / 410 Gone','Resource missing / permanently deleted'],
+        ['409 Conflict / 422 Unprocessable','State conflict / validation failure'],
+        ['429 Too Many Requests','Rate limit exceeded'],
+        ['500 Internal Server Error','Unhandled exception on server'],
+        ['502 Bad Gateway / 503 Unavailable','Upstream error / service down'],
+      ]},
+      {title:'Request Headers',items:[
+        ['Authorization: Bearer <jwt>','JWT bearer token auth'],
+        ['Content-Type: application/json','Declare request body format'],
+        ['Accept: application/json','Declare desired response format'],
+        ['Accept-Encoding: gzip, br','Declare accepted compression'],
+        ['If-None-Match: "etag"','Conditional request via ETag'],
+        ['Idempotency-Key: uuid','Safe retry identifier'],
+        ['X-Request-ID: uuid','Distributed request tracing'],
+      ]},
+      {title:'Security & Cache Headers',items:[
+        ['Cache-Control: max-age=3600, must-revalidate','Cache directive with revalidation'],
+        ['ETag: "abc123"','Resource fingerprint for caching'],
+        ['Strict-Transport-Security: max-age=31536000','Force HTTPS (HSTS)'],
+        ['Content-Security-Policy: default-src \'self\'','XSS and injection protection'],
+        ['X-Content-Type-Options: nosniff','Prevent MIME-type sniffing'],
+        ['Permissions-Policy: geolocation=()','Restrict browser feature API'],
+        ['Access-Control-Allow-Origin: https://app.example','CORS allow-origin policy'],
+      ]},
+      {title:'REST Conventions',items:[
+        ['GET /resources','List collection (paginated)'],
+        ['POST /resources','Create new resource in collection'],
+        ['GET /resources/:id','Retrieve a single resource'],
+        ['PUT /resources/:id','Replace resource (full update)'],
+        ['PATCH /resources/:id','Update resource (partial)'],
+        ['DELETE /resources/:id','Delete a resource'],
+        ['GET /resources/:id/sub','Nested sub-collection'],
+        ['POST /resources/:id/actions/publish','Named action on resource'],
+      ]},
+    ]
+  }
+];
+
+// ─── helpers ──────────────────────────────────
+function totalCmds(sheet) {
+  return sheet.sections.reduce((a,s)=>a+s.items.length,0);
+}
+function allCmds() {
+  return SHEETS.reduce((a,s)=>a+totalCmds(s),0);
+}
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ─── state ────────────────────────────────────
+let activeId = null;
+let searchQuery = '';
+
+// ─── nav build ────────────────────────────────
+const navScroll = document.getElementById('navScroll');
+
+function buildNav() {
+  navScroll.innerHTML = '';
+  const q = searchQuery.toLowerCase();
+  const cats = [...new Set(SHEETS.map(s=>s.category))];
+  cats.forEach(cat => {
+    const sheets = SHEETS.filter(s => {
+      if (s.category !== cat) return false;
+      if (!q) return true;
+      return s.title.toLowerCase().includes(q) ||
+             s.tags.some(t=>t.includes(q)) ||
+             s.category.toLowerCase().includes(q);
+    });
+    if (!sheets.length) return;
+    const sec = document.createElement('div');
+    sec.className = 'nav-section';
+    const lbl = document.createElement('div');
+    lbl.className = 'nav-section-label';
+    lbl.textContent = cat;
+    sec.appendChild(lbl);
+    sheets.forEach(sheet => {
+      const btn = document.createElement('button');
+      btn.className = 'nav-item' + (sheet.id===activeId?' active':'');
+      btn.dataset.id = sheet.id;
+      btn.innerHTML = `
+        <span class="nav-item-icon">${sheet.icon}</span>
+        <span class="nav-item-name">${sheet.title}</span>
+        <span class="nav-item-count">${totalCmds(sheet)}</span>
+      `;
+      btn.addEventListener('click', ()=>selectSheet(sheet.id));
+      sec.appendChild(btn);
+    });
+    navScroll.appendChild(sec);
+  });
+}
+
+function updateCount() {
+  const q = searchQuery.toLowerCase();
+  const n = q ? SHEETS.filter(s=>s.title.toLowerCase().includes(q)||s.tags.some(t=>t.includes(q))||s.category.toLowerCase().includes(q)).length : SHEETS.length;
+  document.getElementById('searchCount').textContent = `${n} / ${SHEETS.length} sheets`;
+}
+
+// ─── select sheet ─────────────────────────────
+function selectSheet(id) {
+  activeId = id;
+  const sheet = SHEETS.find(s=>s.id===id);
+  if (!sheet) return;
+
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.id===id));
+  document.getElementById('topbarCurrent').textContent = sheet.title.toUpperCase();
+  document.getElementById('statCmds').textContent = totalCmds(sheet);
+
+  document.getElementById('welcomeScreen').style.display = 'none';
+  const sv = document.getElementById('sheet-view');
+  sv.classList.add('visible');
+
+  document.getElementById('sheetIcon').textContent = sheet.icon;
+  document.getElementById('sheetTitle').textContent = sheet.title;
+  document.getElementById('sheetDesc').textContent = sheet.desc;
+
+  document.getElementById('sheetBadges').innerHTML =
+    `<span class="badge badge-cat">${sheet.category}</span>` +
+    sheet.tags.map(t=>`<span class="badge badge-tag">${t}</span>`).join('');
+
+  const grid = document.getElementById('sectionsGrid');
+  grid.innerHTML = '';
+
+  sheet.sections.forEach((sec,si) => {
+    const block = document.createElement('div');
+    block.className = 'sec-block';
+    block.style.animationDelay = `${si*0.055}s`;
+    block.style.setProperty('--sec-accent', sheet.accent);
+
+    block.innerHTML = `
+      <div class="sec-block-header">
+        <span class="sec-block-title">${escHtml(sec.title)}</span>
+        <span class="sec-block-count">${sec.items.length} cmds</span>
+      </div>
+      ${sec.items.map(([key,val])=>`
+        <div class="cmd-row">
+          <span class="cmd-key">${escHtml(key)}</span>
+          <span class="cmd-val">${escHtml(val)}</span>
+          <button class="cmd-copy" data-copy="${key.replace(/"/g,'&quot;')}" title="Copy">
+            <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+        </div>
+      `).join('')}
+    `;
+    grid.appendChild(block);
+  });
+
+  grid.querySelectorAll('.cmd-copy').forEach(btn => {
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(btn.dataset.copy).then(() => {
+        const orig = btn.innerHTML;
+        btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+        setTimeout(()=>{ btn.innerHTML=orig; }, 1400);
+      });
+    });
+  });
+
+  document.getElementById('contentScroll').scrollTop = 0;
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('mobOverlay').classList.remove('show');
+}
+
+// copy all
+document.getElementById('copyAllBtn').addEventListener('click', () => {
+  if (!activeId) return;
+  const sheet = SHEETS.find(s=>s.id===activeId);
+  const text = sheet.sections.map(sec =>
+    `# ${sec.title}\n` + sec.items.map(([k,v])=>`${k.padEnd(45)} # ${v}`).join('\n')
+  ).join('\n\n');
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn = document.getElementById('copyAllBtn');
+    const orig = btn.innerHTML;
+    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> COPIED!`;
+    btn.style.borderColor='var(--cyan)'; btn.style.color='var(--cyan)';
+    setTimeout(()=>{ btn.innerHTML=orig; btn.style.borderColor=''; btn.style.color=''; }, 2000);
+  });
+});
+
+// search
+document.getElementById('navSearch').addEventListener('input', e=>{
+  searchQuery = e.target.value;
+  buildNav();
+  updateCount();
+});
+
+// theme
+const savedTheme = localStorage.getItem('nexus-theme')||'dark';
+document.documentElement.dataset.theme = savedTheme;
+applyTheme(savedTheme);
+
+document.getElementById('themeBtn').addEventListener('click', ()=>{
+  const next = document.documentElement.dataset.theme==='dark'?'light':'dark';
+  document.documentElement.dataset.theme=next;
+  localStorage.setItem('nexus-theme',next);
+  applyTheme(next);
+});
+
+function applyTheme(t) {
+  document.getElementById('themeIconSun').style.display  = t==='dark'?'block':'none';
+  document.getElementById('themeIconMoon').style.display = t==='dark'?'none':'block';
+  document.getElementById('themeLabel').textContent = t==='dark'?'LIGHT':'DARK';
+}
+
+// keyboard
+document.addEventListener('keydown', e=>{
+  const inp = document.getElementById('navSearch');
+  if (e.key==='/' && document.activeElement!==inp) { e.preventDefault(); inp.focus(); }
+  if (e.key==='Escape') { inp.blur(); document.getElementById('sidebar').classList.remove('open'); document.getElementById('mobOverlay').classList.remove('show'); }
+});
+
+// mobile
+document.getElementById('mobToggle').addEventListener('click',()=>{
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('mobOverlay').classList.toggle('show');
+});
+document.getElementById('mobOverlay').addEventListener('click',()=>{
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('mobOverlay').classList.remove('show');
+});
+
+// init
+document.getElementById('wTotalCmds').textContent = allCmds();
+buildNav();
+updateCount();
+selectSheet(SHEETS[0].id);
+</script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+{
+  "id": "python",
+  "title": "Python",
+  "category": "Language",
+  "icon": "🐍",
+  "accent": "#ffb700",
+  "description": "Core Python syntax, data structures, file I/O, and common stdlib patterns.",
+  "tags": ["python", "scripting", "dev"],
+  "sections": [
+    {
+      "title": "Data Structures",
+      "items": [
+        ["[x*2 for x in lst]", "List comprehension"],
+        ["{k:v for k,v in d.items()}", "Dict comprehension"],
+        ["{x for x in lst}", "Set comprehension"],
+        ["lst.sort(key=lambda x: x.attr)", "In-place sort with key"],
+        ["sorted(lst, key=fn, reverse=True)", "Sorted copy, reversed"],
+        ["zip(a, b)", "Pair iterables together"],
+        ["zip(*matrix)", "Transpose a matrix"],
+        ["enumerate(lst, start=1)", "Index + value pairs"],
+        ["dict.get(k, default)", "Safe dict lookup"],
+        ["d1 | d2", "Merge dicts (Python 3.9+)"],
+        ["set(lst)", "Deduplicate with set"],
+        ["collections.Counter(lst)", "Count occurrences"]
+      ]
+    },
+    {
+      "title": "Functions & Decorators",
+      "items": [
+        ["lambda x: x + 1", "Anonymous function"],
+        ["*args, **kwargs", "Variable positional/keyword args"],
+        ["def fn(a, /, b, *, c):", "Positional-only / keyword-only params"],
+        ["@functools.wraps(fn)", "Preserve function metadata in decorator"],
+        ["@property", "Computed attribute getter"],
+        ["@classmethod", "Method receiving the class"],
+        ["@staticmethod", "Method with no implicit first arg"],
+        ["@functools.lru_cache(maxsize=128)", "Memoize with LRU cache"],
+        ["@dataclass", "Auto-generate __init__, __repr__, etc."],
+        ["@dataclass(frozen=True)", "Immutable dataclass"]
+      ]
+    },
+    {
+      "title": "File & I/O",
+      "items": [
+        ["with open(f, 'r', encoding='utf-8') as fh:", "Safe file open (text)"],
+        ["with open(f, 'rb') as fh:", "Open binary file"],
+        ["json.load(fh)", "Parse JSON from file object"],
+        ["json.loads(string)", "Parse JSON from string"],
+        ["json.dumps(obj, indent=2)", "Serialize to pretty JSON string"],
+        ["pathlib.Path(p).read_text()", "Read file to string easily"],
+        ["pathlib.Path(p).write_text(txt)", "Write string to file"],
+        ["pathlib.Path(p).glob('**/*.py')", "Recursive glob"],
+        ["pathlib.Path(p).mkdir(parents=True, exist_ok=True)", "Create directory safely"],
+        ["csv.DictReader(fh)", "Read CSV as dicts"],
+        ["subprocess.run(['cmd'], capture_output=True, text=True)", "Run subprocess, capture output"],
+        ["os.environ.get('KEY', 'default')", "Read env var with fallback"]
+      ]
+    },
+    {
+      "title": "Error Handling",
+      "items": [
+        ["try: ... except ValueError as e: ...", "Catch specific exception"],
+        ["except (TypeError, ValueError):", "Catch multiple exception types"],
+        ["except Exception as e: raise RuntimeError() from e", "Chain exceptions"],
+        ["finally:", "Always-run cleanup block"],
+        ["raise ValueError('message')", "Raise exception"],
+        ["assert condition, 'message'", "Assert with message"],
+        ["contextlib.suppress(FileNotFoundError)", "Silently ignore exception"],
+        ["warnings.warn('msg', DeprecationWarning)", "Issue deprecation warning"]
+      ]
+    },
+    {
+      "title": "Type Hints & Typing",
+      "items": [
+        ["def fn(x: int) -> str:", "Basic type annotation"],
+        ["from typing import Optional, Union", "Import Optional/Union"],
+        ["Optional[str]", "str or None"],
+        ["Union[int, str]", "Multiple allowed types (< 3.10)"],
+        ["int | str", "Union type (Python 3.10+)"],
+        ["list[int] / dict[str, int]", "Generic built-ins (3.9+)"],
+        ["TypeVar('T')", "Generic type variable"],
+        ["Protocol", "Structural subtyping"],
+        ["TypedDict", "Dict with typed keys"],
+        ["Literal['a', 'b']", "Literal type constraint"]
+      ]
+    },
+    {
+      "title": "Async & Concurrency",
+      "items": [
+        ["async def fn(): ...", "Async function definition"],
+        ["await coroutine", "Await a coroutine"],
+        ["asyncio.run(main())", "Run async entry point"],
+        ["async for item in aiter:", "Async iteration"],
+        ["async with ctx:", "Async context manager"],
+        ["asyncio.gather(*coros)", "Run coroutines concurrently"],
+        ["asyncio.create_task(coro)", "Schedule task without awaiting"],
+        ["ThreadPoolExecutor", "Run blocking code in threads"]
+      ]
+    }
+  ]
+}

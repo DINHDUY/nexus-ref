@@ -1,0 +1,94 @@
+{
+  "id": "vim",
+  "title": "Vim / Neovim",
+  "category": "Editor",
+  "icon": "⬡",
+  "accent": "#00d4ff",
+  "description": "Motions, modes, and commands for efficient editing in Vim and Neovim.",
+  "tags": ["vim", "nvim", "editor"],
+  "sections": [
+    {
+      "title": "Modes",
+      "items": [
+        ["i / I", "Insert before cursor / line start"],
+        ["a / A", "Append after cursor / line end"],
+        ["o / O", "New line below / above"],
+        ["Esc / Ctrl+[", "Return to Normal mode"],
+        ["v / V", "Visual / Visual-Line mode"],
+        ["Ctrl+v", "Visual-Block mode"],
+        [":", "Enter Command mode"],
+        ["R", "Replace mode"]
+      ]
+    },
+    {
+      "title": "Navigation",
+      "items": [
+        ["h j k l", "Left / Down / Up / Right"],
+        ["w / b / e", "Next word / Prev word / End of word"],
+        ["W / B / E", "Same but WORD (whitespace-delimited)"],
+        ["0 / ^ / $", "Line start / first non-blank / end"],
+        ["gg / G", "File start / File end"],
+        [":<n>", "Go to line n"],
+        ["Ctrl+d / Ctrl+u", "Half-page down / up"],
+        ["Ctrl+f / Ctrl+b", "Full page down / up"],
+        ["{ / }", "Prev / Next paragraph"],
+        ["%", "Jump to matching bracket"]
+      ]
+    },
+    {
+      "title": "Editing",
+      "items": [
+        ["dd / D", "Delete line / to end of line"],
+        ["yy / Y", "Yank (copy) line"],
+        ["p / P", "Paste after / before cursor"],
+        ["u / Ctrl+r", "Undo / Redo"],
+        ["x / X", "Delete char forward / backward"],
+        ["ciw / caw", "Change inner word / around word"],
+        ["di( / da(", "Delete inside / around parentheses"],
+        [".", "Repeat last change"],
+        ["~ / gu / gU", "Toggle / lower / upper case"],
+        [">> / <<", "Indent / De-indent line"],
+        ["J", "Join current line with next"]
+      ]
+    },
+    {
+      "title": "Search & Replace",
+      "items": [
+        ["/pattern", "Search forward"],
+        ["?pattern", "Search backward"],
+        ["n / N", "Next / Prev match"],
+        ["* / #", "Search word under cursor fwd / bwd"],
+        [":%s/old/new/g", "Replace all in file"],
+        [":%s/old/new/gc", "Replace all, confirm each"],
+        [":s/old/new/g", "Replace in current line"],
+        [":noh", "Clear search highlight"]
+      ]
+    },
+    {
+      "title": "Files & Windows",
+      "items": [
+        [":w / :q / :wq / :q!", "Write / Quit / Write+Quit / Force quit"],
+        [":e <file>", "Open file"],
+        [":bn / :bp", "Next / Prev buffer"],
+        [":ls", "List open buffers"],
+        [":split / :vsplit", "Horizontal / Vertical split"],
+        ["Ctrl+w h/j/k/l", "Navigate splits"],
+        ["Ctrl+w =", "Equalize split sizes"],
+        [":tabnew / gt / gT", "New tab / Next tab / Prev tab"]
+      ]
+    },
+    {
+      "title": "Macros & Misc",
+      "items": [
+        ["qa ... q", "Record macro to register a"],
+        ["@a", "Play macro from register a"],
+        ["@@", "Replay last macro"],
+        ["10@a", "Play macro 10 times"],
+        [":set number", "Show line numbers"],
+        [":set relativenumber", "Show relative line numbers"],
+        ["Ctrl+a / Ctrl+x", "Increment / Decrement number"],
+        ["za", "Toggle fold"]
+      ]
+    }
+  ]
+}

@@ -1,0 +1,120 @@
+{
+  "id": "linux-bash",
+  "title": "Linux / Bash",
+  "category": "Shell",
+  "icon": "🐧",
+  "accent": "#00ff9f",
+  "description": "File management, permissions, process control, and everyday shell commands.",
+  "tags": ["bash", "shell", "linux"],
+  "sections": [
+    {
+      "title": "Navigation & Files",
+      "items": [
+        ["ls -la", "List files with details (including hidden)"],
+        ["ls -lhS", "Sort by size, human-readable"],
+        ["cd ~", "Go to home directory"],
+        ["cd -", "Go to previous directory"],
+        ["pwd", "Print working directory"],
+        ["mkdir -p dir/sub", "Create nested directories"],
+        ["rm -rf <dir>", "Remove directory recursively"],
+        ["cp -r src dest", "Copy directory recursively"],
+        ["mv <src> <dst>", "Move or rename"],
+        ["ln -s target link", "Create symbolic link"],
+        ["find . -name \"*.log\"", "Find files by name"],
+        ["find . -type f -mtime -7", "Files modified in last 7 days"]
+      ]
+    },
+    {
+      "title": "Text & Search",
+      "items": [
+        ["cat <file>", "Show file contents"],
+        ["less <file>", "Page through file (q to quit)"],
+        ["head -n 20 <file>", "Show first 20 lines"],
+        ["tail -n 20 <file>", "Show last 20 lines"],
+        ["tail -f <file>", "Follow file output live"],
+        ["grep -r \"pattern\" .", "Recursive pattern search"],
+        ["grep -n \"pat\" file", "Search with line numbers"],
+        ["grep -i \"pat\" file", "Case-insensitive search"],
+        ["grep -v \"pat\" file", "Invert match (exclude lines)"],
+        ["sed 's/old/new/g' file", "Stream substitute"],
+        ["awk '{print $1}' file", "Print first column"],
+        ["sort | uniq -c | sort -rn", "Count and rank unique lines"],
+        ["wc -l <file>", "Count lines"]
+      ]
+    },
+    {
+      "title": "Permissions & Ownership",
+      "items": [
+        ["chmod 755 <file>", "rwxr-xr-x permissions"],
+        ["chmod +x <file>", "Make file executable"],
+        ["chmod -R 644 dir/", "Recursive permission set"],
+        ["chown user:group <file>", "Change owner and group"],
+        ["chown -R user dir/", "Recursive ownership change"],
+        ["umask 022", "Default permission mask"],
+        ["stat <file>", "Detailed file info"]
+      ]
+    },
+    {
+      "title": "Processes",
+      "items": [
+        ["ps aux | grep proc", "Find running process"],
+        ["kill -9 <pid>", "Force kill process by PID"],
+        ["pkill <name>", "Kill processes by name"],
+        ["top", "Interactive process monitor"],
+        ["htop", "Enhanced process monitor"],
+        ["nohup cmd &", "Run command detached from terminal"],
+        ["cmd &", "Run command in background"],
+        ["jobs", "List background jobs"],
+        ["fg %1", "Bring job 1 to foreground"]
+      ]
+    },
+    {
+      "title": "Disk & System",
+      "items": [
+        ["df -h", "Disk usage by filesystem"],
+        ["du -sh <dir>", "Directory total size"],
+        ["du -h --max-depth=1", "Sizes one level deep"],
+        ["free -h", "Memory usage"],
+        ["uptime", "System uptime and load"],
+        ["uname -a", "Kernel and OS info"],
+        ["systemctl status <svc>", "Service status"],
+        ["systemctl start/stop/restart <svc>", "Manage services"],
+        ["journalctl -u <svc> -f", "Follow service logs"]
+      ]
+    },
+    {
+      "title": "Networking & Transfers",
+      "items": [
+        ["curl -O <url>", "Download file keeping original name"],
+        ["curl -L -o file <url>", "Download to named file, follow redirects"],
+        ["wget <url>", "Download file"],
+        ["ssh user@host", "SSH connect"],
+        ["ssh -i key.pem user@host", "SSH with identity file"],
+        ["scp file user@host:~/path", "Secure copy to remote"],
+        ["rsync -avz src/ user@host:dst/", "Sync directory to remote"],
+        ["tar -czvf out.tar.gz .", "Create gzipped tar archive"],
+        ["tar -xzvf file.tar.gz", "Extract gzipped tar archive"],
+        ["netstat -tlnp", "Show listening ports"],
+        ["ss -tlnp", "Modern socket statistics"],
+        ["ping -c 4 <host>", "Test connectivity (4 pings)"]
+      ]
+    },
+    {
+      "title": "Shell Features",
+      "items": [
+        ["!!","Repeat last command"],
+        ["!$", "Last argument of previous command"],
+        ["Ctrl+r", "Reverse search command history"],
+        ["Ctrl+l", "Clear screen"],
+        ["Ctrl+a / Ctrl+e", "Move to start / end of line"],
+        ["export VAR=value", "Set environment variable"],
+        ["source ~/.bashrc", "Reload shell config"],
+        ["alias ll='ls -la'", "Create command alias"],
+        ["cmd1 | cmd2", "Pipe stdout to next command"],
+        ["cmd > file.txt", "Redirect stdout to file"],
+        ["cmd >> file.txt", "Append stdout to file"],
+        ["cmd 2>&1 | tee file.txt", "Log stdout and stderr"]
+      ]
+    }
+  ]
+}

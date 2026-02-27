@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="NEXUS REF — Developer cheat sheet reference system"/>
+  <title>NEXUS REF — Developer Reference System</title>
+
+  <!-- Favicon (inline SVG as data URI) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><polygon points='16,2 28,9 28,23 16,30 4,23 4,9' fill='%2300d4ff' opacity='0.9'/><text x='16' y='21' text-anchor='middle' font-size='14' font-weight='900' fill='%23070c1a' font-family='monospace'>N</text></svg>"/>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="assets/styles.css"/>
+</head>
+<body>
+
+  <!-- ======================================================
+       SIDEBAR
+       ====================================================== -->
+  <aside class="sidebar" id="sidebar" role="navigation" aria-label="Sheet navigation">
+
+    <!-- Logo -->
+    <div class="sidebar-logo">
+      <svg class="sidebar-logo-icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="20,3 35,11.5 35,28.5 20,37 5,28.5 5,11.5" fill="rgba(0,212,255,0.08)" stroke="#00d4ff" stroke-width="1"/>
+        <polygon points="20,9 30,14.5 30,25.5 20,31 10,25.5 10,14.5" fill="rgba(0,212,255,0.06)" stroke="rgba(0,212,255,0.3)" stroke-width="0.75"/>
+        <text x="20" y="24" text-anchor="middle" font-size="12" font-weight="900" fill="#00d4ff" font-family="monospace">N</text>
+      </svg>
+      <div class="sidebar-logo-text">
+        <div class="logo-title">NEX<span>US</span></div>
+        <div class="logo-sub">REF SYSTEM v2.0</div>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="sidebar-search">
+      <div class="sidebar-search-inner">
+        <svg class="sidebar-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input
+          type="text"
+          id="sidebarSearch"
+          placeholder="Search sheets… (press /)"
+          autocomplete="off"
+          aria-label="Search cheat sheets"
+        />
+      </div>
+    </div>
+
+    <!-- Navigation list (populated by app.js) -->
+    <nav class="sidebar-nav" id="navList" aria-label="Cheat sheet list"></nav>
+
+    <!-- Footer -->
+    <div class="sidebar-footer">
+      <div class="status-dot" role="presentation"></div>
+      <span class="status-label">SYSTEM ONLINE</span>
+    </div>
+  </aside>
+
+  <!-- Mobile overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay" role="presentation"></div>
+
+  <!-- ======================================================
+       MAIN AREA
+       ====================================================== -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <!-- Mobile menu button -->
+      <button class="topbar-btn menu-btn" id="menuBtn" aria-label="Open navigation menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+        Menu
+      </button>
+
+      <!-- Breadcrumb -->
+      <div class="topbar-breadcrumb" id="breadcrumb">
+        <span>Select a sheet to begin</span>
+      </div>
+
+      <!-- Stats -->
+      <div class="topbar-stats">
+        <div class="topbar-stat" id="statSheets">
+          <span>—</span> sheets
+        </div>
+        <div class="topbar-stat" id="statCmds">
+          <span>—</span> cmds
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="topbar-actions">
+        <button class="topbar-btn" id="themeBtn" aria-label="Toggle color theme">
+          <span id="themeIcon">☀</span>
+          <span id="themeLabel">Light</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Scrollable content -->
+    <div class="content" id="content">
+
+      <!-- ---- Welcome screen ---- -->
+      <div class="welcome-screen" id="welcomeScreen">
+        <div class="welcome-inner">
+
+          <!-- Hex icon -->
+          <div class="welcome-hex" aria-hidden="true">
+            <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" width="80" height="80">
+              <polygon points="40,5 68,21 68,59 40,75 12,59 12,21" fill="rgba(0,212,255,0.06)" stroke="#00d4ff" stroke-width="1.5"/>
+              <polygon points="40,15 60,26 60,54 40,65 20,54 20,26" fill="rgba(0,212,255,0.04)" stroke="rgba(0,212,255,0.3)" stroke-width="1"/>
+              <text x="40" y="48" text-anchor="middle" font-size="26" fill="#00d4ff" font-family="monospace">⌨</text>
+            </svg>
+          </div>
+
+          <h1 class="welcome-title">DEVELOPER <span>NEXUS</span></h1>
+          <p class="welcome-desc">
+            Your developer reference system. Select a cheat sheet from the sidebar
+            to view commands, copy snippets, and search across all topics.
+          </p>
+
+          <!-- Stats grid -->
+          <div class="welcome-stats" role="region" aria-label="Library statistics">
+            <div class="welcome-stat">
+              <div class="welcome-stat-value" id="welcomeSheetCount">—</div>
+              <div class="welcome-stat-label">Sheets</div>
+            </div>
+            <div class="welcome-stat">
+              <div class="welcome-stat-value" id="welcomeCmdCount">—</div>
+              <div class="welcome-stat-label">Commands</div>
+            </div>
+            <div class="welcome-stat">
+              <div class="welcome-stat-value" id="welcomeCatCount">—</div>
+              <div class="welcome-stat-label">Categories</div>
+            </div>
+          </div>
+
+          <!-- Keyboard hints -->
+          <div class="welcome-hints" role="region" aria-label="Keyboard shortcuts">
+            <div class="hint"><kbd>/</kbd> Search</div>
+            <div class="hint"><kbd>↑↓</kbd> Navigate</div>
+            <div class="hint"><kbd>Enter</kbd> Open</div>
+            <div class="hint"><kbd>Esc</kbd> Dismiss</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ---- Sheet view (shown after selection) ---- -->
+      <div class="sheet-view" id="sheetView" role="main" aria-live="polite">
+
+        <!-- Sheet header -->
+        <div class="sheet-header">
+          <div class="sheet-header-row">
+            <div class="sheet-icon" id="sheetIcon" aria-hidden="true"></div>
+            <div class="sheet-meta">
+              <h2 class="sheet-title" id="sheetTitle"></h2>
+              <p class="sheet-description" id="sheetDescription"></p>
+              <div class="sheet-badges" id="sheetBadges"></div>
+            </div>
+            <button class="sheet-copy-all" id="copyAllBtn" aria-label="Copy all commands as text">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <rect x="9" y="9" width="13" height="13" rx="2"/>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+              </svg>
+              COPY ALL
+            </button>
+          </div>
+        </div>
+
+        <!-- Section cards grid (populated by app.js) -->
+        <div class="sheet-body" id="sheetBody"></div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Application logic -->
+  <script src="assets/app.js"></script>
+</body>
+</html>

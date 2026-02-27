@@ -1,0 +1,100 @@
+{
+  "id": "javascript",
+  "title": "JavaScript",
+  "category": "Language",
+  "icon": "⚡",
+  "accent": "#ffb700",
+  "description": "Modern ES6+ syntax, async patterns, DOM manipulation, and array methods.",
+  "tags": ["js", "es6", "frontend"],
+  "sections": [
+    {
+      "title": "Array Methods",
+      "items": [
+        ["arr.map(fn)", "Transform each element, return new array"],
+        ["arr.filter(fn)", "Keep elements where fn returns true"],
+        ["arr.reduce(fn, init)", "Accumulate to a single value"],
+        ["arr.find(fn)", "First element matching predicate"],
+        ["arr.findIndex(fn)", "Index of first matching element"],
+        ["arr.some(fn)", "True if any element matches"],
+        ["arr.every(fn)", "True if all elements match"],
+        ["arr.flat(Infinity)", "Flatten nested arrays"],
+        ["arr.flatMap(fn)", "Map then flatten one level"],
+        ["arr.at(-1)", "Last element (negative index)"],
+        ["[...new Set(arr)]", "Remove duplicates"],
+        ["arr.includes(val)", "Check if value exists"],
+        ["Array.from({length: 5}, (_, i) => i)", "Create array with factory"]
+      ]
+    },
+    {
+      "title": "Async & Promises",
+      "items": [
+        ["async function fn() {}", "Async function declaration"],
+        ["const fn = async () => {}", "Async arrow function"],
+        ["await promise", "Pause until promise resolves"],
+        ["Promise.all([p1, p2])", "Resolve when all settle"],
+        ["Promise.allSettled([...])", "All results regardless of rejection"],
+        ["Promise.race([...])", "Resolves/rejects with first to settle"],
+        ["Promise.any([...])", "First to fulfill (ignores rejections)"],
+        ["try { await fn() } catch(e) {}", "Async error handling"],
+        ["new Promise((res, rej) => {})", "Create promise from scratch"]
+      ]
+    },
+    {
+      "title": "Destructuring & Spread",
+      "items": [
+        ["const {a, b} = obj", "Object destructuring"],
+        ["const {a: alias} = obj", "Rename on destructure"],
+        ["const {a = 10} = obj", "Destructure with default"],
+        ["const [x, y] = arr", "Array destructuring"],
+        ["const [, second] = arr", "Skip first element"],
+        ["const [first, ...rest] = arr", "Rest in destructuring"],
+        ["{...obj, key: val}", "Spread and override"],
+        ["[...arr1, ...arr2]", "Merge arrays with spread"],
+        ["fn({name, age})", "Destructure function parameters"]
+      ]
+    },
+    {
+      "title": "Objects & Classes",
+      "items": [
+        ["Object.keys(obj)", "Array of keys"],
+        ["Object.values(obj)", "Array of values"],
+        ["Object.entries(obj)", "Array of [key, value] pairs"],
+        ["Object.fromEntries(entries)", "Create object from entries"],
+        ["Object.assign({}, a, b)", "Shallow merge (use spread instead)"],
+        ["structuredClone(obj)", "Deep clone (native, modern)"],
+        ["class Foo extends Bar {}", "Class inheritance"],
+        ["#privateField", "Private class field"],
+        ["static method()", "Static class method"],
+        ["getter / setter", "Computed get/set property"]
+      ]
+    },
+    {
+      "title": "DOM & Browser APIs",
+      "items": [
+        ["document.querySelector('.cls')", "Select first matching element"],
+        ["document.querySelectorAll('p')", "Select all matching elements"],
+        ["el.addEventListener('click', fn)", "Attach event listener"],
+        ["el.addEventListener('click', fn, {once: true})", "Fire event listener once"],
+        ["el.classList.toggle('active')", "Toggle CSS class"],
+        ["el.closest('.parent')", "Find nearest ancestor matching selector"],
+        ["el.dataset.key", "Access data-key attribute"],
+        ["new IntersectionObserver(fn)", "Observe viewport visibility"],
+        ["new MutationObserver(fn)", "Observe DOM changes"],
+        ["new ResizeObserver(fn)", "Observe element size changes"]
+      ]
+    },
+    {
+      "title": "Fetch & Storage",
+      "items": [
+        ["fetch(url).then(r => r.json())", "Basic fetch and parse JSON"],
+        ["const r = await fetch(url, {method: 'POST', body: JSON.stringify(d), headers: {'Content-Type': 'application/json'}})", "POST JSON with fetch"],
+        ["if (!r.ok) throw new Error(r.status)", "Check response status"],
+        ["localStorage.setItem('k', JSON.stringify(v))", "Save to localStorage"],
+        ["JSON.parse(localStorage.getItem('k'))", "Read from localStorage"],
+        ["sessionStorage", "Same API, clears on tab close"],
+        ["navigator.clipboard.writeText(txt)", "Copy to clipboard (async)"],
+        ["navigator.share({title, url})", "Native share sheet (mobile)"]
+      ]
+    }
+  ]
+}

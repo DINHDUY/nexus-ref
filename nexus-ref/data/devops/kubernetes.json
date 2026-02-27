@@ -1,0 +1,84 @@
+{
+  "id": "kubernetes",
+  "title": "Kubernetes",
+  "category": "DevOps",
+  "icon": "⚙️",
+  "accent": "#00d4ff",
+  "description": "kubectl commands, resource management, scaling, debugging, and cluster operations.",
+  "tags": ["k8s", "kubernetes", "devops"],
+  "sections": [
+    {
+      "title": "Getting Info",
+      "items": [
+        ["kubectl get pods -A", "List all pods in all namespaces"],
+        ["kubectl get pods -n <ns> -o wide", "Pods with node/IP info"],
+        ["kubectl get nodes", "List cluster nodes"],
+        ["kubectl get nodes -o wide", "Nodes with IP and OS info"],
+        ["kubectl describe pod <n>", "Detailed pod info and events"],
+        ["kubectl get svc", "List services"],
+        ["kubectl get deploy", "List deployments"],
+        ["kubectl get ingress", "List ingress resources"],
+        ["kubectl get all -n <ns>", "All resources in namespace"],
+        ["kubectl get events --sort-by=.lastTimestamp", "Recent cluster events"],
+        ["kubectl explain pod.spec.containers", "Field-level documentation"]
+      ]
+    },
+    {
+      "title": "Managing Resources",
+      "items": [
+        ["kubectl apply -f file.yaml", "Apply manifest (create or update)"],
+        ["kubectl apply -f dir/", "Apply all manifests in directory"],
+        ["kubectl apply -k ./kustomize/", "Apply Kustomize overlay"],
+        ["kubectl delete -f file.yaml", "Delete resources in manifest"],
+        ["kubectl delete pod <n> --grace-period=0", "Force delete pod"],
+        ["kubectl edit deploy <n>", "Edit live deployment in-place"],
+        ["kubectl patch deploy <n> -p '{...}'", "JSON patch a resource"],
+        ["kubectl scale deploy <n> --replicas=3", "Scale deployment"],
+        ["kubectl autoscale deploy <n> --min=2 --max=10 --cpu-percent=80", "Create HPA"],
+        ["kubectl label pod <n> env=prod", "Add label to pod"],
+        ["kubectl annotate pod <n> key=val", "Add annotation"]
+      ]
+    },
+    {
+      "title": "Rollouts",
+      "items": [
+        ["kubectl rollout status deploy/<n>", "Watch rollout progress"],
+        ["kubectl rollout history deploy/<n>", "View revision history"],
+        ["kubectl rollout undo deploy/<n>", "Rollback to previous revision"],
+        ["kubectl rollout undo deploy/<n> --to-revision=2", "Rollback to specific revision"],
+        ["kubectl rollout pause deploy/<n>", "Pause rollout"],
+        ["kubectl rollout resume deploy/<n>", "Resume paused rollout"],
+        ["kubectl set image deploy/<n> container=image:tag", "Update container image"]
+      ]
+    },
+    {
+      "title": "Debugging",
+      "items": [
+        ["kubectl logs <pod>", "Container logs"],
+        ["kubectl logs -f <pod> -c <container>", "Follow specific container logs"],
+        ["kubectl logs <pod> --previous", "Logs of previous crashed container"],
+        ["kubectl exec -it <pod> -- bash", "Shell into running container"],
+        ["kubectl exec <pod> -- env", "List environment variables"],
+        ["kubectl port-forward <pod> 8080:80", "Forward local port to pod"],
+        ["kubectl port-forward svc/<n> 8080:80", "Forward local port to service"],
+        ["kubectl top pods", "Pod CPU/memory usage (requires metrics-server)"],
+        ["kubectl top nodes", "Node resource usage"],
+        ["kubectl get pod <n> -o yaml", "Full pod YAML spec"],
+        ["kubectl debug -it <pod> --image=busybox", "Attach ephemeral debug container"]
+      ]
+    },
+    {
+      "title": "Context & Namespace",
+      "items": [
+        ["kubectl config get-contexts", "List all kubeconfig contexts"],
+        ["kubectl config use-context <name>", "Switch active context"],
+        ["kubectl config current-context", "Show current context"],
+        ["kubectl config set-context --current --namespace=<ns>", "Set default namespace"],
+        ["kubens <ns>", "Switch namespace (requires kubens plugin)"],
+        ["kubectx <ctx>", "Switch context (requires kubectx plugin)"],
+        ["kubectl create namespace <ns>", "Create new namespace"],
+        ["kubectl get secret <n> -o jsonpath='{.data.key}' | base64 -d", "Decode secret value"]
+      ]
+    }
+  ]
+}

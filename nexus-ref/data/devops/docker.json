@@ -1,0 +1,94 @@
+{
+  "id": "docker",
+  "title": "Docker",
+  "category": "DevOps",
+  "icon": "🐳",
+  "accent": "#00d4ff",
+  "description": "Build, run, manage containers, images, networks, and Docker Compose workflows.",
+  "tags": ["docker", "containers", "devops"],
+  "sections": [
+    {
+      "title": "Images",
+      "items": [
+        ["docker build -t name:tag .", "Build image from Dockerfile in current dir"],
+        ["docker build --no-cache -t name .", "Build without layer cache"],
+        ["docker images", "List local images"],
+        ["docker image ls --filter dangling=true", "List dangling (untagged) images"],
+        ["docker pull image:tag", "Pull image from registry"],
+        ["docker push registry/image:tag", "Push image to registry"],
+        ["docker rmi image:tag", "Remove image"],
+        ["docker image prune -a", "Remove all unused images"],
+        ["docker tag src:tag dst:tag", "Add tag to image"],
+        ["docker history image:tag", "Show image layer history"],
+        ["docker inspect image:tag", "Low-level image metadata"]
+      ]
+    },
+    {
+      "title": "Containers",
+      "items": [
+        ["docker run -d -p 8080:80 --name web nginx", "Run detached, name it, map ports"],
+        ["docker run -it --rm alpine sh", "Interactive, auto-remove on exit"],
+        ["docker run -e ENV_VAR=value image", "Pass environment variable"],
+        ["docker run --env-file .env image", "Pass env file"],
+        ["docker run --memory=512m --cpus=1 image", "Set resource limits"],
+        ["docker ps", "List running containers"],
+        ["docker ps -a", "List all containers (including stopped)"],
+        ["docker stop <id>", "Graceful stop (SIGTERM)"],
+        ["docker kill <id>", "Force stop (SIGKILL)"],
+        ["docker rm <id>", "Remove stopped container"],
+        ["docker container prune", "Remove all stopped containers"],
+        ["docker exec -it <id> bash", "Shell into running container"],
+        ["docker exec <id> env", "Run command in container"],
+        ["docker logs -f --tail=100 <id>", "Follow last 100 log lines"],
+        ["docker cp <id>:/path ./local", "Copy from container to host"]
+      ]
+    },
+    {
+      "title": "Volumes & Networks",
+      "items": [
+        ["docker volume create mydata", "Create named volume"],
+        ["docker volume ls", "List volumes"],
+        ["docker volume inspect mydata", "Inspect volume details"],
+        ["docker volume prune", "Remove unused volumes"],
+        ["-v mydata:/app/data", "Mount named volume"],
+        ["-v $(pwd):/app", "Bind mount current directory"],
+        ["docker network create mynet", "Create user-defined network"],
+        ["docker network ls", "List networks"],
+        ["docker network connect mynet <id>", "Connect container to network"],
+        ["--network=host", "Use host network stack"],
+        ["--network=none", "Isolated network (no external)"]
+      ]
+    },
+    {
+      "title": "Compose",
+      "items": [
+        ["docker compose up -d", "Start all services detached"],
+        ["docker compose up --build", "Rebuild images before starting"],
+        ["docker compose down", "Stop and remove containers/networks"],
+        ["docker compose down -v", "Also remove volumes"],
+        ["docker compose logs -f service", "Follow service logs"],
+        ["docker compose ps", "List service containers"],
+        ["docker compose exec service bash", "Shell into running service"],
+        ["docker compose run --rm service cmd", "Run one-off command"],
+        ["docker compose build", "Build/rebuild images"],
+        ["docker compose pull", "Pull latest service images"],
+        ["docker compose restart service", "Restart specific service"],
+        ["docker compose config", "Validate and view merged config"]
+      ]
+    },
+    {
+      "title": "Dockerfile Best Practices",
+      "items": [
+        ["FROM node:20-alpine", "Use slim base image"],
+        ["COPY package*.json ./", "Copy manifests before source"],
+        ["RUN npm ci --only=production", "Install deps in own layer"],
+        ["USER node", "Run as non-root user"],
+        ["HEALTHCHECK CMD curl -f http://localhost/ || exit 1", "Add health check"],
+        [".dockerignore", "Exclude node_modules, .git, etc."],
+        ["ARG / ENV", "Build-time arg vs runtime env var"],
+        ["ENTRYPOINT + CMD", "Fixed entrypoint with default args"],
+        ["multi-stage: FROM builder AS build", "Separate build and runtime stages"]
+      ]
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "id": "css",
+  "title": "CSS",
+  "category": "Web",
+  "icon": "🎨",
+  "accent": "#ff006e",
+  "description": "Flexbox, Grid, selectors, custom properties, and modern CSS patterns.",
+  "tags": ["css", "styling", "web"],
+  "sections": [
+    {
+      "title": "Flexbox",
+      "items": [
+        ["display: flex", "Enable flexbox layout"],
+        ["flex-direction: row | column", "Main axis direction"],
+        ["justify-content: center | space-between | flex-end", "Main-axis alignment"],
+        ["align-items: center | stretch | flex-start", "Cross-axis alignment"],
+        ["align-self: center", "Override alignment for single item"],
+        ["flex-wrap: wrap | nowrap", "Allow / prevent item wrapping"],
+        ["gap: 1rem", "Space between flex items"],
+        ["flex: 1 1 auto", "Shorthand: grow shrink basis"],
+        ["flex: 0 0 200px", "Fixed-width non-growing item"],
+        ["order: 2", "Reorder item visually"],
+        ["flex-grow / flex-shrink", "Individual grow and shrink factors"]
+      ]
+    },
+    {
+      "title": "Grid",
+      "items": [
+        ["display: grid", "Enable grid layout"],
+        ["grid-template-columns: repeat(3, 1fr)", "3 equal columns"],
+        ["grid-template-columns: repeat(auto-fill, minmax(200px, 1fr))", "Responsive auto-fill"],
+        ["grid-template-rows: auto 1fr auto", "Header, main, footer rows"],
+        ["grid-column: 1 / -1", "Span full row width"],
+        ["grid-row: 2 / 4", "Span rows 2–3"],
+        ["grid-area: header", "Place item in named area"],
+        ["grid-template-areas: 'h h' 's m'", "Define named template areas"],
+        ["place-items: center", "Align + justify items simultaneously"],
+        ["place-content: center", "Align + justify the grid tracks"],
+        ["gap: 1rem 2rem", "Row gap, column gap"],
+        ["subgrid", "Inherit parent track sizing"]
+      ]
+    },
+    {
+      "title": "Selectors",
+      "items": [
+        [".parent > .child", "Direct child combinator"],
+        [".a + .b", "Adjacent sibling"],
+        [".a ~ .b", "General sibling"],
+        [":is(h1, h2, h3)", "Match multiple selectors (forgiving)"],
+        [":where(h1, h2)", "Same as :is but zero specificity"],
+        [":not(.excluded)", "Negate selector"],
+        [":has(.child)", "Parent selector (if it contains .child)"],
+        ["[data-state=\"open\"]", "Attribute selector"],
+        ["::before / ::after", "Pseudo-elements (require content)"],
+        [":first-child / :last-child", "Position-based pseudo-classes"],
+        [":nth-child(2n+1)", "Odd children"],
+        [":focus-visible", "Keyboard-only focus style"]
+      ]
+    },
+    {
+      "title": "Custom Properties",
+      "items": [
+        [":root { --color: #ff006e; }", "Define global custom property"],
+        ["var(--color)", "Use custom property"],
+        ["var(--color, red)", "Use with fallback value"],
+        ["@property --angle { syntax: '<angle>'; inherits: false; initial-value: 0deg; }", "Registered custom property (animatable)"],
+        ["color-scheme: dark light", "Declare supported color schemes"],
+        ["@layer base { ... }", "Define cascade layer"],
+        ["@layer utilities { }", "Utilities override base layer"]
+      ]
+    },
+    {
+      "title": "Animation & Transitions",
+      "items": [
+        ["transition: all 0.3s ease", "Transition all properties"],
+        ["transition: color 0.2s, transform 0.3s cubic-bezier(0.34,1.56,0.64,1)", "Named transitions"],
+        ["@keyframes slide { from { ... } to { ... } }", "Define keyframe animation"],
+        ["animation: slide 1s ease forwards", "Apply animation"],
+        ["animation-delay: 200ms", "Delay before start"],
+        ["will-change: transform", "Hint GPU compositing (use sparingly)"],
+        ["transform: translateX(10px) scale(1.05)", "Compose transforms"],
+        ["@starting-style { opacity: 0; }", "Entry animation (Chrome 117+)"],
+        ["view-transition-name: hero", "Named view transition element"]
+      ]
+    },
+    {
+      "title": "Modern Layout & Sizing",
+      "items": [
+        ["@container (min-width: 400px) { ... }", "Container query"],
+        ["container-type: inline-size", "Declare containment for queries"],
+        ["@media (prefers-color-scheme: dark)", "Dark mode media query"],
+        ["@media (max-width: 768px)", "Responsive breakpoint"],
+        ["clamp(1rem, 5vw, 3rem)", "Fluid value between min and max"],
+        ["min() / max()", "Pick minimum or maximum value"],
+        ["aspect-ratio: 16 / 9", "Lock aspect ratio"],
+        ["object-fit: cover", "Image fill behavior in container"],
+        ["scroll-behavior: smooth", "Smooth anchor scrolling"],
+        ["scroll-snap-type: x mandatory", "Scroll snapping axis"],
+        ["overscroll-behavior: contain", "Prevent scroll chaining"]
+      ]
+    }
+  ]
+}

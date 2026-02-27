@@ -1,0 +1,94 @@
+{
+  "id": "sql",
+  "title": "SQL",
+  "category": "Database",
+  "icon": "🗄️",
+  "accent": "#ffb700",
+  "description": "Core SQL queries, joins, aggregation, indexes, and common database patterns.",
+  "tags": ["sql", "database", "query"],
+  "sections": [
+    {
+      "title": "Basic Queries",
+      "items": [
+        ["SELECT * FROM tbl", "Select all rows and columns"],
+        ["SELECT col1, col2 FROM tbl", "Select specific columns"],
+        ["WHERE col = 'val'", "Filter rows by exact match"],
+        ["WHERE col LIKE '%pattern%'", "Pattern match (% = any chars)"],
+        ["WHERE col IN ('a', 'b', 'c')", "Match any in list"],
+        ["WHERE col BETWEEN 10 AND 20", "Range filter (inclusive)"],
+        ["WHERE col IS NULL", "Filter for null values"],
+        ["ORDER BY col DESC, col2 ASC", "Sort by multiple columns"],
+        ["LIMIT 10 OFFSET 20", "Paginate: skip 20, take 10"],
+        ["SELECT DISTINCT col", "Deduplicate result values"],
+        ["SELECT col AS alias", "Rename column in result"],
+        ["SELECT col, CASE WHEN col > 10 THEN 'big' ELSE 'small' END AS size", "Conditional column"]
+      ]
+    },
+    {
+      "title": "Joins",
+      "items": [
+        ["INNER JOIN b ON a.id = b.a_id", "Only rows with matches in both tables"],
+        ["LEFT JOIN b ON a.id = b.a_id", "All from left, NULL for unmatched right"],
+        ["RIGHT JOIN b ON a.id = b.a_id", "All from right, NULL for unmatched left"],
+        ["FULL OUTER JOIN b ON ...", "All rows from both tables"],
+        ["CROSS JOIN b", "Cartesian product (all combinations)"],
+        ["a LEFT JOIN b ON ... WHERE b.id IS NULL", "Rows in a not in b (anti-join)"],
+        ["self JOIN: a JOIN a AS b ON a.mgr_id = b.id", "Table joined to itself"]
+      ]
+    },
+    {
+      "title": "Aggregation & Grouping",
+      "items": [
+        ["COUNT(*)", "Count all rows"],
+        ["COUNT(DISTINCT col)", "Count unique non-null values"],
+        ["SUM(col) / AVG(col) / MIN(col) / MAX(col)", "Numeric aggregates"],
+        ["GROUP BY col", "Aggregate per distinct value"],
+        ["GROUP BY col1, col2", "Multi-column grouping"],
+        ["HAVING COUNT(*) > 5", "Filter on aggregate result"],
+        ["ROLLUP(col1, col2)", "Subtotals and grand total"],
+        ["FILTER (WHERE condition)", "Conditional aggregate (PostgreSQL)"]
+      ]
+    },
+    {
+      "title": "Window Functions",
+      "items": [
+        ["ROW_NUMBER() OVER (ORDER BY col)", "Sequential row number"],
+        ["RANK() OVER (ORDER BY col)", "Rank with gaps for ties"],
+        ["DENSE_RANK() OVER (ORDER BY col)", "Rank without gaps"],
+        ["LAG(col, 1) OVER (ORDER BY col)", "Previous row value"],
+        ["LEAD(col, 1) OVER (ORDER BY col)", "Next row value"],
+        ["SUM(col) OVER (PARTITION BY cat)", "Running total per group"],
+        ["PARTITION BY col ORDER BY date ROWS UNBOUNDED PRECEDING", "Cumulative frame"],
+        ["NTILE(4) OVER (ORDER BY col)", "Divide into N buckets (quartiles)"]
+      ]
+    },
+    {
+      "title": "CTEs & Subqueries",
+      "items": [
+        ["WITH cte AS (SELECT ...) SELECT * FROM cte", "Common Table Expression (CTE)"],
+        ["WITH RECURSIVE cte AS (...)", "Recursive CTE (tree traversal)"],
+        ["SELECT * FROM (SELECT ...) AS sub", "Inline subquery"],
+        ["WHERE col IN (SELECT id FROM other)", "Subquery in WHERE"],
+        ["WHERE EXISTS (SELECT 1 FROM other WHERE ...)", "Existence check"],
+        ["LATERAL JOIN", "Each row can reference outer query columns"]
+      ]
+    },
+    {
+      "title": "DDL & Management",
+      "items": [
+        ["CREATE TABLE users (id SERIAL PRIMARY KEY, name TEXT NOT NULL)", "Create table"],
+        ["ALTER TABLE users ADD COLUMN age INT", "Add column"],
+        ["ALTER TABLE users ALTER COLUMN name TYPE VARCHAR(255)", "Change column type"],
+        ["ALTER TABLE users DROP COLUMN age", "Remove column"],
+        ["DROP TABLE users", "Delete table"],
+        ["TRUNCATE TABLE users", "Delete all rows, reset sequences (fast)"],
+        ["CREATE INDEX idx_users_email ON users(email)", "Add single-column index"],
+        ["CREATE UNIQUE INDEX ON users(email)", "Unique constraint via index"],
+        ["CREATE INDEX ON users(category, created_at DESC)", "Composite index"],
+        ["EXPLAIN ANALYZE SELECT ...", "Show query plan with timing"],
+        ["INSERT INTO users VALUES (...) ON CONFLICT DO NOTHING", "Upsert (ignore dup)"],
+        ["INSERT INTO users VALUES (...) ON CONFLICT (email) DO UPDATE SET ...", "Upsert (update dup)"]
+      ]
+    }
+  ]
+}

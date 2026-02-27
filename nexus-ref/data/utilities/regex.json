@@ -1,0 +1,92 @@
+{
+  "id": "regex",
+  "title": "Regex",
+  "category": "Utilities",
+  "icon": "🔍",
+  "accent": "#ff006e",
+  "description": "Regular expression syntax for matching, groups, lookaheads, and common patterns.",
+  "tags": ["regex", "pattern", "search"],
+  "sections": [
+    {
+      "title": "Anchors & Quantifiers",
+      "items": [
+        ["^abc", "Match at start of string"],
+        ["abc$", "Match at end of string"],
+        ["^abc$", "Exact full string match"],
+        ["a*", "0 or more (greedy)"],
+        ["a+", "1 or more (greedy)"],
+        ["a?", "0 or 1 (optional)"],
+        ["a*? / a+?", "Non-greedy versions"],
+        ["a{3}", "Exactly 3"],
+        ["a{2,5}", "Between 2 and 5 (inclusive)"],
+        ["a{3,}", "3 or more"],
+        ["\\b word \\b", "Word boundary (whole word)"],
+        ["\\B", "Non-word boundary"]
+      ]
+    },
+    {
+      "title": "Character Classes",
+      "items": [
+        ["[abc]", "Any single char: a, b, or c"],
+        ["[^abc]", "Any char except a, b, c"],
+        ["[a-z]", "Any lowercase letter"],
+        ["[A-Z0-9]", "Uppercase letter or digit"],
+        [".", "Any char except newline (use [\\s\\S] for any)"],
+        ["\\d / \\D", "Digit [0-9] / non-digit"],
+        ["\\w / \\W", "Word char [a-zA-Z0-9_] / non-word"],
+        ["\\s / \\S", "Whitespace / non-whitespace"],
+        ["\\n / \\t / \\r", "Newline / tab / carriage return"]
+      ]
+    },
+    {
+      "title": "Groups & References",
+      "items": [
+        ["(abc)", "Capture group — reference as \\1 or $1"],
+        ["(?:abc)", "Non-capturing group (no back-reference)"],
+        ["(?<name>abc)", "Named capture group"],
+        ["\\k<name>", "Back-reference by name"],
+        ["a|b", "Alternation — match a or b"],
+        ["(a|b)+", "One or more of a or b"],
+        ["\\1", "Back-reference to capture group 1"]
+      ]
+    },
+    {
+      "title": "Lookarounds",
+      "items": [
+        ["(?=abc)", "Positive lookahead — followed by abc"],
+        ["(?!abc)", "Negative lookahead — NOT followed by abc"],
+        ["(?<=abc)", "Positive lookbehind — preceded by abc"],
+        ["(?<!abc)", "Negative lookbehind — NOT preceded by abc"],
+        ["(?=.*[A-Z])(?=.*\\d)", "Chain lookaheads (password rules)"]
+      ]
+    },
+    {
+      "title": "Flags",
+      "items": [
+        ["g", "Global — find all matches"],
+        ["i", "Case-insensitive"],
+        ["m", "Multi-line — ^ and $ match line boundaries"],
+        ["s", "Dot-all — . matches newlines"],
+        ["u", "Unicode mode"],
+        ["v", "Unicode sets mode (ES2024+, enables [\\w--\\d])"],
+        ["/pattern/gi", "Multiple flags combined"]
+      ]
+    },
+    {
+      "title": "Common Patterns",
+      "items": [
+        ["^[\\w.+-]+@[\\w-]+\\.[a-z]{2,}$", "Email address"],
+        ["^\\+?[\\d\\s().-]{7,15}$", "Phone number (international)"],
+        ["https?:\\/\\/[^\\s]+", "URL (http/https)"],
+        ["#[0-9a-fA-F]{3,8}", "Hex color (#RGB, #RRGGBB, #RRGGBBAA)"],
+        ["\\d{4}-\\d{2}-\\d{2}", "Date: YYYY-MM-DD"],
+        ["^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$", "Password: 8+ chars, upper, lower, digit"],
+        ["[a-f\\d]{8}-[a-f\\d]{4}-[a-f\\d]{4}-[a-f\\d]{4}-[a-f\\d]{12}", "UUID v4"],
+        ["^\\d{1,3}(\\.\\d{1,3}){3}$", "IPv4 address (basic)"],
+        ["\\b(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)(?:\\.(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3}\\b", "IPv4 (strict)"],
+        ["^[A-Z]{2}\\d{2}[A-Z0-9]{4}\\d{7}([A-Z0-9]{0,16})?$", "IBAN"],
+        ["\\$?\\d{1,3}(,\\d{3})*(\\.\\d{2})?", "Currency amount (US format)"]
+      ]
+    }
+  ]
+}

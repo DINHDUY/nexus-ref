@@ -1,0 +1,90 @@
+{
+  "id": "git",
+  "title": "Git",
+  "category": "Version Control",
+  "icon": "🌿",
+  "accent": "#00ff9f",
+  "description": "Essential Git commands for staging, branching, merging, and working with remotes.",
+  "tags": ["git", "vcs", "cli"],
+  "sections": [
+    {
+      "title": "Setup & Init",
+      "items": [
+        ["git init", "Initialize a new repo"],
+        ["git clone <url>", "Clone remote repo"],
+        ["git config --global user.name \"Name\"", "Set global username"],
+        ["git config --global user.email \"email\"", "Set global email"],
+        ["git config --list", "View all config settings"]
+      ]
+    },
+    {
+      "title": "Staging & Committing",
+      "items": [
+        ["git status", "Show working tree status"],
+        ["git add .", "Stage all changes"],
+        ["git add <file>", "Stage specific file"],
+        ["git add -p", "Stage changes interactively (hunks)"],
+        ["git commit -m \"msg\"", "Commit with message"],
+        ["git commit --amend", "Amend last commit"],
+        ["git diff", "Show unstaged changes"],
+        ["git diff --staged", "Show staged changes"],
+        ["git reset HEAD <file>", "Unstage a file"],
+        ["git restore <file>", "Discard working dir changes"]
+      ]
+    },
+    {
+      "title": "Branching",
+      "items": [
+        ["git branch", "List all branches"],
+        ["git branch <name>", "Create new branch"],
+        ["git checkout <name>", "Switch to branch"],
+        ["git checkout -b <name>", "Create & switch branch"],
+        ["git switch -c <name>", "Create & switch (modern)"],
+        ["git merge <branch>", "Merge branch into current"],
+        ["git merge --no-ff <branch>", "Merge with merge commit"],
+        ["git branch -d <name>", "Delete local branch"],
+        ["git rebase <branch>", "Rebase onto branch"],
+        ["git rebase -i HEAD~3", "Interactive rebase last 3 commits"]
+      ]
+    },
+    {
+      "title": "Remotes",
+      "items": [
+        ["git remote -v", "List remotes"],
+        ["git remote add origin <url>", "Add remote"],
+        ["git push origin <branch>", "Push to remote"],
+        ["git push -u origin <branch>", "Push and set upstream"],
+        ["git push --force-with-lease", "Safe force push"],
+        ["git pull", "Fetch & merge remote"],
+        ["git pull --rebase", "Fetch & rebase"],
+        ["git fetch", "Fetch without merge"],
+        ["git fetch --prune", "Fetch and remove deleted remote branches"]
+      ]
+    },
+    {
+      "title": "History & Inspection",
+      "items": [
+        ["git log --oneline --graph", "Compact graph history"],
+        ["git log --author=\"name\"", "Filter by author"],
+        ["git show <commit>", "Show commit details"],
+        ["git blame <file>", "Show who changed each line"],
+        ["git bisect start", "Start binary search for bug"],
+        ["git reflog", "History of HEAD movements"]
+      ]
+    },
+    {
+      "title": "Stash & Tags",
+      "items": [
+        ["git stash", "Stash dirty state"],
+        ["git stash push -m \"msg\"", "Stash with message"],
+        ["git stash list", "List stashes"],
+        ["git stash pop", "Apply and remove latest stash"],
+        ["git stash apply stash@{n}", "Apply specific stash"],
+        ["git stash drop stash@{n}", "Delete specific stash"],
+        ["git tag v1.0.0", "Create lightweight tag"],
+        ["git tag -a v1.0.0 -m \"msg\"", "Create annotated tag"],
+        ["git push origin --tags", "Push all tags"]
+      ]
+    }
+  ]
+}
