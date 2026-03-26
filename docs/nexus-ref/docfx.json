@@ -1,0 +1,18 @@
+{
+  "build": {
+    "content": [
+      { "files": ["**/*.md", "**/*.yml"], "src": "articles", "dest": "articles" },
+      { "files": ["toc.yml"] }
+    ],
+    "resource": [ { "files": ["images/**"] } ],
+    "output": "_site",
+    "template": ["modern"],
+    "globalMetadata": {
+      "_appTitle": "My Professional Documentation",
+      "_appName": "DocFX Demo",
+      "_appFooter": "© 2026 My Company • Built with DocFX + Mermaid",
+      "_enableSearch": true,
+      "_enableDarkMode": true
+    }
+  }
+}

@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code — Tools & MCP Cheatsheet</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bricolage+Grotesque:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:      #070b10; --bg2: #0b1118; --bg3: #111820; --bg4: #161f2a;
+    --border:  #1c2635; --border2: #263345;
+    --text:    #ccd6e0; --muted: #607585; --dim: #2d3f52;
+    --cyan:    #00d4f5; --purple: #a78bfa; --green: #2eeba8;
+    --orange:  #f59e42; --yellow: #fcd34d; --pink: #f472b6;
+    --red:     #f87171; --blue: #60a5fa;
+    --code-bg: #060a0f;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Space Mono', monospace; font-size: 12.5px;
+    line-height: 1.65; padding: 36px 20px 80px;
+  }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,212,245,.012) 2px,rgba(0,212,245,.012) 4px);
+    pointer-events: none; z-index: 0;
+  }
+  body::after {
+    content: ''; position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 10% 0%,  rgba(0,212,245,.04) 0%,transparent 60%),
+      radial-gradient(ellipse 60% 40% at 90% 100%,rgba(46,235,168,.03) 0%,transparent 60%);
+    pointer-events: none; z-index: 0;
+  }
+  .container { max-width: 1340px; margin: 0 auto; position: relative; z-index: 1; }
+
+  /* ── HEADER ─── */
+  .header { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 24px; margin-bottom: 36px; padding-bottom: 24px; border-bottom: 1px solid var(--border2); }
+  .eyebrow { font-size: 9px; letter-spacing: .22em; text-transform: uppercase; color: var(--cyan); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .eyebrow::before { content: ''; width: 20px; height: 1px; background: var(--cyan); }
+  h1 { font-family: 'Bricolage Grotesque', sans-serif; font-size: clamp(28px,4.5vw,54px); font-weight: 800; line-height: .95; letter-spacing: -.03em; color: #fff; }
+  h1 em { font-style: normal; color: var(--cyan); }
+  .header-sub { margin-top: 12px; font-size: 11.5px; color: var(--muted); max-width: 720px; }
+  .meta-pills { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+  .pill { background: var(--bg3); border: 1px solid var(--border2); padding: 6px 14px; font-size: 10px; letter-spacing: .08em; white-space: nowrap; color: var(--muted); }
+  .pill strong { color: var(--green); }
+
+  /* ── SECTION LABELS ─── */
+  .section-label { font-size: 9px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 10px; margin: 32px 0 14px; }
+  .section-label::before { content: attr(data-n); color: var(--cyan); font-size: 11px; }
+  .section-label::after  { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ── GRIDS ─── */
+  .g2 { display: grid; grid-template-columns: repeat(auto-fit,minmax(520px,1fr)); gap: 14px; margin-bottom: 14px; }
+  .g3 { display: grid; grid-template-columns: repeat(auto-fit,minmax(340px,1fr)); gap: 14px; margin-bottom: 14px; }
+  .g4 { display: grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 14px; margin-bottom: 14px; }
+  .fw { margin-bottom: 14px; }
+
+  /* ── CARDS ─── */
+  .card { background: var(--bg2); border: 1px solid var(--border); padding: 20px; position: relative; overflow: hidden; animation: fadeUp .4s ease both; }
+  .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg,var(--ac),transparent); }
+  .card:nth-child(1){animation-delay:.04s} .card:nth-child(2){animation-delay:.08s}
+  .card:nth-child(3){animation-delay:.12s} .card:nth-child(4){animation-delay:.16s}
+  @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+  .c-cyan{--ac:var(--cyan)} .c-purple{--ac:var(--purple)} .c-green{--ac:var(--green)}
+  .c-orange{--ac:var(--orange)} .c-yellow{--ac:var(--yellow)} .c-pink{--ac:var(--pink)}
+  .c-red{--ac:var(--red)} .c-blue{--ac:var(--blue)}
+  .card-title { font-family: 'Bricolage Grotesque',sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--ac); margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
+  .card-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ── CODE ─── */
+  pre { background: var(--code-bg); border: 1px solid var(--border); border-left: 3px solid var(--ac,var(--cyan)); padding: 13px 16px; font-family: 'Space Mono',monospace; font-size: 11.5px; line-height: 1.75; overflow-x: auto; margin-bottom: 10px; }
+  pre:last-child { margin-bottom: 0; }
+  .pre-label { font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); margin-bottom: 5px; display: block; }
+  .t-cm{color:var(--muted);font-style:italic} .t-kw{color:var(--pink)} .t-st{color:var(--green)}
+  .t-nm{color:var(--orange)} .t-fn{color:var(--blue)} .t-op{color:var(--cyan)}
+  .t-h1{color:#fff;font-weight:700} .t-h2{color:var(--cyan)} .t-h3{color:var(--purple)}
+  .t-bi{color:var(--yellow)} .t-er{color:var(--red)} .t-sl{color:var(--green);font-weight:700}
+  .hl  {background:rgba(0,212,245,.07);  display:block;margin:0 -16px;padding:0 16px}
+  .hl-g{background:rgba(46,235,168,.07); display:block;margin:0 -16px;padding:0 16px}
+  .hl-r{background:rgba(248,113,113,.07);display:block;margin:0 -16px;padding:0 16px}
+  .hl-y{background:rgba(252,211,77,.06); display:block;margin:0 -16px;padding:0 16px}
+  code { background:var(--bg4); border:1px solid var(--border2); padding:1px 5px; font-size:11px; color:var(--cyan); }
+
+  /* ── CALLOUTS ─── */
+  .tip,.warn,.info,.key,.danger { padding:9px 13px; font-size:11px; margin-bottom:8px; border-left:2px solid; line-height:1.7; }
+  .tip   {background:rgba(46,235,168,.04);  border-color:var(--green)}
+  .warn  {background:rgba(245,158,66,.05);  border-color:var(--orange)}
+  .info  {background:rgba(0,212,245,.04);   border-color:var(--cyan)}
+  .key   {background:rgba(167,139,250,.05); border-color:var(--purple)}
+  .danger{background:rgba(248,113,113,.05); border-color:var(--red)}
+  .tip strong,.warn strong,.info strong,.key strong,.danger strong { display:block; font-size:8.5px; letter-spacing:.14em; text-transform:uppercase; margin-bottom:2px; }
+  .tip strong{color:var(--green)} .warn strong{color:var(--orange)} .info strong{color:var(--cyan)}
+  .key strong{color:var(--purple)} .danger strong{color:var(--red)}
+
+  /* ── TABLE ─── */
+  table { width:100%; border-collapse:collapse; font-size:11.5px; margin-bottom:10px; }
+  th { text-align:left; font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); padding:6px 10px; border-bottom:1px solid var(--border2); }
+  td { padding:7px 10px; border-bottom:1px solid var(--border); vertical-align:top; line-height:1.55; }
+  tr:last-child td { border-bottom:none; }
+  td:first-child { color:var(--cyan); font-weight:700; white-space:nowrap; }
+  td:nth-child(2),td:nth-child(3) { color:var(--muted); }
+
+  /* ── TAGS ─── */
+  .tag { display:inline-block; padding:2px 7px; font-size:8.5px; letter-spacing:.1em; text-transform:uppercase; font-weight:700; border:1px solid; margin:2px 3px 2px 0; }
+  .tc{color:var(--cyan);border-color:var(--cyan)} .tp{color:var(--purple);border-color:var(--purple)}
+  .tg{color:var(--green);border-color:var(--green)} .to{color:var(--orange);border-color:var(--orange)}
+  .ty{color:var(--yellow);border-color:var(--yellow)} .tk{color:var(--pink);border-color:var(--pink)}
+  .tr{color:var(--red);border-color:var(--red)} .tb{color:var(--blue);border-color:var(--blue)}
+
+  /* ── TOOL MINI-CARDS ─── */
+  .tool-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:8px; margin-bottom:12px; }
+  .tc-card { background:var(--bg3); border:1px solid var(--border); padding:11px 13px; position:relative; }
+  .tc-card::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,var(--tc,var(--dim)),transparent); }
+  .tc-name { font-family:'Bricolage Grotesque',sans-serif; font-size:12px; font-weight:700; color:var(--tc,var(--text)); margin-bottom:4px; }
+  .tc-desc { font-size:10.5px; color:var(--muted); line-height:1.55; }
+  .tc-note { font-size:9.5px; color:var(--dim); margin-top:5px; font-style:italic; }
+
+  /* ── SCOPE STACK ─── */
+  .hier-stack { border:1px solid var(--border); overflow:hidden; margin-bottom:12px; }
+  .hier-row { display:grid; grid-template-columns:28px 160px 1fr 95px; border-bottom:1px solid var(--border); align-items:stretch; }
+  .hier-row:last-child { border-bottom:none; }
+  .hier-num { display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; color:#000; border-right:1px solid var(--border); }
+  .hier-label { padding:9px 12px; border-right:1px solid var(--border); font-size:10px; font-weight:700; letter-spacing:.08em; display:flex; align-items:center; }
+  .hier-body { padding:9px 14px; font-size:11.5px; color:var(--muted); display:flex; align-items:center; line-height:1.55; flex:1; }
+  .hier-body strong{color:var(--text)} .hier-body code{font-size:10.5px;}
+  .hier-scope { padding:9px 10px; border-left:1px solid var(--border); font-size:9px; color:var(--dim); display:flex; align-items:center; justify-content:center; text-align:center; line-height:1.4; }
+
+  /* ── TRANSPORT GRID ─── */
+  .tr-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:12px; }
+  .tr-card { background:var(--bg3); border:1px solid var(--border2); padding:13px 14px; }
+  .tr-name { font-family:'Bricolage Grotesque',sans-serif; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; margin-bottom:5px; }
+  .tr-badge { font-size:8px; letter-spacing:.1em; text-transform:uppercase; padding:1px 5px; border:1px solid; display:inline-block; margin-bottom:6px; }
+  .tr-desc { font-size:11px; color:var(--muted); line-height:1.6; }
+
+  /* ── FLOW ROW ─── */
+  .flow-row { display:flex; align-items:center; flex-wrap:wrap; margin:10px 0; }
+  .fnode { padding:7px 12px; font-size:11px; border:1px solid var(--border2); background:var(--bg3); white-space:nowrap; }
+  .fnode.c1{border-color:var(--cyan);  color:var(--cyan)}  .fnode.c2{border-color:var(--green); color:var(--green)}
+  .fnode.c3{border-color:var(--orange);color:var(--orange)} .fnode.c4{border-color:var(--purple);color:var(--purple)}
+  .fnode.c5{border-color:var(--yellow);color:var(--yellow)}
+  .farrow { color:var(--dim); padding:0 6px; font-size:14px; }
+
+  /* ── DECISION TREE ─── */
+  .tree pre { border-left-color:var(--purple); }
+  .tq{color:var(--text)} .tya{color:var(--green)} .tno{color:var(--orange)}
+  .tre{color:var(--cyan);font-weight:700} .tln{color:var(--dim)}
+
+  /* ── COMPARE ─── */
+  .compare { display:grid; grid-template-columns:1fr 1fr 1fr; border:1px solid var(--border); overflow:hidden; margin-bottom:12px; }
+  .cmp-col { border-right:1px solid var(--border); }
+  .cmp-col:last-child { border-right:none; }
+  .cmp-head { padding:9px 12px; font-size:9px; letter-spacing:.14em; text-transform:uppercase; font-weight:700; background:var(--bg3); border-bottom:1px solid var(--border2); }
+  .cmp-body { padding:10px 12px; font-size:11px; color:var(--muted); line-height:1.7; }
+
+  /* ── FOOTER ─── */
+  .footer { margin-top:48px; padding-top:20px; border-top:1px solid var(--border); display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; font-size:10px; color:var(--dim); letter-spacing:.08em; }
+
+  @media(max-width:680px){
+    .g2,.g3,.g4{grid-template-columns:1fr}
+    .header{grid-template-columns:1fr}
+    .meta-pills{align-items:flex-start}
+    .hier-row{grid-template-columns:28px 1fr}
+    .hier-scope{display:none}
+    .tr-grid{grid-template-columns:1fr}
+    .compare{grid-template-columns:1fr}
+    .tool-grid{grid-template-columns:1fr 1fr}
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ═══════════ HEADER ═══════════════════════════════════ -->
+<div class="header">
+  <div>
+    <div class="eyebrow">Official Docs · docs.anthropic.com/en/docs/claude-code/mcp · SDK type reference · Mar 2026</div>
+    <h1>Claude Code —<br><em>Tools &amp; MCPs</em></h1>
+    <p class="header-sub">// 20 built-in tools (incl. MCP resource + agent tools) · 3 transports (HTTP · SSE · stdio) · 3 scopes (local · project · user) · list_changed · Tool Search · binary content handling · OAuth · claude mcp serve</p>
+  </div>
+  <div class="meta-pills">
+    <div class="pill">Built-in tools <strong>20 (SDK-verified)</strong></div>
+    <div class="pill">MCP output warning at <strong>10k tokens</strong></div>
+    <div class="pill">Tool Search auto at <strong>&gt; 10% context</strong></div>
+    <div class="pill">npm github server <strong>deprecated Apr 2025</strong></div>
+    <div class="pill">SSE transport <strong>deprecated → use HTTP</strong></div>
+  </div>
+</div>
+
+
+<!-- ═══════════ 01: SCOPE RENAMING ALERT ════════════════ -->
+<div class="section-label" data-n="01">⚠ Scope Naming Change — Read Before Anything Else</div>
+
+<div class="card c-red fw">
+  <div class="card-title">🚨 Breaking Change — MCP Scope Names Renamed</div>
+  <p style="color:var(--muted);font-size:12px;line-height:1.8;margin-bottom:14px;">Claude Code renamed MCP scopes. If you wrote guides or scripts using old names, <strong style="color:var(--text)">they still work but the docs use new names</strong>. Old tutorials and third-party docs may still use the old names — check yours.</p>
+
+  <div class="compare">
+    <div class="cmp-col">
+      <div class="cmp-head" style="color:var(--red);">Old Name (still works)</div>
+      <div class="cmp-body">
+        <code>project</code> (old default)<br>private, current project<br><br>
+        <em style="color:var(--dim)">no old equivalent</em><br><em style="color:var(--dim)">shared .mcp.json</em><br><br>
+        <code>global</code><br>all projects
+      </div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-head" style="color:var(--green);">New Name (current docs)</div>
+      <div class="cmp-body">
+        <code style="color:var(--cyan)">local</code> ← <strong style="color:var(--text)">default</strong><br>private, current project<br><br>
+        <code style="color:var(--cyan)">project</code><br>shared via <code>.mcp.json</code><br><br>
+        <code style="color:var(--cyan)">user</code><br>all projects on machine
+      </div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-head" style="color:var(--cyan);">Storage Location</div>
+      <div class="cmp-body">
+        <code>~/.claude.json</code> under project path<br><br><br>
+        <code>.mcp.json</code> at project root → commit to git<br><br>
+        <code>~/.claude.json</code> at user level
+      </div>
+    </div>
+  </div>
+
+  <div class="info" style="margin-top:10px;">
+    <strong>ℹ Precedence: local &gt; project &gt; user</strong>
+    Same server name at local scope overrides project and user. Use this to temporarily override a team server without touching <code>.mcp.json</code>.
+  </div>
+</div>
+
+
+<!-- ═══════════ 02: BUILT-IN TOOLS ══════════════════════ -->
+<div class="section-label" data-n="02">Built-In Tools — All 20 (SDK ToolInputSchemas-Verified)</div>
+
+<div class="card c-cyan fw">
+  <div class="card-title">🔧 Complete Built-In Tool Reference</div>
+
+  <div class="tool-grid">
+    <!-- File tools -->
+    <div class="tc-card" style="--tc:var(--green)">
+      <div class="tc-name">Read</div>
+      <div class="tc-desc">Read any file. Default 2,000 lines. Use <code>offset</code> + <code>limit</code> for large files. Multimodal — renders images. Batch multiple reads in one response.</div>
+      <div class="tc-note">Must Read before Edit. Lines &gt;2,000 chars truncated.</div>
+    </div>
+    <div class="tc-card" style="--tc:var(--green)">
+      <div class="tc-name">Edit</div>
+      <div class="tc-desc">Exact string replacement. <code>old_string</code> must be unique in file. <code>replace_all</code> to rename across entire file. Fails if match isn't unique.</div>
+      <div class="tc-note">Must Read first. Add surrounding context to make old_string unique.</div>
+    </div>
+    <div class="tc-card" style="--tc:var(--green)">
+      <div class="tc-name">MultiEdit</div>
+      <div class="tc-desc">Multiple sequential edits to one file in a single atomic call. All succeed or none apply. Each edit operates on the result of the prior one.</div>
+      <div class="tc-note">Prefer over repeated Edit calls on the same file.</div>
+    </div>
+    <div class="tc-card" style="--tc:var(--green)">
+      <div class="tc-name">Write</div>
+      <div class="tc-desc">Overwrite an entire file. Must Read first if file exists. Never create .md/README files unless explicitly asked.</div>
+      <div class="tc-note">Destructive. Prefer Edit/MultiEdit for targeted changes.</div>
+    </div>
+    <!-- Search tools -->
+    <div class="tc-card" style="--tc:var(--cyan)">
+      <div class="tc-name">Glob</div>
+      <div class="tc-desc">Fast file pattern matching. Patterns like <code>**/*.ts</code> or <code>src/**/*.tsx</code>. Results sorted by modification time.</div>
+      <div class="tc-note">Prefer over Agent for known file name patterns.</div>
+    </div>
+    <div class="tc-card" style="--tc:var(--cyan)">
+      <div class="tc-name">Grep</div>
+      <div class="tc-desc">Content search with full regex. <code>include</code> filters by file type (e.g. <code>*.ts</code>). For counting matches, use Bash with <code>rg</code>.</div>
+      <div class="tc-note">Returns paths sorted by mtime, not match count.</div>
+    </div>
+    <div class="tc-card" style="--tc:var(--muted)">
+      <div class="tc-name">LS</div>
+      <div class="tc-desc">List directory. Requires absolute path. Supports <code>ignore</code> glob array. Prefer Glob/Grep when you know what to look for.</div>
+      <div class="tc-note">Verify parent exists before creating dirs.</div>
+    </div>
+    <!-- Execution -->
+    <div class="tc-card" style="--tc:var(--orange)">
+      <div class="tc-name">Bash</div>
+      <div class="tc-desc">Shell in persistent session. Default 2 min timeout; max 10 min. Output truncated at 30,000 chars. Use <code>rg</code> not grep. Chain with <code>;</code> or <code>&&</code>, not newlines.</div>
+      <div class="tc-note">Always HEREDOC for git commits. Don't cat/ls — use Read/LS.</div>
+    </div>
+    <!-- Agent -->
+    <div class="tc-card" style="--tc:var(--blue)">
+      <div class="tc-name">Agent (Task)</div>
+      <div class="tc-desc">Spawn isolated subagent. Returns ONE final message — stateless. Params: <code>description</code>, <code>prompt</code>, <code>subagent_type</code>, <code>model</code>, <code>resume</code>, <code>run_in_background</code>, <code>max_turns</code>, <code>name</code>, <code>mode</code>.</div>
+      <div class="tc-note">Batch multiple Agent calls in ONE message for concurrency.</div>
+    </div>
+    <div class="tc-card" style="--tc:var(--blue)">
+      <div class="tc-name">TaskStop</div>
+      <div class="tc-desc">Stop a running background task or shell by ID. Used when <code>run_in_background: true</code> was set on an Agent call that needs to be cancelled.</div>
+      <div class="tc-note">Background tasks only. Regular Agent calls are synchronous.</div>
+    </div>
+    <!-- Notebook -->
+    <div class="tc-card" style="--tc:var(--yellow)">
+      <div class="tc-name">NotebookRead</div>
+      <div class="tc-desc">Read Jupyter (.ipynb). Returns all cells + outputs. Absolute path required. Use instead of Read for notebooks.</div>
+      <div class="tc-note">Read cannot parse .ipynb format.</div>
+    </div>
+    <div class="tc-card" style="--tc:var(--yellow)">
+      <div class="tc-name">NotebookEdit</div>
+      <div class="tc-desc">Edit a cell. Params: <code>notebook_path</code>, <code>cell_id</code> (0-indexed string), <code>new_source</code>, <code>cell_type</code>?, <code>edit_mode</code>: replace/insert/delete.</div>
+      <div class="tc-note"><code>cell_type</code> required for insert mode.</div>
+    </div>
+    <!-- Web -->
+    <div class="tc-card" style="--tc:var(--pink)">
+      <div class="tc-name">WebFetch</div>
+      <div class="tc-desc">Fetch URL → process with fast model. HTML → markdown. 15-min cache. Binary responses (PDFs etc.) saved to disk. Prefer <code>mcp__*</code> fetch tool if available.</div>
+      <div class="tc-note">HTTP auto-upgrades to HTTPS. Read-only.</div>
+    </div>
+    <div class="tc-card" style="--tc:var(--pink)">
+      <div class="tc-name">WebSearch</div>
+      <div class="tc-desc">Search the web. <code>allowed_domains</code> / <code>blocked_domains</code> filtering. Returns search result blocks. <strong>US only.</strong></div>
+      <div class="tc-note">For post-cutoff info only. Not available outside US.</div>
+    </div>
+    <!-- Todo -->
+    <div class="tc-card" style="--tc:var(--red)">
+      <div class="tc-name">TodoRead</div>
+      <div class="tc-desc">Read session todo list. Takes no parameters. Use proactively: session start, before tasks, when uncertain, after completions.</div>
+      <div class="tc-note">Call frequently — it's free and keeps you on track.</div>
+    </div>
+    <div class="tc-card" style="--tc:var(--red)">
+      <div class="tc-name">TodoWrite</div>
+      <div class="tc-desc">Manage task list. <code>todos[]</code> with <code>content</code>, <code>status</code> (pending/in_progress/completed), <code>priority</code> (high/medium/low), <code>id</code>. One <code>in_progress</code> at a time.</div>
+      <div class="tc-note">Use for 3+ step tasks. Mark completed immediately when done.</div>
+    </div>
+    <!-- MCP resource tools -->
+    <div class="tc-card" style="--tc:var(--purple)">
+      <div class="tc-name">ListMcpResources</div>
+      <div class="tc-desc">List all available MCP resources from connected servers. Returns the full catalog of <code>@server:type://path</code> resources you can reference.</div>
+      <div class="tc-note">Call when you need to discover what data sources are available.</div>
+    </div>
+    <div class="tc-card" style="--tc:var(--purple)">
+      <div class="tc-name">ReadMcpResource</div>
+      <div class="tc-desc">Read a specific MCP resource by URI. Same data as <code>@server:type://path</code> mention but programmatic — useful inside Agent subagents.</div>
+      <div class="tc-note">Equivalent to typing @resource in the prompt.</div>
+    </div>
+    <div class="tc-card" style="--tc:var(--purple)">
+      <div class="tc-name">SubscribeMcpResource</div>
+      <div class="tc-desc">Subscribe to a resource for live updates via MCP <code>list_changed</code> notifications. Claude Code is notified when the resource changes.</div>
+      <div class="tc-note">Pair with UnsubscribeMcpResource to clean up.</div>
+    </div>
+    <!-- Utility -->
+    <div class="tc-card" style="--tc:var(--dim)">
+      <div class="tc-name">AskUserQuestion</div>
+      <div class="tc-desc">Ask the user a clarifying question and wait for their reply. Surfaces a prompt in the UI without the overhead of a full conversation turn.</div>
+      <div class="tc-note">For mid-task clarification when critical info is missing.</div>
+    </div>
+  </div>
+
+  <div class="info">
+    <strong>ℹ Additional internal tools (not typically user-facing)</strong>
+    <code>Config</code> (get/set settings), <code>ExitPlanMode</code> (plan mode only), <code>EnterWorktree</code> (git worktree), <code>SubscribePolling</code> / <code>UnsubscribePolling</code> (resource polling fallback when list_changed not supported), <code>TaskOutput</code> (background task result retrieval) — all verified from SDK <code>ToolInputSchemas</code> union type.
+  </div>
+</div>
+
+
+<!-- ═══════════ 03: TOOL DEEP DIVES ═════════════════════ -->
+<div class="section-label" data-n="03">Key Tool Behaviors — Critical Details</div>
+
+<div class="g2 fw">
+
+  <div class="card c-blue">
+    <div class="card-title">🤖 Agent (Task) — Subagent Dispatch</div>
+
+    <span class="pre-label">Full parameter set (from AgentInput SDK type)</span>
+    <pre><span class="t-op">{</span>
+  <span class="t-nm">description</span>: <span class="t-st">"3-5 word task description"</span>,    <span class="t-cm">// shown in UI</span>
+  <span class="t-nm">prompt</span>:      <span class="t-st">"Detailed task instructions..."</span>,  <span class="t-cm">// be exhaustive</span>
+  <span class="t-nm">subagent_type</span>: <span class="t-st">"general"</span>,                 <span class="t-cm">// or specialized type</span>
+  <span class="t-nm">model</span>:       <span class="t-st">"sonnet"</span>,                      <span class="t-cm">// sonnet | opus | haiku</span>
+  <span class="t-nm">run_in_background</span>: <span class="t-kw">false</span>,               <span class="t-cm">// true → fire-and-forget</span>
+  <span class="t-nm">max_turns</span>:   <span class="t-bi">20</span>,
+  <span class="t-nm">name</span>:        <span class="t-st">"optional label"</span>,
+  <span class="t-nm">resume</span>:      <span class="t-st">"&lt;task-id&gt;"</span>,                  <span class="t-cm">// resume a paused background task</span>
+  <span class="t-nm">mode</span>:        <span class="t-st">"acceptEdits"</span>                 <span class="t-cm">// acceptEdits | bypassPermissions | default</span>
+<span class="t-op">}</span>
+
+<span class="t-cm">── When TO use Agent ─────────────────────────────</span>
+<span class="hl-g"><span class="t-st">✓</span> Open-ended search: "which file handles X?" or "find all usages of Y"</span>
+<span class="hl-g"><span class="t-st">✓</span> Parallel workstreams — batch multiple Agent calls in ONE message</span>
+<span class="hl-g"><span class="t-st">✓</span> Background research while continuing main task (run_in_background: true)</span>
+
+<span class="t-cm">── When NOT to use Agent ─────────────────────────</span>
+<span class="hl-r"><span class="t-er">✗</span> Specific file path  → use Read or Glob directly (faster)</span>
+<span class="hl-r"><span class="t-er">✗</span> "class Foo" search  → use Glob directly</span>
+<span class="hl-r"><span class="t-er">✗</span> 2-3 known files     → use Read directly</span>
+
+<span class="t-cm">── Stateless contract ────────────────────────────</span>
+<span class="t-cm"># Returns ONE final message. Cannot send follow-up.</span>
+<span class="t-cm"># Agent result NOT visible to user — you must summarize.</span>
+<span class="t-cm"># Specify EXACTLY what info to return.</span>
+<span class="t-cm"># Tell agent: research-only vs. write code.</span></pre>
+
+    <div class="key">
+      <strong>🔑 Concurrency: always batch Agent calls</strong>
+      Launch multiple independent Tasks in a <strong>single message with multiple tool uses</strong> — they run concurrently. Sequential calls are up to 10× slower.
+    </div>
+  </div>
+
+  <div class="card c-orange">
+    <div class="card-title">💻 Bash — Shell Execution Rules</div>
+
+    <span class="pre-label">Timeouts, chaining, gotchas, commit format</span>
+    <pre><span class="t-cm">── Timeouts ──────────────────────────────────────</span>
+<span class="t-cm"># Default: 2 minutes (120,000 ms)</span>
+<span class="t-cm"># Max:     10 minutes (600,000 ms)  — set explicitly</span>
+<span class="t-cm"># Large builds/tests need explicit timeout param</span>
+
+<span class="t-cm">── Chaining (NO newlines!) ───────────────────────</span>
+<span class="hl-g"><span class="t-st">✓</span> npm install; npm run build; npm test</span>
+<span class="hl-g"><span class="t-st">✓</span> cd /foo/bar && pytest tests</span>
+<span class="hl-r"><span class="t-er">✗</span> newlines between commands (only ok inside quoted strings)</span>
+
+<span class="t-cm">── Always quote paths with spaces ───────────────</span>
+<span class="hl-g"><span class="t-st">✓</span> cd "/Users/name/My Project"</span>
+<span class="hl-r"><span class="t-er">✗</span> cd /Users/name/My Project</span>
+
+<span class="t-cm">── Tool discipline ───────────────────────────────</span>
+<span class="hl-r"><span class="t-er">✗</span> grep -r "…"  → use Grep tool or rg in Bash</span>
+<span class="hl-r"><span class="t-er">✗</span> find . -name → use Glob tool</span>
+<span class="hl-r"><span class="t-er">✗</span> cat / head / tail → use Read tool</span>
+<span class="hl-r"><span class="t-er">✗</span> ls -la        → use LS tool</span>
+<span class="hl-g"><span class="t-st">✓</span> rg "pattern" --type ts  ← ripgrep pre-installed</span>
+
+<span class="t-cm">── Git commit (always HEREDOC) ───────────────────</span>
+<span class="t-fn">git</span> commit -m <span class="t-st">"$(cat &lt;&lt;'EOF'</span>
+<span class="t-st">feat(auth): add OAuth 2.0 login</span>
+
+<span class="t-st">🤖 Generated with [Claude Code](https://claude.ai/code)</span>
+
+<span class="t-st">Co-Authored-By: Claude &lt;noreply@anthropic.com&gt;</span>
+<span class="t-st">EOF</span>
+<span class="t-st">)"</span>
+
+<span class="t-cm">── Output limits ─────────────────────────────────</span>
+<span class="t-cm"># Bash output truncated at 30,000 chars</span>
+<span class="t-cm"># Use --summary, head, or pagination for long output</span></pre>
+  </div>
+</div>
+
+<div class="g3 fw">
+
+  <div class="card c-green">
+    <div class="card-title">📁 Read / Edit / MultiEdit / Write</div>
+    <span class="pre-label">File operation rules and critical gotchas</span>
+    <pre><span class="t-cm">── Read ──────────────────────────────────────────</span>
+<span class="t-cm"># Default: 2,000 lines from line 1</span>
+<span class="t-cm"># Large files: use offset + limit params</span>
+<span class="t-cm"># Lines > 2,000 chars: silently truncated</span>
+<span class="t-cm"># Images (PNG/JPG/GIF): displayed visually</span>
+<span class="t-cm"># Batch multiple Reads in one response ← always do this</span>
+
+<span class="t-cm">── Edit contract ─────────────────────────────────</span>
+<span class="t-cm"># MUST Read at least once before editing</span>
+<span class="t-cm"># old_string: must be UNIQUE in file</span>
+<span class="t-cm"># If not unique: add more surrounding context lines</span>
+<span class="t-cm"># replace_all: true → renames every instance</span>
+<span class="t-cm"># Preserve EXACT indentation (tabs/spaces matter)</span>
+<span class="t-cm"># Do NOT include line-number prefix from Read output</span>
+
+<span class="t-cm">── MultiEdit over Edit ───────────────────────────</span>
+<span class="t-cm"># Atomic: all succeed OR none apply</span>
+<span class="t-cm"># Applied in ORDER — plan for sequencing</span>
+<span class="t-cm"># Faster than N separate Edit calls</span>
+
+<span class="t-cm">── Write caution ─────────────────────────────────</span>
+<span class="t-cm"># Overwrites entire file — destructive</span>
+<span class="t-cm"># Must Read existing file first</span>
+<span class="t-cm"># Prefer Edit/MultiEdit for targeted changes</span>
+<span class="t-cm"># NEVER create .md / README files unprompted</span></pre>
+  </div>
+
+  <div class="card c-red">
+    <div class="card-title">✅ Todo Tools — Task State Machine</div>
+    <span class="pre-label">When, how, and state rules</span>
+    <pre><span class="t-cm">── TodoWrite: when to use ────────────────────────</span>
+<span class="hl-g"><span class="t-st">✓</span> 3+ step tasks</span>
+<span class="hl-g"><span class="t-st">✓</span> Complex / multi-file work</span>
+<span class="hl-g"><span class="t-st">✓</span> User gives a list of things to do</span>
+<span class="hl-r"><span class="t-er">✗</span> Single trivial task — just do it</span>
+<span class="hl-r"><span class="t-er">✗</span> Conversational / informational replies</span>
+
+<span class="t-cm">── State machine ─────────────────────────────────</span>
+<span class="t-cm">pending → in_progress → completed</span>
+<span class="t-cm"># ONE in_progress at a time — hard rule</span>
+<span class="t-cm"># Mark in_progress BEFORE starting work</span>
+<span class="t-cm"># Mark completed IMMEDIATELY on finish (no batching)</span>
+<span class="t-cm"># Keep as in_progress if tests fail or errors exist</span>
+<span class="t-cm"># Delete tasks that are no longer relevant</span>
+
+<span class="t-cm">── TodoRead call schedule ────────────────────────</span>
+<span class="t-cm"># Start of conversation</span>
+<span class="t-cm"># Before starting any new task</span>
+<span class="t-cm"># After completing tasks</span>
+<span class="t-cm"># When uncertain what to do next</span>
+<span class="t-cm"># Every few messages as a sanity check</span></pre>
+  </div>
+
+  <div class="card c-purple">
+    <div class="card-title">🔗 MCP Resource Tools</div>
+    <span class="pre-label">Programmatic resource access inside Agent context</span>
+    <pre><span class="t-cm">── ListMcpResources ──────────────────────────────</span>
+<span class="t-cm"># No params required</span>
+<span class="t-cm"># Returns full catalog of available resources</span>
+<span class="t-cm"># Same as browsing /mcp → Resources tab</span>
+
+<span class="t-cm">── ReadMcpResource ───────────────────────────────</span>
+<span class="t-cm"># Params: server_name, uri</span>
+<span class="t-cm"># Equivalent to @server:type://path in prompt</span>
+<span class="t-cm"># Useful inside Agent subagents (no @ syntax there)</span>
+
+<span class="t-cm">── SubscribeMcpResource ──────────────────────────</span>
+<span class="t-cm"># Registers for live list_changed notifications</span>
+<span class="t-cm"># Claude Code notified when resource changes</span>
+<span class="t-cm"># Server must support MCP list_changed event</span>
+<span class="t-cm"># Pair with UnsubscribeMcpResource to clean up</span>
+
+<span class="t-cm">── list_changed notifications (new) ─────────────</span>
+<span class="t-cm"># MCP servers can push dynamic tool/prompt/resource</span>
+<span class="t-cm"># updates without disconnect + reconnect</span>
+<span class="t-cm"># Claude Code automatically refreshes capabilities</span>
+<span class="t-cm"># Example: server adds a new tool mid-session → </span>
+<span class="t-cm">#          immediately available without /mcp refresh</span>
+
+<span class="t-cm">── Fallback: SubscribePolling ────────────────────</span>
+<span class="t-cm"># Used when server doesn't support list_changed</span>
+<span class="t-cm"># Claude Code polls on interval instead</span>
+<span class="t-cm"># Transparent to user; same end behavior</span></pre>
+  </div>
+</div>
+
+
+<!-- ═══════════ 04: MCP OVERVIEW ════════════════════════ -->
+<div class="section-label" data-n="04">MCP — What It Is &amp; Three Transport Types</div>
+
+<div class="card c-purple fw">
+  <div class="card-title">🔌 Model Context Protocol — The USB-C for AI Tools</div>
+  <p style="color:var(--muted);font-size:12px;line-height:1.8;margin-bottom:14px;">An open standard for connecting Claude Code to external tools, databases, and APIs. MCP servers expose: <strong style="color:var(--text)">Tools</strong> (functions Claude calls), <strong style="color:var(--text)">Resources</strong> (data @-mentionable in chat), <strong style="color:var(--text)">Prompts</strong> (templates as slash commands). Works with any language — build once, integrate everywhere.</p>
+
+  <div class="tr-grid">
+    <div class="tr-card" style="border-color:rgba(0,212,245,.3)">
+      <div class="tr-name" style="color:var(--cyan)">HTTP / Streamable HTTP</div>
+      <span class="tr-badge" style="color:var(--cyan);border-color:var(--cyan)">Recommended</span>
+      <div class="tr-desc">Remote servers via HTTP endpoints. Best for hosted services. Supports OAuth 2.0 and bearer token auth. Streamable HTTP is the current spec — use when available.</div>
+    </div>
+    <div class="tr-card" style="border-color:rgba(248,113,113,.3)">
+      <div class="tr-name" style="color:var(--red)">SSE</div>
+      <span class="tr-badge" style="color:var(--red);border-color:var(--red)">Deprecated</span>
+      <div class="tr-desc">Server-Sent Events streaming. Still supported by Claude Code, but officially deprecated. Migrate to HTTP/Streamable HTTP. Third-party servers may require <code>--transport sse</code> flag.</div>
+    </div>
+    <div class="tr-card" style="border-color:rgba(46,235,168,.3)">
+      <div class="tr-name" style="color:var(--green)">stdio</div>
+      <span class="tr-badge" style="color:var(--green);border-color:var(--green)">Local Process</span>
+      <div class="tr-desc">Claude Code launches the process, communicates via stdin/stdout. Best for local tools: npx packages, Python scripts, native binaries. Requires <code>--</code> separator in CLI.</div>
+    </div>
+  </div>
+
+  <div class="warn">
+    <strong>⚠ MCP binary content — new behavior</strong>
+    MCP tools returning PDFs, Office documents, or audio now <strong>save decoded bytes to disk with the correct file extension</strong> instead of dumping raw base64 into the conversation context. WebFetch also saves binary responses alongside its summary. This reduces context waste enormously.
+  </div>
+
+  <div class="info">
+    <strong>ℹ MCP tool naming convention throughout Claude Code</strong>
+    All MCP tools are accessed as <code>mcp__servername__toolname</code>. A server named <code>github</code> with tool <code>create_pr</code> → <code>mcp__github__create_pr</code>. Use this pattern in <code>allow</code>/<code>deny</code> permission rules, <code>disallowedTools</code> settings, and hook matchers (<code>mcp__github__.*</code>).
+  </div>
+</div>
+
+
+<!-- ═══════════ 05: CLI COMMANDS ════════════════════════ -->
+<div class="section-label" data-n="05">MCP CLI Commands — Complete Reference</div>
+
+<div class="g2 fw">
+
+  <div class="card c-cyan">
+    <div class="card-title">⌨ Adding Servers — Transport Syntax</div>
+
+    <span class="pre-label">HTTP (recommended for remote servers)</span>
+    <pre><span class="t-cm">── Streamable HTTP (modern, preferred) ───────────</span>
+<span class="t-fn">claude mcp add</span> <span class="t-op">--transport http</span> <span class="t-st">sentry</span>  https://mcp.sentry.dev/mcp
+<span class="t-fn">claude mcp add</span> <span class="t-op">--transport http</span> <span class="t-st">stripe</span>  https://mcp.stripe.com
+<span class="t-fn">claude mcp add</span> <span class="t-op">--transport http</span> <span class="t-st">context7</span> https://mcp.context7.com/mcp
+
+<span class="t-cm">── HTTP with header auth ─────────────────────────</span>
+<span class="t-fn">claude mcp add</span> <span class="t-op">--transport http</span> <span class="t-st">github</span> \
+  https://api.githubcopilot.com/mcp \
+  <span class="t-op">-H</span> <span class="t-st">"Authorization: Bearer ${GITHUB_PAT}"</span>
+
+<span class="t-cm">── Or use add-json for exact control ─────────────</span>
+<span class="t-fn">claude mcp add-json</span> <span class="t-st">github</span> \
+  <span class="t-st">'{"type":"http","url":"https://api.githubcopilot.com/mcp","headers":{"Authorization":"Bearer YOUR_PAT"}}'</span>
+
+<span class="t-cm">── SSE (legacy, still works) ─────────────────────</span>
+<span class="t-fn">claude mcp add</span> <span class="t-op">--transport sse</span> <span class="t-st">old-server</span> https://stream.example.com/sse</pre>
+
+    <span class="pre-label">stdio (local process — note the -- separator)</span>
+    <pre><span class="t-cm">── npx-based ─────────────────────────────────────</span>
+<span class="t-fn">claude mcp add</span> <span class="t-st">filesystem</span> -- npx -y @modelcontextprotocol/server-filesystem ~/Documents
+<span class="t-fn">claude mcp add</span> <span class="t-st">postgres</span>   -- uvx mcp-server-postgres --db-url postgresql://localhost/mydb
+
+<span class="t-cm">── ⚠ GitHub npm package deprecated Apr 2025 ─────</span>
+<span class="hl-r"><span class="t-er">✗</span> npx -y @modelcontextprotocol/server-github  ← deprecated!</span>
+<span class="hl-g"><span class="t-st">✓</span> claude mcp add --transport http github https://api.githubcopilot.com/mcp</span>
+
+<span class="t-cm">── With env vars ─────────────────────────────────</span>
+<span class="t-fn">claude mcp add</span> <span class="t-op">--env</span> API_KEY=xxx <span class="t-st">myserver</span> -- npx -y my-mcp-server
+
+<span class="t-cm">── ⚠ Flag ordering: ALL flags BEFORE server name!</span>
+<span class="hl-g"><span class="t-st">✓</span> claude mcp add --scope project --transport http sentry https://mcp.sentry.dev/mcp</span>
+<span class="hl-r"><span class="t-er">✗</span> claude mcp add sentry --scope project https://...  ← flags after name = broken</span>
+
+<span class="t-cm">── MCP startup timeout ───────────────────────────</span>
+<span class="t-bi">MCP_TIMEOUT</span>=10000 <span class="t-fn">claude</span>  <span class="t-cm"># 10-second server startup timeout</span></pre>
+  </div>
+
+  <div class="card c-green">
+    <div class="card-title">📋 Scope, Manage, &amp; Alternative Methods</div>
+
+    <span class="pre-label">Scope flags — use new names</span>
+    <pre><span class="t-cm">── local (default) — private, current project ────</span>
+<span class="t-fn">claude mcp add</span> <span class="t-st">temp-server</span> -- python server.py
+<span class="t-cm"># no --scope flag = local. stored in ~/.claude.json</span>
+
+<span class="t-cm">── project — shared via .mcp.json ───────────────</span>
+<span class="t-fn">claude mcp add</span> <span class="t-op">--scope project</span> <span class="t-op">--transport http</span> \
+  <span class="t-st">github</span> https://api.githubcopilot.com/mcp
+
+<span class="t-cm">── user — all projects on this machine ──────────</span>
+<span class="t-fn">claude mcp add</span> <span class="t-op">--scope user</span> <span class="t-st">filesystem</span> -- \
+  npx -y @modelcontextprotocol/server-filesystem ~/</pre>
+
+    <span class="pre-label">Inspect, remove, reset</span>
+    <pre><span class="t-fn">claude mcp list</span>                <span class="t-cm"># Name / Scope / Transport / Status table</span>
+<span class="t-fn">claude mcp get</span> <span class="t-st">github</span>          <span class="t-cm"># config, env vars, capabilities, status</span>
+<span class="t-fn">claude mcp remove</span> <span class="t-st">github</span>       <span class="t-cm"># also revokes OAuth tokens</span>
+<span class="t-fn">claude mcp reset-project-choices</span>  <span class="t-cm"># re-ask team trust prompts for .mcp.json</span>
+<span class="t-sl">/mcp</span>                           <span class="t-cm"># in-session: browse · add · auth · reconnect</span></pre>
+
+    <span class="pre-label">Alternative add methods</span>
+    <pre><span class="t-cm">── Add from JSON blob ────────────────────────────</span>
+<span class="t-fn">claude mcp add-json</span> <span class="t-st">myserver</span> <span class="t-st">'{</span>
+<span class="t-st">  "transport": "stdio",</span>
+<span class="t-st">  "command": "npx",</span>
+<span class="t-st">  "args": ["-y", "@company/mcp-server"],</span>
+<span class="t-st">  "env": { "API_KEY": "${COMPANY_KEY}" }</span>
+<span class="t-st">}'</span>
+
+<span class="t-cm">── Import from Claude Desktop (macOS / WSL) ──────</span>
+<span class="t-fn">claude mcp add-from-claude-desktop</span>
+<span class="t-cm"># imports all servers to user scope</span>
+
+<span class="t-cm">── Windows non-WSL: wrap with cmd /c ────────────</span>
+<span class="t-fn">claude mcp add</span> <span class="t-st">myserver</span> -- cmd /c npx -y @my/server
+
+<span class="t-cm">── Serve Claude Code as an MCP server ───────────</span>
+<span class="t-fn">claude mcp serve</span>                          <span class="t-cm"># stdio (for Claude Desktop)</span>
+<span class="t-fn">claude mcp serve</span> <span class="t-op">--transport http</span> <span class="t-op">--port</span> <span class="t-bi">3000</span>
+
+<span class="t-cm"># claude_desktop_config.json:</span>
+<span class="t-op">{</span><span class="t-nm">"mcpServers"</span>:<span class="t-op">{</span><span class="t-nm">"claude-code"</span>:<span class="t-op">{</span>
+  <span class="t-nm">"type"</span>:<span class="t-st">"stdio"</span>,<span class="t-nm">"command"</span>:<span class="t-st">"claude"</span>,<span class="t-nm">"args"</span>:<span class="t-op">[</span><span class="t-st">"mcp"</span>,<span class="t-st">"serve"</span><span class="t-op">]}}}</span></pre>
+  </div>
+</div>
+
+
+<!-- ═══════════ 06: SCOPE & .MCP.JSON ═══════════════════ -->
+<div class="section-label" data-n="06">Scopes &amp; .mcp.json Configuration</div>
+
+<div class="card c-orange fw">
+  <div class="card-title">📍 3 Scopes — Updated Names, Storage &amp; Priority</div>
+
+  <div class="hier-stack">
+    <div class="hier-row">
+      <div class="hier-num" style="background:var(--cyan)">1</div>
+      <div class="hier-label" style="color:var(--cyan)">local (default)</div>
+      <div class="hier-body">
+        <strong>Private to you, current project only.</strong> No <code>--scope</code> flag needed.<br>
+        Stored in <code>~/.claude.json</code> under your project's path. Session-persistent but not shared.<br>
+        <em>Was called <code>project</code> in older Claude Code versions.</em>
+      </div>
+      <div class="hier-scope">private<br>this machine<br>this project</div>
+    </div>
+    <div class="hier-row">
+      <div class="hier-num" style="background:var(--green)">2</div>
+      <div class="hier-label" style="color:var(--green)">project</div>
+      <div class="hier-body">
+        <strong>Shared with entire team</strong> via <code>.mcp.json</code> at project root. Commit to git.<br>
+        Everyone who clones the repo gets the same MCP servers. Best for: GitHub, Sentry, Postgres.<br>
+        <em>This scope name is new — the "project" concept previously mapped to what is now "local".</em>
+      </div>
+      <div class="hier-scope">team<br>git-committed<br>.mcp.json</div>
+    </div>
+    <div class="hier-row">
+      <div class="hier-num" style="background:var(--purple)">3</div>
+      <div class="hier-label" style="color:var(--purple)">user</div>
+      <div class="hier-body">
+        <strong>All projects on this machine.</strong> Stored in <code>~/.claude.json</code> at user level.<br>
+        Best for personal tools: filesystem, notes, tasks, productivity apps.<br>
+        <em>Was called <code>global</code> in older Claude Code versions.</em>
+      </div>
+      <div class="hier-scope">all projects<br>this machine</div>
+    </div>
+  </div>
+
+  <span class="pre-label">.mcp.json — full format with env var expansion and defaults</span>
+  <pre><span class="t-op">{</span>
+  <span class="t-nm">"mcpServers"</span>: <span class="t-op">{</span>
+
+    <span class="t-cm">── HTTP server with PAT auth (GitHub) ────────────</span>
+    <span class="t-nm">"github"</span>: <span class="t-op">{</span>
+      <span class="t-nm">"type"</span>: <span class="t-st">"http"</span>,
+      <span class="t-nm">"url"</span>:  <span class="t-st">"https://api.githubcopilot.com/mcp"</span>,
+      <span class="t-nm">"headers"</span>: <span class="t-op">{</span> <span class="t-nm">"Authorization"</span>: <span class="t-st">"Bearer ${GITHUB_PAT}"</span> <span class="t-op">}</span>
+    <span class="t-op">}</span>,
+
+    <span class="t-cm">── stdio with env vars ───────────────────────────</span>
+    <span class="t-nm">"postgres"</span>: <span class="t-op">{</span>
+      <span class="t-nm">"transport"</span>: <span class="t-st">"stdio"</span>,
+      <span class="t-nm">"command"</span>:   <span class="t-st">"uvx"</span>,
+      <span class="t-nm">"args"</span>: <span class="t-op">[</span><span class="t-st">"mcp-server-postgres"</span>, <span class="t-st">"--db-url"</span>,
+               <span class="t-st">"postgresql://${DB_USER}:${DB_PASS}@${DB_HOST:-localhost}/${DB_NAME:-myapp}"</span><span class="t-op">]</span>
+    <span class="t-op">}</span>,
+
+    <span class="t-cm">── stdio with explicit env block ─────────────────</span>
+    <span class="t-nm">"sentry"</span>: <span class="t-op">{</span>
+      <span class="t-nm">"transport"</span>: <span class="t-st">"stdio"</span>,
+      <span class="t-nm">"command"</span>:   <span class="t-st">"npx"</span>,
+      <span class="t-nm">"args"</span>: <span class="t-op">[</span><span class="t-st">"-y"</span>, <span class="t-st">"@modelcontextprotocol/server-sentry"</span><span class="t-op">]</span>,
+      <span class="t-nm">"env"</span>: <span class="t-op">{</span>
+        <span class="t-nm">"SENTRY_ORG"</span>:   <span class="t-st">"${SENTRY_ORG}"</span>,
+        <span class="t-nm">"SENTRY_TOKEN"</span>: <span class="t-st">"${SENTRY_TOKEN}"</span>
+      <span class="t-op">}</span>
+    <span class="t-op">}</span>
+  <span class="t-op">}</span>
+<span class="t-op">}</span></pre>
+
+  <div class="danger">
+    <strong>⚠ NEVER hardcode secrets in .mcp.json</strong>
+    Always use <code>${ENV_VAR}</code> substitution. Add <code>.env</code> to <code>.gitignore</code>. Use <code>${VAR:-default}</code> for safe fallbacks. A token committed to git is a security incident.
+  </div>
+</div>
+
+
+<!-- ═══════════ 07: RESOURCES, PROMPTS & OUTPUT ══════════ -->
+<div class="section-label" data-n="07">MCP Resources, Prompts, Output Limits &amp; Tool Search</div>
+
+<div class="g2 fw">
+
+  <div class="card c-yellow">
+    <div class="card-title">📎 Resources (@-mentions) &amp; Prompts (Slash Commands)</div>
+
+    <span class="pre-label">Resources — @server:type://path in conversation</span>
+    <pre><span class="t-cm">── Syntax ────────────────────────────────────────</span>
+<span class="t-op">@github</span>:<span class="t-nm">repos</span>://<span class="t-st">anthropics/anthropic-sdk-python</span>
+<span class="t-op">@sentry</span>:<span class="t-nm">issues</span>://<span class="t-st">my-project</span>
+<span class="t-op">@postgres</span>:<span class="t-nm">schema</span>://<span class="t-st">users</span>
+<span class="t-op">@filesystem</span>:<span class="t-nm">read</span>://~/Documents/spec.pdf
+
+<span class="t-cm">── Type @ in prompt to autocomplete available resources</span>
+<span class="t-cm">── Discover via: /mcp → Resources tab</span>
+<span class="t-cm">── Or call ListMcpResources tool inside an Agent</span>
+
+<span class="t-cm">── In conversation ───────────────────────────────</span>
+<span class="t-cm">&gt; Analyze @sentry:issues://my-project and suggest fixes</span>
+<span class="t-cm">&gt; Review schema @postgres:schema://users</span>
+<span class="t-cm">&gt; Implement @github:issues://owner/repo/4521</span></pre>
+
+    <span class="pre-label">Prompts — MCP slash commands</span>
+    <pre><span class="t-cm">── Format: /mcp__servername__promptname ──────────</span>
+<span class="t-sl">/mcp__github__search-code</span>
+<span class="t-sl">/mcp__sentry__analyze-errors</span>
+<span class="t-sl">/mcp__postgres__explain-query</span>
+
+<span class="t-cm">── Type / to see all available commands (incl. MCP)</span>
+<span class="t-cm">── Navigate /mcp → Prompts tab to browse all</span>
+<span class="t-cm">── Prompts can accept parameters via interactive UI</span></pre>
+
+    <div class="tip">
+      <strong>✦ MCP server instructions field + Tool Search</strong>
+      When Tool Search is enabled, Claude uses MCP server <code>instructions</code> fields to decide when to search for your tools — exactly like Skill descriptions. Write clear, keyword-rich server instructions to improve tool discovery.
+    </div>
+  </div>
+
+  <div class="card c-red">
+    <div class="card-title">📊 Output Limits &amp; Tool Search</div>
+
+    <table>
+      <thead><tr><th>Limit / Control</th><th>Value</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Output warning</td><td>10,000 tokens per call</td><td>Warning shown in UI. Design servers to paginate.</td></tr>
+        <tr><td>Output max</td><td>No hard cap by default</td><td>Raise with <code>MAX_MCP_OUTPUT_TOKENS=N</code> env var</td></tr>
+        <tr><td>Tool Search trigger</td><td>&gt;10% of context window</td><td>Requires Sonnet 4+ or Opus 4+. Haiku unsupported.</td></tr>
+        <tr><td>Tool Search threshold</td><td>Configurable</td><td><code>ENABLE_TOOL_SEARCH=auto:5</code> for 5% threshold</td></tr>
+        <tr><td>Tool Search disable</td><td>—</td><td><code>ENABLE_TOOL_SEARCH=false</code> or add <code>MCPSearch</code> to <code>disallowedTools</code></td></tr>
+        <tr><td>Server startup timeout</td><td>Varies</td><td><code>MCP_TIMEOUT=10000</code> (ms) env var</td></tr>
+        <tr><td>Binary content</td><td>—</td><td>PDFs, Office, audio → saved to disk, not base64 in context</td></tr>
+      </tbody>
+    </table>
+
+    <span class="pre-label">Tool Search — how it works</span>
+    <pre><span class="t-cm">── Problem: many MCP servers → huge context ──────</span>
+<span class="t-cm">── Solution: defer tool loading until needed ──────</span>
+
+<span class="t-cm">When auto triggers (>10% context window):</span>
+<span class="t-cm">  → Tools marked defer_loading: true (not in context upfront)</span>
+<span class="t-cm">  → Claude uses MCPSearch tool to find what it needs</span>
+<span class="t-cm">  → Only needed tools loaded into context</span>
+<span class="t-cm">  → From your view: tools work exactly as before</span>
+
+<span class="t-cm">── Model requirement ─────────────────────────────</span>
+<span class="t-cm">⚠ Requires tool_reference block support:</span>
+<span class="t-cm">  Sonnet 4+ or Opus 4+ only</span>
+<span class="t-cm">  Haiku models: Tool Search NOT supported</span>
+
+<span class="t-cm">── Control via env var ───────────────────────────</span>
+<span class="t-bi">ENABLE_TOOL_SEARCH</span>=auto         <span class="t-cm"># default → 10%</span>
+<span class="t-bi">ENABLE_TOOL_SEARCH</span>=auto:<span class="t-bi">5</span>      <span class="t-cm"># custom 5% threshold</span>
+<span class="t-bi">ENABLE_TOOL_SEARCH</span>=<span class="t-kw">false</span>        <span class="t-cm"># disable entirely</span>
+
+<span class="t-cm"># Or in settings.json / .claude/settings.json:</span>
+<span class="t-op">{</span><span class="t-nm">"env"</span>:<span class="t-op">{</span><span class="t-nm">"ENABLE_TOOL_SEARCH"</span>:<span class="t-st">"auto:5"</span><span class="t-op">}}</span></pre>
+  </div>
+</div>
+
+
+<!-- ═══════════ 08: AUTH ═════════════════════════════════ -->
+<div class="section-label" data-n="08">Authentication — OAuth, API Keys, Bearer Tokens</div>
+
+<div class="card c-pink fw">
+  <div class="card-title">🔐 3 Authentication Methods</div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;">
+    <div>
+      <div style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--purple);font-weight:700;margin-bottom:8px;">OAuth 2.0 — Browser Flow</div>
+      <pre style="margin:0;"><span class="t-cm"># 1. Add server (HTTP transport):</span>
+<span class="t-fn">claude mcp add</span> <span class="t-op">--transport http</span> \
+  <span class="t-st">stripe</span> https://mcp.stripe.com
+
+<span class="t-cm"># 2. Open /mcp in session</span>
+<span class="t-cm"># 3. Select → Authenticate</span>
+<span class="t-cm"># 4. Complete OAuth in browser</span>
+<span class="t-cm"># 5. Tokens stored + auto-refreshed</span>
+
+<span class="t-cm"># Revoke via:</span>
+<span class="t-fn">claude mcp remove</span> <span class="t-st">stripe</span>
+<span class="t-cm"># /mcp → Settings → Revoke Access</span></pre>
+    </div>
+    <div>
+      <div style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--green);font-weight:700;margin-bottom:8px;">API Keys — Env Vars (stdio)</div>
+      <pre style="margin:0;"><span class="t-cm"># Pass with --env flag:</span>
+<span class="t-fn">claude mcp add</span> \
+  <span class="t-op">--env</span> SENTRY_ORG=my-org \
+  <span class="t-op">--env</span> SENTRY_TOKEN=sntrys_xxx \
+  <span class="t-st">sentry</span> -- npx -y \
+  @modelcontextprotocol/server-sentry
+
+<span class="t-cm"># Or export then add:</span>
+<span class="t-fn">export</span> SENTRY_TOKEN=sntrys_xxx
+<span class="t-fn">claude mcp add</span> <span class="t-st">sentry</span> -- ...
+
+<span class="t-cm"># In .mcp.json (NEVER hardcode):</span>
+<span class="t-nm">"env"</span>: <span class="t-op">{</span>
+  <span class="t-nm">"SENTRY_TOKEN"</span>: <span class="t-st">"${SENTRY_TOKEN}"</span>
+<span class="t-op">}</span></pre>
+    </div>
+    <div>
+      <div style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan);font-weight:700;margin-bottom:8px;">Bearer / Header (HTTP)</div>
+      <pre style="margin:0;"><span class="t-cm"># Via -H / --header flag:</span>
+<span class="t-fn">claude mcp add</span> <span class="t-op">--transport http</span> \
+  <span class="t-st">my-api</span> https://api.example.com/mcp \
+  <span class="t-op">-H</span> <span class="t-st">"Authorization: Bearer ${TOKEN}"</span> \
+  <span class="t-op">-H</span> <span class="t-st">"X-API-Version: 2026-01"</span>
+
+<span class="t-cm"># In .mcp.json:</span>
+<span class="t-nm">"headers"</span>: <span class="t-op">{</span>
+  <span class="t-nm">"Authorization"</span>:
+    <span class="t-st">"Bearer ${MY_TOKEN}"</span>,
+  <span class="t-nm">"X-API-Version"</span>: <span class="t-st">"2026-01"</span>
+<span class="t-op">}</span>
+
+<span class="t-cm"># Best for: PATs, custom APIs,</span>
+<span class="t-cm"># enterprise portals</span></pre>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════ 09: REAL-WORLD EXAMPLES ═════════════════ -->
+<div class="section-label" data-n="09">Real-World MCP Setup Examples</div>
+
+<div class="g3 fw">
+
+  <div class="card c-cyan">
+    <div class="card-title">🐙 GitHub (HTTP — PAT)</div>
+    <span class="tag tc">Project scope</span><span class="tag tc">HTTP</span>
+    <pre><span class="t-cm"># npm package deprecated Apr 2025 — use HTTP:</span>
+<span class="t-fn">claude mcp add</span> <span class="t-op">--scope project</span> <span class="t-op">--transport http</span> \
+  <span class="t-st">github</span> https://api.githubcopilot.com/mcp \
+  <span class="t-op">-H</span> <span class="t-st">"Authorization: Bearer ${GITHUB_PAT}"</span>
+
+<span class="t-cm"># Usage in Claude Code:</span>
+<span class="t-cm">&gt; Implement feature in @github:issues://owner/repo/4521</span>
+<span class="t-cm">&gt; Create a PR for this branch</span>
+<span class="t-cm">&gt; /mcp__github__search-code</span></pre>
+  </div>
+
+  <div class="card c-green">
+    <div class="card-title">🐘 PostgreSQL (stdio)</div>
+    <span class="tag tg">Project scope</span><span class="tag tg">stdio</span>
+    <pre><span class="t-fn">claude mcp add</span> <span class="t-op">--scope project</span> <span class="t-st">postgres</span> -- \
+  uvx mcp-server-postgres \
+  --db-url <span class="t-st">"postgresql://${DB_USER}:${DB_PASS}@localhost/mydb"</span>
+
+<span class="t-cm"># Usage:</span>
+<span class="t-cm">&gt; Find 10 users who used feature ENG-4521</span>
+<span class="t-cm">&gt; @postgres:schema://users  — view table structure</span></pre>
+  </div>
+
+  <div class="card c-orange">
+    <div class="card-title">🚨 Sentry (HTTP — OAuth)</div>
+    <span class="tag to">User scope</span><span class="tag tc">HTTP + OAuth</span>
+    <pre><span class="t-fn">claude mcp add</span> <span class="t-op">--scope user</span> <span class="t-op">--transport http</span> \
+  <span class="t-st">sentry</span> https://mcp.sentry.dev/mcp
+
+<span class="t-cm"># Then: /mcp → Authenticate via OAuth</span>
+<span class="t-cm"># Usage:</span>
+<span class="t-cm">&gt; Check Sentry for errors in ENG-4521</span>
+<span class="t-cm">&gt; @sentry:issues://my-project</span></pre>
+  </div>
+
+  <div class="card c-purple">
+    <div class="card-title">📁 Filesystem (stdio)</div>
+    <span class="tag tp">User scope</span><span class="tag tg">stdio</span>
+    <pre><span class="t-fn">claude mcp add</span> <span class="t-op">--scope user</span> <span class="t-st">filesystem</span> -- \
+  npx -y @modelcontextprotocol/server-filesystem \
+  ~/Documents ~/Downloads
+
+<span class="t-cm"># Usage:</span>
+<span class="t-cm">&gt; @filesystem:read://~/Documents/spec.pdf</span>
+<span class="t-cm">&gt; @filesystem:list://~/Downloads</span></pre>
+  </div>
+
+  <div class="card c-blue">
+    <div class="card-title">🔴 Stripe (HTTP — OAuth)</div>
+    <span class="tag tb">Local scope</span><span class="tag tc">HTTP</span>
+    <pre><span class="t-fn">claude mcp add</span> <span class="t-op">--transport http</span> \
+  <span class="t-st">stripe</span> https://mcp.stripe.com
+
+<span class="t-cm"># After: /mcp → Authenticate via OAuth</span>
+<span class="t-cm"># Usage:</span>
+<span class="t-cm">&gt; Create a $99 payment link</span>
+<span class="t-cm">&gt; List failed charges this week</span></pre>
+    <div class="tip" style="margin-top:10px;">
+      <strong>✦ Popular services with hosted HTTP MCP</strong>
+      Sentry, Stripe, GitHub Copilot, Context7, Notion, Figma, Slack — add via HTTP, authenticate with OAuth in <code>/mcp</code>. No local process needed.
+    </div>
+  </div>
+
+  <div class="card c-pink">
+    <div class="card-title">📋 Team Shared .mcp.json</div>
+    <span class="tag tk">Project scope</span><span class="tag tc">Commit to git</span>
+    <pre><span class="t-cm"># Add team servers to project scope:</span>
+<span class="t-fn">claude mcp add</span> <span class="t-op">--scope project</span> <span class="t-op">--transport http</span> \
+  <span class="t-st">github</span> https://api.githubcopilot.com/mcp
+<span class="t-fn">claude mcp add</span> <span class="t-op">--scope project</span> <span class="t-op">--transport http</span> \
+  <span class="t-st">sentry</span> https://mcp.sentry.dev/mcp
+<span class="t-fn">claude mcp add</span> <span class="t-op">--scope project</span> <span class="t-st">postgres</span> -- \
+  uvx mcp-server-postgres --db-url <span class="t-st">"postgresql://${DB_URL}"</span>
+
+<span class="t-cm"># .mcp.json created automatically — commit it:</span>
+<span class="t-fn">git</span> add .mcp.json
+<span class="t-fn">git</span> commit -m <span class="t-st">"chore: add shared MCP config"</span></pre>
+  </div>
+</div>
+
+
+<!-- ═══════════ 10: DECISION TREE ════════════════════════ -->
+<div class="section-label" data-n="10">Decision Tree — Which Tool to Use</div>
+
+<div class="card c-purple tree fw">
+  <div class="card-title">🌿 Tool Selection Decision Tree</div>
+  <pre><span class="tq">Need to find something in the codebase?</span>
+<span class="tln">├─ </span><span class="tya">Know the exact file path?</span>
+<span class="tln">│  └─ YES</span> → .ipynb file? <span class="tre">NotebookRead</span>  /  Otherwise: <span class="tre">Read</span>  (batch multiple in one call)
+<span class="tln">│  └─ NO</span>  → Know the file name pattern (e.g. *.ts, *config*)?
+<span class="tln">│         ├─ YES</span> → <span class="tre">Glob</span>  (fast, sorted by mtime)
+<span class="tln">│         └─ NO</span>  → Know a regex or keyword inside the file?
+<span class="tln">│               ├─ YES</span> → <span class="tre">Grep</span>  (regex search + file type filter)
+<span class="tln">│               └─ NO</span>  → Open-ended, may take multiple rounds?
+<span class="tln">│                     └─ YES</span> → <span class="tre">Agent (Task)</span>  (batch multiple concurrently)
+
+<span class="tq">Need to modify a file?</span>
+<span class="tln">├─ </span><span class="tya">Single targeted replacement?</span>   → <span class="tre">Edit</span>         (must Read first; old_string unique)
+<span class="tln">├─ </span><span class="tya">Multiple changes, same file?</span>   → <span class="tre">MultiEdit</span>    (atomic batch)
+<span class="tln">├─ </span><span class="tya">Rewrite entire file content?</span>   → <span class="tre">Write</span>        (must Read first; destructive)
+<span class="tln">└─ </span><span class="tya">Edit a Jupyter cell?</span>           → <span class="tre">NotebookEdit</span> (modes: replace/insert/delete; cell_id 0-indexed)
+
+<span class="tq">Need to run a command?</span>
+<span class="tln">├─ </span><span class="tya">Shell command or script?</span>       → <span class="tre">Bash</span>  (use rg; chain with ; or &&; HEREDOC for commits)
+<span class="tln">└─ </span><span class="tya">List a directory?</span>              → <span class="tre">LS</span>    (absolute path; prefer Glob/Grep when possible)
+
+<span class="tq">Need external / web data?</span>
+<span class="tln">├─ </span><span class="tya">Have the URL?</span>                   → <span class="tre">WebFetch</span>  (prefer mcp__* fetch tools if available)
+<span class="tln">├─ </span><span class="tya">Need to search the web?</span>         → <span class="tre">WebSearch</span> (US only; use domain filters)
+<span class="tln">├─ </span><span class="tya">External service (GitHub, DB)?</span>  → <span class="tre">MCP tool  mcp__servername__toolname</span>
+<span class="tln">└─ </span><span class="tya">Browse available MCP resources?</span> → <span class="tre">ListMcpResources</span> or type @ in prompt
+
+<span class="tq">Need to track tasks?</span>
+<span class="tln">├─ </span><span class="tya">3+ steps or complex task?</span>      → <span class="tre">TodoWrite</span>  (plan first; one in_progress at a time)
+<span class="tln">├─ </span><span class="tya">Single simple task?</span>             → skip TodoWrite — just do it
+<span class="tln">└─ </span><span class="tya">Unsure what's pending?</span>          → <span class="tre">TodoRead</span>   (call proactively and frequently)
+
+<span class="tq">Need to clarify something with the user mid-task?</span>
+<span class="tln">└─ </span><span class="tya">Yes, need specific info before proceeding</span> → <span class="tre">AskUserQuestion</span>  (surfaces in UI cleanly)</pre>
+</div>
+
+
+<!-- ═══════════ 11: QUICK REFERENCE ═════════════════════ -->
+<div class="section-label" data-n="11">Complete Quick Reference</div>
+
+<div class="g2 fw">
+
+  <div class="card c-cyan">
+    <div class="card-title">📋 Built-In Tools Master Table</div>
+    <table>
+      <thead><tr><th>Tool</th><th>Key Parameters</th><th>Limits / Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Agent (Task)</td><td>description, prompt, subagent_type, model, run_in_background, max_turns, resume, mode</td><td>Stateless. ONE final message. Batch for concurrency.</td></tr>
+        <tr><td>TaskStop</td><td>task_id</td><td>Cancel a background Agent (run_in_background: true).</td></tr>
+        <tr><td>Bash</td><td>command, timeout?</td><td>Default 2 min; max 10 min; 30k char output limit. Use rg not grep.</td></tr>
+        <tr><td>Glob</td><td>pattern, path?</td><td>Sorted by mtime. Faster than Agent for known patterns.</td></tr>
+        <tr><td>Grep</td><td>pattern, path?, include?</td><td>Full regex. For match counts use Bash+rg.</td></tr>
+        <tr><td>LS</td><td>path (absolute), ignore?</td><td>Requires absolute path. Prefer Glob/Grep.</td></tr>
+        <tr><td>Read</td><td>file_path, offset?, limit?</td><td>Default 2,000 lines. Batch reads. Multimodal (images).</td></tr>
+        <tr><td>Edit</td><td>file_path, old_string, new_string, replace_all?</td><td>Must Read first. old_string must be unique in file.</td></tr>
+        <tr><td>MultiEdit</td><td>file_path, edits[] (old_string, new_string, replace_all?)</td><td>Atomic. Applied in order. Prefer over repeated Edit.</td></tr>
+        <tr><td>Write</td><td>file_path, content</td><td>Must Read first. Full overwrite. Never create docs unprompted.</td></tr>
+        <tr><td>NotebookRead</td><td>notebook_path (absolute)</td><td>All cells + outputs. Use instead of Read for .ipynb.</td></tr>
+        <tr><td>NotebookEdit</td><td>notebook_path, cell_id (0-indexed), new_source, cell_type?, edit_mode?</td><td>replace/insert/delete. cell_type required for insert.</td></tr>
+        <tr><td>WebFetch</td><td>url, prompt</td><td>15-min cache. Binary → disk. Prefer mcp__ tools.</td></tr>
+        <tr><td>WebSearch</td><td>query, allowed_domains?, blocked_domains?</td><td>US only. Post-cutoff info.</td></tr>
+        <tr><td>TodoRead</td><td>(none)</td><td>Call proactively: start, before tasks, when uncertain.</td></tr>
+        <tr><td>TodoWrite</td><td>todos[] (content, status, priority, id)</td><td>One in_progress at a time. Complete immediately.</td></tr>
+        <tr><td>ListMcpResources</td><td>(none)</td><td>Full catalog of available @server:type://path resources.</td></tr>
+        <tr><td>ReadMcpResource</td><td>server_name, uri</td><td>Programmatic resource access. Useful inside Agent.</td></tr>
+        <tr><td>SubscribeMcpResource</td><td>server_name, uri</td><td>Live list_changed updates. Pair with Unsubscribe.</td></tr>
+        <tr><td>AskUserQuestion</td><td>question</td><td>Mid-task clarification without full conversation turn.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card c-green">
+    <div class="card-title">📋 MCP Master Table</div>
+    <table>
+      <thead><tr><th>Concept</th><th>Detail</th><th>Notes / Gotchas</th></tr></thead>
+      <tbody>
+        <tr><td>Scope: local</td><td>Default. Private, current project. <code>~/.claude.json</code>.</td><td>Was called <code>project</code> in old Claude Code versions.</td></tr>
+        <tr><td>Scope: project</td><td><code>--scope project</code> → <code>.mcp.json</code>. Commit to git.</td><td>Was NOT a scope name in older versions.</td></tr>
+        <tr><td>Scope: user</td><td><code>--scope user</code> → <code>~/.claude.json</code>. All projects.</td><td>Was called <code>global</code> in old Claude Code versions.</td></tr>
+        <tr><td>Precedence</td><td>local &gt; project &gt; user</td><td>Same server name: higher scope wins silently.</td></tr>
+        <tr><td>HTTP transport</td><td><code>--transport http &lt;name&gt; &lt;url&gt;</code></td><td>Recommended. Supports OAuth + bearer. Streamable HTTP.</td></tr>
+        <tr><td>SSE transport</td><td><code>--transport sse &lt;name&gt; &lt;url&gt;</code></td><td>Deprecated. Migrate to HTTP.</td></tr>
+        <tr><td>stdio transport</td><td><code>&lt;name&gt; -- &lt;command&gt; [args]</code></td><td><code>--</code> separator required. Local processes only.</td></tr>
+        <tr><td>Flag order</td><td>ALL flags BEFORE server name</td><td>Flags after server name = broken command.</td></tr>
+        <tr><td>GitHub npm</td><td>@modelcontextprotocol/server-github deprecated</td><td>Use HTTP: https://api.githubcopilot.com/mcp instead.</td></tr>
+        <tr><td>Env vars</td><td><code>${VAR}</code> in .mcp.json. <code>${VAR:-default}</code> for fallbacks.</td><td>NEVER hardcode tokens. Add .env to .gitignore.</td></tr>
+        <tr><td>Tool naming</td><td><code>mcp__servername__toolname</code></td><td>Use in allow/deny rules, disallowedTools, hook matchers.</td></tr>
+        <tr><td>Resources</td><td><code>@server:type://path</code> in prompt</td><td>Type @ to autocomplete. Or call ListMcpResources tool.</td></tr>
+        <tr><td>Prompts</td><td><code>/mcp__server__promptname</code></td><td>Type / to see all available MCP prompts.</td></tr>
+        <tr><td>list_changed</td><td>Servers push tool/prompt/resource updates dynamically</td><td>No disconnect needed. Claude Code auto-refreshes.</td></tr>
+        <tr><td>Binary content</td><td>PDFs, Office, audio → saved to disk with correct ext</td><td>No more raw base64 in context. WebFetch does this too.</td></tr>
+        <tr><td>Output warning</td><td>10,000 tokens per tool output</td><td>Design servers with pagination. Raise with MAX_MCP_OUTPUT_TOKENS.</td></tr>
+        <tr><td>MCP_TIMEOUT</td><td><code>MCP_TIMEOUT=10000 claude</code></td><td>Server startup timeout in milliseconds.</td></tr>
+        <tr><td>Tool Search</td><td>Auto at &gt;10% context. Defer + search on demand.</td><td>Sonnet 4+ / Opus 4+ only. Write good server instructions.</td></tr>
+        <tr><td>/mcp command</td><td>In-session: browse, add, auth, reconnect</td><td>Opens interactive management dialog.</td></tr>
+        <tr><td>claude mcp serve</td><td>Expose Claude Code tools to other MCP clients.</td><td><code>--transport http --port N</code> for HTTP.</td></tr>
+        <tr><td>add-from-claude-desktop</td><td>Import Claude Desktop config to user scope.</td><td>macOS / WSL only.</td></tr>
+        <tr><td>reset-project-choices</td><td>Re-ask trust prompts for .mcp.json servers.</td><td>Use when team updates .mcp.json with new servers.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <span>CLAUDE CODE — TOOLS &amp; MCP CHEATSHEET v2 &nbsp;·&nbsp; MAR 2026 &nbsp;·&nbsp; OFFICIAL ANTHROPIC DOCS</span>
+  <span>docs.anthropic.com/en/docs/claude-code/mcp &nbsp;·&nbsp; SDK ToolInputSchemas &nbsp;·&nbsp; scope rename · list_changed · binary content</span>
+</div>
+
+</div>
+</body>
+</html>

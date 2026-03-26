@@ -1,14 +1,85 @@
 [
   {
+    "id": "ai-agents-maf",
+    "path": "data/ai-agents/1-maf.html",
+    "type": "html",
+    "title": "Microsoft Agent Framework (MAF)",
+    "category": "ai-agents",
+    "icon": "🤖",
+    "accent": "#00d4ff",
+    "description": "Microsoft Agent Framework (MAF) is a comprehensive platform for building, deploying, and managing AI agents.",
+    "tags": [
+      "ai",
+      "ai-agents",
+      "microsoft",
+      "maf"
+    ],
+    "show-sheet-header": false
+  },
+  {
+    "id": "claude-rule",
+    "path": "data/claude/1-rules.html",
+    "type": "html",
+    "title": "Rules",
+    "category": "Claude",
+    "icon": "🧠",
+    "accent": "#ff006e",
+    "description": "How AI models process and generate text based on the context window, including token limits and strategies for effective prompting.",
+    "tags": [
+      "ai",
+      "claude",
+      "context window",
+      "prompting"
+    ],
+    "show-sheet-header": false
+  },
+  {
+    "id": "claude-skills",
+    "path": "data/claude/3-skills.html",
+    "type": "html",
+    "title": "Skills",
+    "category": "Claude",
+    "icon": "📚",
+    "accent": "#ff006e",
+    "description": "Claude Skills and guidelines for using it effectively, including best practices and common pitfalls.",
+    "tags": [
+      "ai",
+      "claude",
+      "skills"
+    ],
+    "show-sheet-header": false
+  },
+  {
+    "id": "claude-mcp",
+    "path": "data/claude/4-mcps.html",
+    "type": "html",
+    "title": "MCP",
+    "category": "Claude",
+    "icon": "🔌",
+    "accent": "#ff006e",
+    "description": "MCP (Model Context Protocol)",
+    "tags": [
+      "ai",
+      "claude",
+      "tool",
+      "mcp"
+    ],
+    "show-sheet-header": false
+  },
+  {
     "id": "cursor-context",
     "path": "data/cursor/0-context.html",
     "type": "html",
     "title": "Context",
     "category": "Cursor",
-    "icon": "🧠",
+    "icon": "💡",
     "accent": "#ff006e",
     "description": "How AI models process and generate text based on the context window, including token limits and strategies for effective prompting.",
-    "tags": ["ai", "context window", "prompting"],
+    "tags": [
+      "ai",
+      "context window",
+      "prompting"
+    ],
     "show-sheet-header": false
   },
   {
@@ -20,7 +91,11 @@
     "icon": "💡",
     "accent": "#ff006e",
     "description": "Rules and guidelines for using the cursor effectively within the context window, including best practices and common pitfalls.",
-    "tags": ["ai", "cursor", "rules"],
+    "tags": [
+      "ai",
+      "cursor",
+      "rules"
+    ],
     "show-sheet-header": false
   },
   {
@@ -32,7 +107,11 @@
     "icon": "🔧",
     "accent": "#ff006e",
     "description": "Custom slash commands and built-in Cursor commands.",
-    "tags": ["ai", "cursor", "commands"],
+    "tags": [
+      "ai",
+      "cursor",
+      "commands"
+    ],
     "show-sheet-header": false
   },
   {
@@ -44,8 +123,12 @@
     "icon": "📚",
     "accent": "#ff006e",
     "description": "Cursor Skills and guidelines for using it effectively, including best practices and common pitfalls.",
-    "tags": ["ai", "cursor", "skills"],
-    "show-sheet-header": false    
+    "tags": [
+      "ai",
+      "cursor",
+      "skills"
+    ],
+    "show-sheet-header": false
   },
   {
     "id": "cursor-mcp",
@@ -56,8 +139,13 @@
     "icon": "🔌",
     "accent": "#ff006e",
     "description": "MCP (Model Context Protocol)",
-    "tags": ["ai", "cursor", "tool","mcp"],
-    "show-sheet-header": false    
+    "tags": [
+      "ai",
+      "cursor",
+      "tool",
+      "mcp"
+    ],
+    "show-sheet-header": false
   },
   {
     "id": "cursor-subagents",
@@ -68,8 +156,12 @@
     "icon": "👥",
     "accent": "#ff006e",
     "description": "Subagents are a powerful feature of Cursor that allow you to create and manage multiple AI agents within a single context. This sheet provides an overview of how to use subagents effectively, including best practices and common use cases.",
-    "tags": ["ai", "cursor", "subagents"],
-    "show-sheet-header": false    
+    "tags": [
+      "ai",
+      "cursor",
+      "subagents"
+    ],
+    "show-sheet-header": false
   },
   {
     "id": "cursor-hooks",
@@ -80,7 +172,11 @@
     "icon": "🔗",
     "accent": "#ff006e",
     "description": "Hooks are a powerful feature of Cursor that allow you to extend and customize its behavior. This sheet provides an overview of how to use hooks effectively, including best practices and common use cases.",
-    "tags": ["ai", "cursor", "hooks"],
+    "tags": [
+      "ai",
+      "cursor",
+      "hooks"
+    ],
     "show-sheet-header": false
   },
   {
@@ -92,7 +188,11 @@
     "icon": "🦠",
     "accent": "#ff006e",
     "description": "Prompt injections are a technique for influencing the behavior of AI models by embedding specific instructions within the input. This sheet provides an overview of how to use prompt injections effectively, including best practices and common use cases.",
-    "tags": ["ai", "cursor", "prompt-injection"],
+    "tags": [
+      "ai",
+      "cursor",
+      "prompt-injection"
+    ],
     "show-sheet-header": false
   },
   {
@@ -103,7 +203,11 @@
     "icon": "🌿",
     "accent": "#00ff9f",
     "description": "Essential Git commands for staging, branching, merging, and working with remotes.",
-    "tags": ["git", "vcs", "cli"]
+    "tags": [
+      "git",
+      "vcs",
+      "cli"
+    ]
   },
   {
     "id": "vim",
@@ -113,7 +217,11 @@
     "icon": "⬡",
     "accent": "#00d4ff",
     "description": "Motions, modes, and commands for efficient editing in Vim and Neovim.",
-    "tags": ["vim", "nvim", "editor"]
+    "tags": [
+      "vim",
+      "nvim",
+      "editor"
+    ]
   },
   {
     "id": "linux-bash",
@@ -123,7 +231,11 @@
     "icon": "🐧",
     "accent": "#00ff9f",
     "description": "File management, permissions, process control, and everyday shell commands.",
-    "tags": ["bash", "shell", "linux"]
+    "tags": [
+      "bash",
+      "shell",
+      "linux"
+    ]
   },
   {
     "id": "python",
@@ -133,7 +245,11 @@
     "icon": "🐍",
     "accent": "#ffb700",
     "description": "Core Python syntax, data structures, file I/O, and common stdlib patterns.",
-    "tags": ["python", "scripting", "dev"]
+    "tags": [
+      "python",
+      "scripting",
+      "dev"
+    ]
   },
   {
     "id": "javascript",
@@ -143,7 +259,11 @@
     "icon": "⚡",
     "accent": "#ffb700",
     "description": "Modern ES6+ syntax, async patterns, DOM manipulation, and array methods.",
-    "tags": ["js", "es6", "frontend"]
+    "tags": [
+      "js",
+      "es6",
+      "frontend"
+    ]
   },
   {
     "id": "typescript",
@@ -153,7 +273,11 @@
     "icon": "🔷",
     "accent": "#00d4ff",
     "description": "Types, interfaces, generics, utility types, and TypeScript-specific patterns.",
-    "tags": ["typescript", "ts", "types"]
+    "tags": [
+      "typescript",
+      "ts",
+      "types"
+    ]
   },
   {
     "id": "docker",
@@ -163,7 +287,11 @@
     "icon": "🐳",
     "accent": "#00d4ff",
     "description": "Build, run, manage containers, images, networks, and Docker Compose workflows.",
-    "tags": ["docker", "containers", "devops"]
+    "tags": [
+      "docker",
+      "containers",
+      "devops"
+    ]
   },
   {
     "id": "kubernetes",
@@ -173,7 +301,11 @@
     "icon": "⚙️",
     "accent": "#00d4ff",
     "description": "kubectl commands, resource management, scaling, debugging, and cluster operations.",
-    "tags": ["k8s", "kubernetes", "devops"]
+    "tags": [
+      "k8s",
+      "kubernetes",
+      "devops"
+    ]
   },
   {
     "id": "css",
@@ -183,7 +315,11 @@
     "icon": "🎨",
     "accent": "#ff006e",
     "description": "Flexbox, Grid, selectors, custom properties, and modern CSS patterns.",
-    "tags": ["css", "styling", "web"]
+    "tags": [
+      "css",
+      "styling",
+      "web"
+    ]
   },
   {
     "id": "http-rest",
@@ -193,7 +329,11 @@
     "icon": "🌐",
     "accent": "#00ff9f",
     "description": "HTTP methods, status codes, headers, caching directives, and REST conventions.",
-    "tags": ["http", "rest", "api"]
+    "tags": [
+      "http",
+      "rest",
+      "api"
+    ]
   },
   {
     "id": "sql",
@@ -203,7 +343,11 @@
     "icon": "🗄️",
     "accent": "#ffb700",
     "description": "Core SQL queries, joins, aggregation, indexes, and common database patterns.",
-    "tags": ["sql", "database", "query"]
+    "tags": [
+      "sql",
+      "database",
+      "query"
+    ]
   },
   {
     "id": "regex",
@@ -213,6 +357,10 @@
     "icon": "🔍",
     "accent": "#ff006e",
     "description": "Regular expression syntax for matching, groups, lookaheads, and common patterns.",
-    "tags": ["regex", "pattern", "search"]
+    "tags": [
+      "regex",
+      "pattern",
+      "search"
+    ]
   }
 ]
