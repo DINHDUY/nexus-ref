@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code — Skills Cheatsheet</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bricolage+Grotesque:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #070b10;
+    --bg2:      #0b1118;
+    --bg3:      #111820;
+    --bg4:      #161f2a;
+    --border:   #1c2635;
+    --border2:  #263345;
+    --text:     #ccd6e0;
+    --muted:    #607585;
+    --dim:      #2d3f52;
+    --cyan:     #00d4f5;
+    --purple:   #a78bfa;
+    --green:    #2eeba8;
+    --orange:   #f59e42;
+    --yellow:   #fcd34d;
+    --pink:     #f472b6;
+    --red:      #f87171;
+    --blue:     #60a5fa;
+    --code-bg:  #060a0f;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.65;
+    padding: 36px 20px 80px;
+  }
+
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 2px,
+      rgba(0,212,245,0.012) 2px, rgba(0,212,245,0.012) 4px
+    );
+    pointer-events: none; z-index: 0;
+  }
+
+  body::after {
+    content: ''; position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 10% 0%,  rgba(0,212,245,0.04)  0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 90% 100%, rgba(167,139,250,0.04) 0%, transparent 60%);
+    pointer-events: none; z-index: 0;
+  }
+
+  .container { max-width: 1280px; margin: 0 auto; position: relative; z-index: 1; }
+
+  /* ── HEADER ─────────────────────────────────── */
+  .header {
+    display: grid; grid-template-columns: 1fr auto;
+    align-items: end; gap: 24px;
+    margin-bottom: 36px; padding-bottom: 24px;
+    border-bottom: 1px solid var(--border2);
+  }
+  .eyebrow {
+    font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--cyan); margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .eyebrow::before { content: ''; width: 20px; height: 1px; background: var(--cyan); }
+  h1 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: clamp(28px, 4.5vw, 54px);
+    font-weight: 800; line-height: 0.95; letter-spacing: -0.03em; color: #fff;
+  }
+  h1 em { font-style: normal; color: var(--cyan); }
+  .header-sub { margin-top: 12px; font-size: 11.5px; color: var(--muted); letter-spacing: 0.04em; max-width: 680px; }
+  .meta-pills { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+  .pill {
+    background: var(--bg3); border: 1px solid var(--border2);
+    padding: 6px 14px; font-size: 10px; letter-spacing: 0.08em;
+    white-space: nowrap; color: var(--muted);
+  }
+  .pill strong { color: var(--green); }
+
+  /* ── SECTION LABELS ─────────────────────────── */
+  .section-label {
+    font-size: 9px; font-weight: 700; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--muted);
+    display: flex; align-items: center; gap: 10px; margin: 32px 0 14px;
+  }
+  .section-label::before { content: attr(data-n); color: var(--cyan); font-size: 11px; }
+  .section-label::after  { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ── GRIDS ───────────────────────────────────── */
+  .g2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(520px, 1fr)); gap: 14px; margin-bottom: 14px; }
+  .g3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 14px; margin-bottom: 14px; }
+  .fw { margin-bottom: 14px; }
+
+  /* ── CARDS ───────────────────────────────────── */
+  .card {
+    background: var(--bg2); border: 1px solid var(--border);
+    padding: 20px; position: relative; overflow: hidden;
+  }
+  .card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--ac), transparent);
+  }
+  .c-cyan   { --ac: var(--cyan); }
+  .c-purple { --ac: var(--purple); }
+  .c-green  { --ac: var(--green); }
+  .c-orange { --ac: var(--orange); }
+  .c-yellow { --ac: var(--yellow); }
+  .c-pink   { --ac: var(--pink); }
+  .c-red    { --ac: var(--red); }
+  .c-blue   { --ac: var(--blue); }
+
+  .card-title {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--ac); margin-bottom: 14px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .card-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ── CODE BLOCKS ────────────────────────────── */
+  pre {
+    background: var(--code-bg); border: 1px solid var(--border);
+    border-left: 3px solid var(--ac, var(--cyan));
+    padding: 13px 16px; font-family: 'Space Mono', monospace;
+    font-size: 11.5px; line-height: 1.75; overflow-x: auto; margin-bottom: 10px;
+  }
+  pre:last-child { margin-bottom: 0; }
+  .pre-label {
+    font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--dim); margin-bottom: 5px; display: block;
+  }
+
+  .t-cm { color: var(--muted); font-style: italic; }
+  .t-kw { color: var(--pink); }
+  .t-st { color: var(--green); }
+  .t-nm { color: var(--orange); }
+  .t-fn { color: var(--blue); }
+  .t-op { color: var(--cyan); }
+  .t-h1 { color: #fff; font-weight: 700; }
+  .t-h2 { color: var(--cyan); }
+  .t-h3 { color: var(--purple); }
+  .t-bi { color: var(--yellow); }
+  .t-er { color: var(--red); }
+  .t-sl { color: var(--green); font-weight: 700; }
+  .hl   { background: rgba(0,212,245,0.07);   display: block; margin: 0 -16px; padding: 0 16px; }
+  .hl-g { background: rgba(46,235,168,0.07);  display: block; margin: 0 -16px; padding: 0 16px; }
+  .hl-r { background: rgba(248,113,113,0.07); display: block; margin: 0 -16px; padding: 0 16px; }
+  .hl-y { background: rgba(252,211,77,0.06);  display: block; margin: 0 -16px; padding: 0 16px; }
+  .hl-p { background: rgba(167,139,250,0.06); display: block; margin: 0 -16px; padding: 0 16px; }
+
+  code {
+    background: var(--bg4); border: 1px solid var(--border2);
+    padding: 1px 5px; font-size: 11px; color: var(--cyan);
+  }
+
+  /* ── CALLOUTS ───────────────────────────────── */
+  .tip, .warn, .info, .key, .danger {
+    padding: 9px 13px; font-size: 11px; margin-bottom: 8px;
+    border-left: 2px solid; line-height: 1.7;
+  }
+  .tip    { background: rgba(46,235,168,0.04);  border-color: var(--green); }
+  .warn   { background: rgba(245,158,66,0.05);  border-color: var(--orange); }
+  .info   { background: rgba(0,212,245,0.04);   border-color: var(--cyan); }
+  .key    { background: rgba(167,139,250,0.05); border-color: var(--purple); }
+  .danger { background: rgba(248,113,113,0.05); border-color: var(--red); }
+  .tip strong, .warn strong, .info strong, .key strong, .danger strong {
+    display: block; font-size: 8.5px; letter-spacing: 0.14em;
+    text-transform: uppercase; margin-bottom: 2px;
+  }
+  .tip strong    { color: var(--green); }
+  .warn strong   { color: var(--orange); }
+  .info strong   { color: var(--cyan); }
+  .key strong    { color: var(--purple); }
+  .danger strong { color: var(--red); }
+
+  /* ── TABLE ──────────────────────────────────── */
+  table { width: 100%; border-collapse: collapse; font-size: 11.5px; margin-bottom: 10px; }
+  th {
+    text-align: left; font-size: 9px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--muted);
+    padding: 6px 10px; border-bottom: 1px solid var(--border2);
+  }
+  td { padding: 7px 10px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.55; }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { color: var(--cyan); font-weight: 700; white-space: nowrap; }
+  td:nth-child(2) { color: var(--muted); }
+  td:nth-child(3) { color: var(--muted); }
+
+  /* ── TAGS ───────────────────────────────────── */
+  .tag {
+    display: inline-block; padding: 2px 7px; font-size: 8.5px;
+    letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700;
+    border: 1px solid; margin: 2px 3px 2px 0;
+  }
+  .tc { color: var(--cyan);   border-color: var(--cyan); }
+  .tp { color: var(--purple); border-color: var(--purple); }
+  .tg { color: var(--green);  border-color: var(--green); }
+  .to { color: var(--orange); border-color: var(--orange); }
+  .ty { color: var(--yellow); border-color: var(--yellow); }
+  .tk { color: var(--pink);   border-color: var(--pink); }
+  .tr { color: var(--red);    border-color: var(--red); }
+  .tb { color: var(--blue);   border-color: var(--blue); }
+
+  /* ── FILE TREE ──────────────────────────────── */
+  .tree-box {
+    background: var(--code-bg); border: 1px solid var(--border);
+    border-left: 3px solid var(--ac, var(--cyan));
+    padding: 13px 16px; font-family: 'Space Mono', monospace;
+    font-size: 11.5px; line-height: 2; margin-bottom: 10px; overflow-x: auto;
+  }
+  .td  { color: var(--orange); }
+  .tf  { color: var(--green); }
+  .ts  { color: var(--cyan); }
+  .tc2 { color: var(--muted); font-style: italic; }
+
+  /* ── HIER STACK ──────────────────────────────── */
+  .hier-stack { border: 1px solid var(--border); overflow: hidden; margin-bottom: 12px; }
+  .hier-row {
+    display: grid; grid-template-columns: 28px 170px 1fr auto;
+    border-bottom: 1px solid var(--border); align-items: stretch;
+  }
+  .hier-row:last-child { border-bottom: none; }
+  .hier-num {
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700; color: #000;
+    border-right: 1px solid var(--border);
+  }
+  .hier-label {
+    padding: 9px 12px; border-right: 1px solid var(--border);
+    font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+    display: flex; align-items: center;
+  }
+  .hier-body {
+    padding: 9px 14px; font-size: 11.5px; color: var(--muted);
+    display: flex; align-items: center; line-height: 1.55; flex: 1;
+  }
+  .hier-body strong { color: var(--text); }
+  .hier-body code  { font-size: 10.5px; }
+  .hier-scope {
+    padding: 9px 12px; border-left: 1px solid var(--border);
+    font-size: 9px; color: var(--dim); display: flex;
+    align-items: center; justify-content: center;
+    text-align: center; min-width: 90px; line-height: 1.4;
+  }
+
+  /* ── INVOCATION MATRIX ───────────────────────── */
+  .inv-matrix {
+    border: 1px solid var(--border); overflow: hidden; margin-bottom: 12px;
+  }
+  .inv-row {
+    display: grid; grid-template-columns: 1fr 80px 80px 1fr;
+    border-bottom: 1px solid var(--border); align-items: center;
+  }
+  .inv-row:first-child { background: var(--bg3); }
+  .inv-row:last-child { border-bottom: none; }
+  .inv-cell { padding: 9px 12px; font-size: 11px; }
+  .inv-cell.head { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+  .inv-cell.mode { text-align: center; font-size: 18px; }
+  .inv-cell.label { color: var(--text); font-weight: 700; }
+  .inv-cell.desc { color: var(--muted); font-size: 10.5px; line-height: 1.5; border-left: 1px solid var(--border); }
+
+  /* ── FLOW ROW ───────────────────────────────── */
+  .flow-row { display: flex; align-items: center; gap: 0; flex-wrap: wrap; margin: 10px 0; }
+  .fnode {
+    padding: 7px 12px; font-size: 11px;
+    border: 1px solid var(--border2); background: var(--bg3); white-space: nowrap;
+  }
+  .fnode.c1 { border-color: var(--cyan);   color: var(--cyan); }
+  .fnode.c2 { border-color: var(--green);  color: var(--green); }
+  .fnode.c3 { border-color: var(--orange); color: var(--orange); }
+  .fnode.c4 { border-color: var(--purple); color: var(--purple); }
+  .fnode.c5 { border-color: var(--yellow); color: var(--yellow); }
+  .farrow { color: var(--dim); padding: 0 6px; font-size: 14px; }
+
+  /* ── DECISION TREE ──────────────────────────── */
+  .tree pre { border-left-color: var(--purple); }
+  .tq  { color: var(--text); }
+  .tya { color: var(--green); }
+  .tno { color: var(--orange); }
+  .tre { color: var(--cyan); font-weight: 700; }
+  .tln { color: var(--dim); }
+
+  /* ── COMPARE GRID ────────────────────────────── */
+  .compare {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    border: 1px solid var(--border); overflow: hidden; margin-bottom: 12px;
+  }
+  .cmp-col { border-right: 1px solid var(--border); }
+  .cmp-col:last-child { border-right: none; }
+  .cmp-head {
+    padding: 9px 12px; font-size: 9px; letter-spacing: 0.14em;
+    text-transform: uppercase; font-weight: 700; background: var(--bg3);
+    border-bottom: 1px solid var(--border2);
+  }
+  .cmp-body { padding: 10px 12px; font-size: 11px; color: var(--muted); line-height: 1.7; }
+
+  /* ── FOOTER ─────────────────────────────────── */
+  .footer {
+    margin-top: 48px; padding-top: 20px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between;
+    flex-wrap: wrap; gap: 10px;
+    font-size: 10px; color: var(--dim); letter-spacing: 0.08em;
+  }
+
+  @media (max-width: 680px) {
+    .g2, .g3 { grid-template-columns: 1fr; }
+    .header { grid-template-columns: 1fr; }
+    .meta-pills { align-items: flex-start; }
+    .hier-row { grid-template-columns: 28px 1fr; }
+    .hier-scope { display: none; }
+    .inv-row { grid-template-columns: 1fr 60px 60px; }
+    .inv-cell.desc { display: none; }
+    .compare { grid-template-columns: 1fr; }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .card { animation: fadeUp 0.4s ease both; }
+  .card:nth-child(1){animation-delay:.04s}
+  .card:nth-child(2){animation-delay:.08s}
+  .card:nth-child(3){animation-delay:.12s}
+  .card:nth-child(4){animation-delay:.16s}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ══════════════════ HEADER ══════════════════════ -->
+  <div class="header">
+    <div>
+      <div class="eyebrow">Official Docs · docs.anthropic.com/en/docs/claude-code/skills · Mar 2026</div>
+      <h1>Claude Code —<br><em>Skills</em></h1>
+      <p class="header-sub">// SKILL.md · frontmatter · invocation control · context modes · dynamic injection · bundled skills · Agent Skills Open Standard · hooks · supporting files — complete reference</p>
+    </div>
+    <div class="meta-pills">
+      <div class="pill">Source <strong>docs.anthropic.com/claude-code/skills</strong></div>
+      <div class="pill">Commands merged into Skills <strong>2025</strong></div>
+      <div class="pill">Max SKILL.md size <strong>500 lines</strong></div>
+      <div class="pill">Token budget <strong>2% context · 16k fallback</strong></div>
+    </div>
+  </div>
+
+
+  <!-- ════════ 01: WHAT IS A SKILL ════════════════════ -->
+  <div class="section-label" data-n="01">What Is a Skill — Mental Model</div>
+
+  <div class="g2 fw">
+
+    <div class="card c-cyan">
+      <div class="card-title">🧠 Core Mental Model</div>
+      <p style="color:var(--muted);font-size:12px;line-height:1.8;margin-bottom:14px;">A skill is a <strong style="color:var(--text)">SKILL.md file inside a named folder</strong> — it gives Claude a repeatable playbook for a specific task. You invoke it with a slash command, Claude invokes it automatically when relevant, or both. Think of it as a reusable prompt template with superpowers.</p>
+
+      <div class="flow-row">
+        <div class="fnode c1">SKILL.md<br><span style="font-size:9px;opacity:.7">instructions</span></div>
+        <div class="farrow">→</div>
+        <div class="fnode c2">/skill-name<br><span style="font-size:9px;opacity:.7">slash invoke</span></div>
+        <div class="farrow">→</div>
+        <div class="fnode c3">Claude executes<br><span style="font-size:9px;opacity:.7">uses its tools</span></div>
+        <div class="farrow">→</div>
+        <div class="fnode c4">Repeatable<br><span style="font-size:9px;opacity:.7">same result</span></div>
+      </div>
+
+      <div class="info">
+        <strong>ℹ Skills = Commands (unified)</strong>
+        <code>.claude/commands/review.md</code> and <code>.claude/skills/review/SKILL.md</code> both create <code>/review</code> and work identically. <strong>Skills are the new recommended system</strong> — commands still work but skills add: a supporting files directory, frontmatter to control invocation, and auto-activation by Claude. Both formats are maintained indefinitely.
+      </div>
+
+      <div class="tip">
+        <strong>✦ Start simple, iterate</strong>
+        Your first skill can be 10 lines with no frontmatter at all. Put instructions you'd copy-paste manually into SKILL.md. Add frontmatter only when you need to control invocation or tool access.
+      </div>
+    </div>
+
+    <div class="card c-green">
+      <div class="card-title">🆚 Skills vs Other Extension Mechanisms</div>
+
+      <div class="compare">
+        <div class="cmp-col">
+          <div class="cmp-head" style="color:var(--cyan);">Skills</div>
+          <div class="cmp-body">Repeatable workflows, slash commands, auto-activation<br><br>Invoke: <code>/skill-name</code> or auto<br>Location: <code>.claude/skills/</code><br>Can use <code>context: fork</code> for subagent isolation</div>
+        </div>
+        <div class="cmp-col">
+          <div class="cmp-head" style="color:var(--orange);">Subagents</div>
+          <div class="cmp-body">Long-running agents with memory, specialized toolsets<br><br>Invoke: <code>@agent-name</code> or Task tool<br>Location: <code>.claude/agents/</code><br>Persistent across the session</div>
+        </div>
+        <div class="cmp-col">
+          <div class="cmp-head" style="color:var(--purple);">CLAUDE.md Rules</div>
+          <div class="cmp-body">Always-on conventions and standards<br><br>Auto-loaded every session<br>Location: <code>CLAUDE.md</code><br>No slash command — passive knowledge</div>
+        </div>
+      </div>
+
+      <div class="key">
+        <strong>🔑 When to use a skill vs CLAUDE.md</strong>
+        Put <strong>ongoing conventions</strong> (code style, commit format) in CLAUDE.md. Put <strong>specific workflows</strong> (deploy, code review, PR summary) in a skill. Skills you invoke on demand; CLAUDE.md loads every session automatically.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ════════ 02: FILE LOCATIONS ═════════════════════ -->
+  <div class="section-label" data-n="02">File Locations &amp; Scope — 4 Skill Layers</div>
+
+  <div class="card c-orange fw">
+    <div class="card-title">📍 Where Skills Live — Priority &amp; Scope</div>
+
+    <div class="hier-stack">
+      <div class="hier-row">
+        <div class="hier-num" style="background:var(--red);">1</div>
+        <div class="hier-label" style="color:var(--red);">Enterprise</div>
+        <div class="hier-body">
+          Plugin skills distributed by org admins via plugin manifests. Deployed to managed plugin paths on each machine. <strong>Highest priority — overrides all others on name conflict.</strong>
+        </div>
+        <div class="hier-scope">org-wide<br>managed</div>
+      </div>
+      <div class="hier-row">
+        <div class="hier-num" style="background:var(--purple);">2</div>
+        <div class="hier-label" style="color:var(--purple);">Personal / Global</div>
+        <div class="hier-body">
+          <code>~/.claude/skills/skill-name/SKILL.md</code><br>
+          Available across <strong>all your projects</strong>. Best for personal workflows: PR summaries, your commit style, your debugging approach. Created once, used everywhere.
+        </div>
+        <div class="hier-scope">all<br>projects</div>
+      </div>
+      <div class="hier-row">
+        <div class="hier-num" style="background:var(--cyan);">3</div>
+        <div class="hier-label" style="color:var(--cyan);">Project</div>
+        <div class="hier-body">
+          <code>.claude/skills/skill-name/SKILL.md</code><br>
+          Project-specific workflows committed to git. Whole team gets the same slash commands. Best for: project deploy scripts, codebase-specific review checklists, team conventions.
+        </div>
+        <div class="hier-scope">project<br>team-shared</div>
+      </div>
+      <div class="hier-row">
+        <div class="hier-num" style="background:var(--green);">4</div>
+        <div class="hier-label" style="color:var(--green);">Bundled (Built-in)</div>
+        <div class="hier-body">
+          Ship with Claude Code — available in every session without any installation. Examples: <code>/claude-api</code> (loads API reference for your language), plus document-processing skills. Always the lowest priority; overridden by any custom skill with the same name.
+        </div>
+        <div class="hier-scope">always<br>available</div>
+      </div>
+    </div>
+
+    <span class="pre-label" style="margin-top:6px;">Full directory structure for a project skill</span>
+    <div class="tree-box">
+<span class="td">.claude/skills/</span>
+└── <span class="td">code-review/</span>               <span class="tc2"># skill name = dir name (if no name: in frontmatter)</span>
+    ├── <span class="tf">SKILL.md</span>               <span class="tc2"># REQUIRED — frontmatter + instructions</span>
+    ├── <span class="td">scripts/</span>               <span class="tc2"># OPTIONAL — helper scripts, run via Bash</span>
+    │   └── <span class="ts">run-lint.sh</span>
+    ├── <span class="td">references/</span>            <span class="tc2"># OPTIONAL — reference docs, loaded via @import</span>
+    │   └── <span class="ts">review-checklist.md</span>
+    └── <span class="td">assets/</span>                <span class="tc2"># OPTIONAL — templates, sample outputs</span>
+        └── <span class="ts">review-template.md</span>
+    </div>
+
+    <div class="warn">
+      <strong>⚠ Name conflict resolution: Enterprise → Personal → Project → Bundled</strong>
+      If two skills share the same name, higher-priority layer wins. A personal skill at <code>~/.claude/skills/deploy/</code> silently overrides a project skill at <code>.claude/skills/deploy/</code>. Check <code>/context</code> if a skill isn't behaving as expected.
+    </div>
+  </div>
+
+
+  <!-- ════════ 03: SKILL.MD ANATOMY ═══════════════════ -->
+  <div class="section-label" data-n="03">SKILL.md Anatomy — Complete Frontmatter Reference</div>
+
+  <div class="g2 fw">
+
+    <div class="card c-cyan">
+      <div class="card-title">📄 Complete Frontmatter — All Fields</div>
+
+      <span class="pre-label">All frontmatter fields (all optional except description is recommended)</span>
+      <pre><span class="t-op">---</span>
+<span class="t-cm"># ── IDENTITY ──────────────────────────────────</span>
+<span class="t-nm">name</span>: <span class="t-st">code-review</span>           <span class="t-cm"># slash cmd name → /code-review</span>
+                               <span class="t-cm"># default: directory name</span>
+                               <span class="t-cm"># lowercase, hyphens, max 64 chars</span>
+
+<span class="hl"><span class="t-nm">description</span>: <span class="t-st">Reviews code for bugs, security, and style.</span>
+               <span class="t-cm"># RECOMMENDED — Claude uses this to auto-activate</span>
+               <span class="t-cm"># Include trigger keywords: "review", "audit", "check"</span>
+               <span class="t-cm"># If omitted: uses first paragraph of markdown content</span></span>
+
+<span class="t-nm">argument-hint</span>: <span class="t-bi">[file or PR number]</span>
+                               <span class="t-cm"># shown in autocomplete dropdown</span>
+                               <span class="t-cm"># examples: [issue-number] [filename] [format]</span>
+
+<span class="t-cm"># ── INVOCATION CONTROL ────────────────────────</span>
+<span class="hl-r"><span class="t-nm">disable-model-invocation</span>: <span class="t-kw">true</span> <span class="t-cm"># ONLY you can invoke via /cmd</span>
+                               <span class="t-cm"># Claude CANNOT trigger automatically</span>
+                               <span class="t-cm"># use for: /deploy, /commit, /send-slack</span></span>
+<span class="hl-y"><span class="t-nm">user-invocable</span>: <span class="t-kw">false</span>         <span class="t-cm"># ONLY Claude can invoke (background knowledge)</span>
+                               <span class="t-cm"># hidden from / slash menu</span>
+                               <span class="t-cm"># use for: context loaders, passive knowledge</span></span>
+
+<span class="t-cm"># ── EXECUTION CONTEXT ─────────────────────────</span>
+<span class="hl-p"><span class="t-nm">context</span>: <span class="t-st">fork</span>                  <span class="t-cm"># run in isolated subagent (default: inline)</span>
+                               <span class="t-cm"># no access to conversation history</span>
+                               <span class="t-cm"># SKILL.md content = the agent's prompt</span></span>
+<span class="t-nm">agent</span>: <span class="t-st">Explore</span>                 <span class="t-cm"># specific subagent type (with context: fork)</span>
+
+<span class="t-cm"># ── TOOL ACCESS ───────────────────────────────</span>
+<span class="t-nm">allowed-tools</span>: <span class="t-st">Read Grep Bash(git *)</span>
+                               <span class="t-cm"># space-separated, no quotes needed</span>
+                               <span class="t-cm"># same syntax as permissions allow rules</span>
+                               <span class="t-cm"># tools listed run WITHOUT permission prompts</span>
+
+<span class="t-cm"># ── MODEL ─────────────────────────────────────</span>
+<span class="t-nm">model</span>: <span class="t-st">haiku</span>                   <span class="t-cm"># haiku | sonnet | opus | inherit (default)</span>
+
+<span class="t-cm"># ── AGENT SKILLS OPEN STANDARD fields ────────</span>
+<span class="t-nm">license</span>: <span class="t-st">MIT</span>
+<span class="t-nm">compatibility</span>: <span class="t-op">[</span><span class="t-st">"claude-code"</span>, <span class="t-st">"cursor"</span><span class="t-op">]</span>
+<span class="t-nm">metadata</span>:
+  <span class="t-nm">version</span>: <span class="t-st">"1.0.0"</span>
+  <span class="t-nm">author</span>: <span class="t-st">your-name</span>
+<span class="t-op">---</span></pre>
+    </div>
+
+    <div class="card c-purple">
+      <div class="card-title">📊 Frontmatter Fields — Quick Reference Table</div>
+      <table>
+        <thead><tr><th>Field</th><th>Default</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td>name</td><td>directory name</td><td>Slash command name. Lowercase + hyphens, max 64 chars. <code>name: code-review</code> → <code>/code-review</code></td></tr>
+          <tr><td>description</td><td>first paragraph</td><td><strong>Recommended.</strong> Claude uses this to decide when to auto-load. Include trigger keywords (actions, file types, domains).</td></tr>
+          <tr><td>argument-hint</td><td>—</td><td>Text shown in autocomplete dropdown. e.g. <code>[file or PR number]</code></td></tr>
+          <tr><td>disable-model-invocation</td><td>false</td><td>Set <code>true</code> → only the user can invoke. Claude cannot trigger automatically. For side-effect commands: deploy, commit, publish.</td></tr>
+          <tr><td>user-invocable</td><td>true</td><td>Set <code>false</code> → hidden from slash menu, only Claude can invoke as background knowledge.</td></tr>
+          <tr><td>context</td><td>inline</td><td><code>inline</code> = runs in current session with conversation history. <code>fork</code> = isolated subagent, no history access.</td></tr>
+          <tr><td>agent</td><td>—</td><td>Specific agent type when using <code>context: fork</code>. e.g. <code>Explore</code></td></tr>
+          <tr><td>allowed-tools</td><td>inherits all</td><td>Tools that run without permission prompts when this skill is active. Same syntax as permissions rules.</td></tr>
+          <tr><td>model</td><td>inherit</td><td>Override model for this skill. <code>haiku</code> / <code>sonnet</code> / <code>opus</code> / <code>inherit</code></td></tr>
+          <tr><td>hooks</td><td>—</td><td>Lifecycle hooks scoped to this skill only. PreToolUse, PostToolUse, Stop. Supports <code>once: true</code>.</td></tr>
+          <tr><td>license</td><td>—</td><td>Agent Skills Open Standard. For shared/published skills.</td></tr>
+          <tr><td>compatibility</td><td>—</td><td>Which agents support this skill. e.g. <code>["claude-code", "cursor"]</code></td></tr>
+          <tr><td>metadata</td><td>—</td><td>Version, author, custom fields. Open Standard.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+
+  <!-- ════════ 04: INVOCATION CONTROL ═════════════════ -->
+  <div class="section-label" data-n="04">Invocation Control — Who Can Call the Skill</div>
+
+  <div class="card c-yellow fw">
+    <div class="card-title">🎛 The 4 Invocation Modes</div>
+
+    <div class="inv-matrix">
+      <div class="inv-row">
+        <div class="inv-cell head">Frontmatter setting</div>
+        <div class="inv-cell head" style="text-align:center;">User<br>/cmd</div>
+        <div class="inv-cell head" style="text-align:center;">Claude<br>auto</div>
+        <div class="inv-cell head desc">Use case</div>
+      </div>
+      <div class="inv-row">
+        <div class="inv-cell label">Neither flag set<br><code style="font-size:9px;color:var(--muted);">(default)</code></div>
+        <div class="inv-cell mode">✅</div>
+        <div class="inv-cell mode">✅</div>
+        <div class="inv-cell desc">General reference skills, code reviewers, analysis tools. Claude auto-activates when relevant AND you can invoke explicitly.</div>
+      </div>
+      <div class="inv-row">
+        <div class="inv-cell label" style="color:var(--red);"><code>disable-model-invocation: true</code></div>
+        <div class="inv-cell mode">✅</div>
+        <div class="inv-cell mode">❌</div>
+        <div class="inv-cell desc">Side-effect commands: <code>/deploy</code>, <code>/commit</code>, <code>/send-slack-message</code>. You control timing — Claude should never trigger these automatically.</div>
+      </div>
+      <div class="inv-row">
+        <div class="inv-cell label" style="color:var(--yellow);"><code>user-invocable: false</code></div>
+        <div class="inv-cell mode">❌</div>
+        <div class="inv-cell mode">✅</div>
+        <div class="inv-cell desc">Background knowledge only: legacy system context, domain glossaries, always-on conventions. Hidden from <code>/</code> menu — not a meaningful action for users.</div>
+      </div>
+      <div class="inv-row">
+        <div class="inv-cell label" style="color:var(--dim);">Both flags set<br><code style="font-size:9px;color:var(--dim);">disable + user-invocable: false</code></div>
+        <div class="inv-cell mode">❌</div>
+        <div class="inv-cell mode">❌</div>
+        <div class="inv-cell desc">Effectively disabled. Only use this temporarily to deactivate a skill without deleting it.</div>
+      </div>
+    </div>
+
+    <div class="danger">
+      <strong>⚠ Always use disable-model-invocation: true for side-effect commands</strong>
+      Without this flag, Claude might decide to <code>/deploy</code> or <code>/commit</code> automatically if the code looks ready. Any skill with external side effects (push, publish, send, delete) should be user-only.
+    </div>
+  </div>
+
+
+  <!-- ════════ 05: ARGUMENTS & DYNAMIC INJECTION ══════ -->
+  <div class="section-label" data-n="05">Arguments &amp; Dynamic Context Injection</div>
+
+  <div class="g2 fw">
+
+    <div class="card c-green">
+      <div class="card-title">📥 Arguments — $ARGUMENTS &amp; Positional $0 $1 $2</div>
+
+      <span class="pre-label">Basic: $ARGUMENTS = everything after the slash command</span>
+      <pre><span class="t-cm">── Invoke: /code-review src/auth.ts ──────────────</span>
+
+<span class="t-op">---</span>
+<span class="t-nm">name</span>: <span class="t-st">code-review</span>
+<span class="t-nm">description</span>: <span class="t-st">Reviews a file for bugs and style</span>
+<span class="t-nm">argument-hint</span>: <span class="t-bi">[file or PR number]</span>
+<span class="t-op">---</span>
+
+Review the file at <span class="t-bi">$ARGUMENTS</span> for:
+<span class="t-cm">- Security vulnerabilities</span>
+<span class="t-cm">- TypeScript type safety</span>
+<span class="t-cm">- Performance issues</span>
+
+<span class="t-cm"># /code-review src/auth.ts → "$ARGUMENTS" = "src/auth.ts"</span></pre>
+
+      <span class="pre-label">Positional: $0 $1 $2 for multi-word arguments</span>
+      <pre><span class="t-cm">── Invoke: /migrate-component SearchBar React Vue ─</span>
+
+<span class="t-op">---</span>
+<span class="t-nm">name</span>: <span class="t-st">migrate-component</span>
+<span class="t-nm">description</span>: <span class="t-st">Migrates a component from one framework to another</span>
+<span class="t-nm">argument-hint</span>: <span class="t-bi">[component] [from-framework] [to-framework]</span>
+<span class="t-op">---</span>
+
+Migrate the component <span class="t-bi">$0</span> from <span class="t-bi">$1</span> to <span class="t-bi">$2</span>.
+Preserve all existing behavior and tests.
+
+<span class="t-cm"># $0 = "SearchBar"  $1 = "React"  $2 = "Vue"</span></pre>
+
+      <div class="info">
+        <strong>ℹ Auto-append if $ARGUMENTS missing</strong>
+        If you don't include <code>$ARGUMENTS</code> in your skill body, Claude Code <strong>automatically appends</strong> it at the end as: <code>ARGUMENTS: &lt;value&gt;</code>. You don't have to include it in the SKILL.md if you only want it appended automatically.
+      </div>
+    </div>
+
+    <div class="card c-orange">
+      <div class="card-title">⚡ Dynamic Context Injection — !`command` Syntax</div>
+      <p style="color:var(--muted);font-size:12px;line-height:1.8;margin-bottom:12px;">The <code>!`command`</code> syntax runs a shell command <strong>when Claude loads the skill</strong>. The command's stdout replaces the backtick block. This lets you inject dynamic context that's always current when the skill runs.</p>
+
+      <span class="pre-label">Examples of backtick dynamic injection</span>
+      <pre><span class="t-op">---</span>
+<span class="t-nm">name</span>: <span class="t-st">pr-summary</span>
+<span class="t-nm">description</span>: <span class="t-st">Summarizes the current pull request changes</span>
+<span class="t-nm">context</span>: <span class="t-st">fork</span>
+<span class="t-nm">allowed-tools</span>: <span class="t-st">Read Bash(git *)</span>
+<span class="t-op">---</span>
+
+<span class="t-h2">## Current Context (auto-injected at load time)</span>
+
+<span class="t-cm">- Branch: </span><span class="t-op">!`git branch --show-current`</span>
+<span class="t-cm">- Diff:   </span><span class="t-op">!`git diff main --stat`</span>
+<span class="t-cm">- Remote: </span><span class="t-op">!`git remote get-url origin`</span>
+<span class="t-cm">- Issues: </span><span class="t-op">!`gh issue list --limit 5 2>/dev/null || echo "N/A"`</span>
+
+<span class="t-h2">## Task</span>
+Write a PR summary for the changes above.
+Include: what changed, why, testing done.
+Reviewing: <span class="t-bi">$ARGUMENTS</span></pre>
+
+      <span class="pre-label">Environment variables available inside !` ` and skill body</span>
+      <pre><span class="t-bi">$ARGUMENTS</span>             <span class="t-cm"># all text after /skill-name</span>
+<span class="t-bi">$0</span> <span class="t-bi">$1</span> <span class="t-bi">$2</span>               <span class="t-cm"># positional args (space-separated)</span>
+<span class="t-bi">$CLAUDE_SESSION_ID</span>     <span class="t-cm"># current session identifier</span>
+<span class="t-bi">$CLAUDE_PLUGIN_ROOT</span>    <span class="t-cm"># absolute path to skill's directory</span>
+                       <span class="t-cm"># (plugin-bundled skills only)</span>
+
+<span class="t-cm">── Use CLAUDE_PLUGIN_ROOT to reference scripts ───</span>
+Run the helper script:
+<span class="t-bi">${CLAUDE_PLUGIN_ROOT}</span>/scripts/debug-helper.ts</pre>
+
+      <div class="warn">
+        <strong>⚠ Backtick commands run at load, not at invoke</strong>
+        The shell command runs once when Claude loads the skill. It does not re-run on subsequent turns. For truly fresh data, use <code>allowed-tools: Bash(git *)</code> and let Claude run the commands in-session.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ════════ 06: CONTEXT MODES ══════════════════════ -->
+  <div class="section-label" data-n="06">Context Modes — Inline vs Fork</div>
+
+  <div class="card c-blue fw">
+    <div class="card-title">🔀 context: inline vs context: fork</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+
+      <div>
+        <div style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan);margin-bottom:8px;font-weight:700;">context: inline (default)</div>
+        <pre style="margin:0;"><span class="t-cm">── When to use ───────────────────────────────</span>
+<span class="t-cm">Reference content, conventions, style guides</span>
+<span class="t-cm">Domain knowledge Claude applies alongside work</span>
+<span class="t-cm">Skills that need to see conversation history</span>
+
+<span class="t-cm">── What it means ─────────────────────────────</span>
+<span class="t-st">✓</span> Runs inside the current session
+<span class="t-st">✓</span> Access to full conversation history
+<span class="t-st">✓</span> Access to prior tool results
+<span class="t-st">✓</span> Continues the current context window
+
+<span class="t-cm">── Example use cases ─────────────────────────</span>
+<span class="t-cm">- API conventions reference</span>
+<span class="t-cm">- Code style guidelines</span>
+<span class="t-cm">- "How to name things" guide</span>
+<span class="t-cm">- /explain-code skill</span></pre>
+      </div>
+
+      <div>
+        <div style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--purple);margin-bottom:8px;font-weight:700;">context: fork</div>
+        <pre style="margin:0;"><span class="t-cm">── When to use ───────────────────────────────</span>
+<span class="t-cm">Task content with step-by-step instructions</span>
+<span class="t-cm">Actions needing clean isolated context</span>
+<span class="t-cm">Deployments, testing, code generation</span>
+
+<span class="t-cm">── What it means ─────────────────────────────</span>
+<span class="t-er">✗</span> No access to conversation history
+<span class="t-er">✗</span> No access to prior tool results
+<span class="t-st">✓</span> SKILL.md content = the agent's full prompt
+<span class="t-st">✓</span> Clean isolated subagent context
+
+<span class="t-cm">── Example use cases ─────────────────────────</span>
+<span class="t-cm">- /deploy production workflow</span>
+<span class="t-cm">- /run-tests with specific steps</span>
+<span class="t-cm">- /pr-summary using git diff</span>
+<span class="t-cm">- /scaffold-feature generator</span></pre>
+      </div>
+    </div>
+
+    <span class="pre-label">Full example: deploy skill with context: fork</span>
+    <pre><span class="t-op">---</span>
+<span class="t-nm">name</span>: <span class="t-st">deploy</span>
+<span class="t-nm">description</span>: <span class="t-st">Deploy the application to production environment</span>
+<span class="t-nm">context</span>: <span class="t-st">fork</span>
+<span class="t-nm">disable-model-invocation</span>: <span class="t-kw">true</span>
+<span class="t-nm">allowed-tools</span>: <span class="t-st">Read Write Bash(npm *) Bash(git *) Bash(docker *)</span>
+<span class="t-op">---</span>
+
+<span class="t-h1"># Deploy Application</span>
+<span class="t-cm">Target: $ARGUMENTS (defaults to staging if omitted)</span>
+
+<span class="t-h2">## Steps</span>
+<span class="t-cm">1. Run the test suite: `npm run test`</span>
+<span class="t-cm">2. Build the application: `npm run build`</span>
+<span class="t-cm">3. Check for uncommitted changes: `git status`</span>
+<span class="t-cm">4. Tag the release: `git tag v$(date +%Y%m%d-%H%M)`</span>
+<span class="t-cm">5. Push to deployment target</span>
+<span class="t-cm">6. Verify health endpoint responds 200</span></pre>
+
+    <div class="danger">
+      <strong>⚠ context: fork only works for task skills with explicit steps</strong>
+      If your skill contains guidelines like "use these API conventions" without an actionable task, the forked subagent receives the guidelines but no prompt to execute. It may return without meaningful output. Use <code>context: inline</code> for reference/knowledge content.
+    </div>
+  </div>
+
+
+  <!-- ════════ 07: ALLOWED-TOOLS & HOOKS ══════════════ -->
+  <div class="section-label" data-n="07">allowed-tools &amp; Skill-Scoped Hooks</div>
+
+  <div class="g2 fw">
+
+    <div class="card c-red">
+      <div class="card-title">🔧 allowed-tools — Permission-Free Tool Access</div>
+      <p style="color:var(--muted);font-size:12px;line-height:1.8;margin-bottom:12px;">Tools listed in <code>allowed-tools</code> run <strong>without permission prompts</strong> while the skill is active. Same syntax as the global permissions <code>allow</code> rules.</p>
+
+      <span class="pre-label">allowed-tools syntax examples</span>
+      <pre><span class="t-cm">── Read-only analysis ────────────────────────────</span>
+<span class="t-nm">allowed-tools</span>: <span class="t-st">Read Grep Glob</span>
+
+<span class="t-cm">── File modifications ────────────────────────────</span>
+<span class="t-nm">allowed-tools</span>: <span class="t-st">Read Edit Write</span>
+
+<span class="t-cm">── Git operations ────────────────────────────────</span>
+<span class="t-nm">allowed-tools</span>: <span class="t-st">Read Write Bash(git *)</span>
+
+<span class="t-cm">── Testing workflows ─────────────────────────────</span>
+<span class="t-nm">allowed-tools</span>: <span class="t-st">Read Write Bash(bun test:*) Bash(npm test:*)</span>
+
+<span class="t-cm">── Full development ──────────────────────────────</span>
+<span class="t-nm">allowed-tools</span>: <span class="t-st">Read Edit Write Bash(git *) Bash(bun *) Bash(npm *)</span>
+
+<span class="t-cm">── MCP tools ─────────────────────────────────────</span>
+<span class="t-nm">allowed-tools</span>: <span class="t-st">Read mcp__github__create_pr mcp__puppeteer</span></pre>
+
+      <div class="tip">
+        <strong>✦ Scope tool access to the minimum needed</strong>
+        <code>Read Grep Glob</code> for analysis skills. Add <code>Edit Write</code> only if the skill modifies files. Add <code>Bash(git *)</code> only for git workflows. Scoping tools makes skills safer and faster — Claude doesn't need to prompt for each tool use.
+      </div>
+
+      <div class="info">
+        <strong>ℹ Tool access is scoped to skill activation</strong>
+        The <code>allowed-tools</code> list only applies while this skill is being executed. It does not permanently change your session permissions. After the skill completes, normal permission rules resume.
+      </div>
+    </div>
+
+    <div class="card c-purple">
+      <div class="card-title">🔗 Skill-Scoped Hooks in Frontmatter</div>
+      <p style="color:var(--muted);font-size:12px;line-height:1.8;margin-bottom:12px;">Skills can define lifecycle hooks in their frontmatter. These hooks only run while this specific skill is active — they're automatically cleaned up when the skill finishes. <code>once: true</code> is supported here (unlike session-level hooks).</p>
+
+      <span class="pre-label">Skill hooks anatomy</span>
+      <pre><span class="t-op">---</span>
+<span class="t-nm">name</span>: <span class="t-st">typescript-dev</span>
+<span class="t-nm">description</span>: <span class="t-st">TypeScript development with auto-lint</span>
+<span class="t-nm">allowed-tools</span>: <span class="t-st">Read Edit Write Bash(npm *)</span>
+<span class="t-nm">hooks</span>:
+  <span class="t-nm">PreToolUse</span>:
+    <span class="t-nm">- matcher</span>: <span class="t-st">"Bash"</span>                  <span class="t-cm"># regex pattern for tool name</span>
+      <span class="t-nm">hooks</span>:
+        <span class="t-nm">- type</span>: <span class="t-st">command</span>
+          <span class="t-nm">command</span>: <span class="t-st">"./scripts/validate-cmd.sh"</span>
+          <span class="t-nm">once</span>: <span class="t-kw">true</span>               <span class="t-cm"># run only once per session</span>
+  <span class="t-nm">PostToolUse</span>:
+    <span class="t-nm">- matcher</span>: <span class="t-st">"Write(*.ts)|Edit(*.ts)"</span>  <span class="t-cm"># pipe = OR</span>
+      <span class="t-nm">hooks</span>:
+        <span class="t-nm">- type</span>: <span class="t-st">command</span>
+          <span class="t-nm">command</span>: <span class="t-st">"npx prettier --write \"$CLAUDE_TOOL_INPUT_FILE_PATH\""</span>
+        <span class="t-nm">- type</span>: <span class="t-st">command</span>
+          <span class="t-nm">command</span>: <span class="t-st">"npx eslint --fix \"$CLAUDE_TOOL_INPUT_FILE_PATH\" 2>/dev/null"</span>
+  <span class="t-nm">Stop</span>:                                 <span class="t-cm"># auto-converts to SubagentStop for fork skills</span>
+    <span class="t-nm">- hooks</span>:
+        <span class="t-nm">- type</span>: <span class="t-st">command</span>
+          <span class="t-nm">command</span>: <span class="t-st">"./scripts/completion-check.sh"</span>
+<span class="t-op">---</span></pre>
+
+      <div class="tip">
+        <strong>✦ once: true is skills-only</strong>
+        <code>once: true</code> on a hook entry means it runs only once per session, even if the trigger fires many times. This field is supported in skill frontmatter hooks but is <em>not</em> available in session-level hooks in settings.json.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ════════ 08: AUTO-ACTIVATION ════════════════════ -->
+  <div class="section-label" data-n="08">Auto-Activation — How Claude Decides to Load Skills</div>
+
+  <div class="g2 fw">
+
+    <div class="card c-cyan">
+      <div class="card-title">🤖 How Auto-Activation Works</div>
+      <p style="color:var(--muted);font-size:12px;line-height:1.8;margin-bottom:14px;">At the start of each session, Claude loads the <strong>descriptions</strong> of all available skills into a discovery layer. When you send a message, Claude scans descriptions to decide which skill (if any) is relevant enough to load and activate.</p>
+
+      <div class="flow-row">
+        <div class="fnode c1">Session start<br><span style="font-size:9px;">load descriptions</span></div>
+        <div class="farrow">→</div>
+        <div class="fnode c3">User message<br><span style="font-size:9px;">semantic match</span></div>
+        <div class="farrow">→</div>
+        <div class="fnode c2">Claude decides<br><span style="font-size:9px;">load full SKILL.md</span></div>
+        <div class="farrow">→</div>
+        <div class="fnode c4">Skill activated<br><span style="font-size:9px;">instructions added</span></div>
+      </div>
+
+      <span class="pre-label" style="margin-top:12px;">Writing descriptions that trigger reliably</span>
+      <pre><span class="t-cm">── ✗ Too vague — rarely triggers ────────────────</span>
+<span class="hl-r"><span class="t-nm">description</span>: <span class="t-st">Helps with files</span></span>
+
+<span class="t-cm">── ✓ Specific with trigger keywords ─────────────</span>
+<span class="hl-g"><span class="t-nm">description</span>: <span class="t-st">Parse and validate JSON files including schema</span>
+               <span class="t-st">validation. Use when working with JSON data,</span>
+               <span class="t-st">.json files, or configuration files.</span></span>
+
+<span class="t-cm">── ✓ Action + domain + file type ─────────────────</span>
+<span class="hl-g"><span class="t-nm">description</span>: <span class="t-st">Reviews Vue and React components against</span>
+               <span class="t-st">accessibility and performance criteria. Use when</span>
+               <span class="t-st">asked to review, audit, or improve a UI component.</span></span>
+
+<span class="t-cm">── Description keyword triggers (add to description):</span>
+<span class="t-cm"># File types:  .ts .json .md .pdf .csv .pptx</span>
+<span class="t-cm"># Actions:     review, audit, parse, validate, deploy</span>
+<span class="t-cm"># Domains:     API, database, auth, CI/CD, testing</span>
+<span class="t-cm"># User words:  "how", "what", "explain", "fix", "create"</span></pre>
+
+      <div class="warn">
+        <strong>⚠ If skill isn't auto-activating</strong>
+        1. Check <code>/context</code> — is it in the budget? 2. Check description — is it specific enough? 3. Run <code>/context</code> to see "excluded-skills" warnings. 4. Add <code>disable-model-invocation: true</code> → check if it works when you invoke manually. 5. Description quality is almost always the cause.
+      </div>
+    </div>
+
+    <div class="card c-green">
+      <div class="card-title">💰 Token Budget &amp; /context Debugging</div>
+
+      <table>
+        <thead><tr><th>Budget Item</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td>Budget per session</td><td>2% of total context window, with a fallback of 16,000 characters if 2% is too small</td></tr>
+          <tr><td>What counts</td><td>All skill <strong>descriptions</strong> (not full content) from all skill discovery layers</td></tr>
+          <tr><td>When exceeded</td><td>Lower-priority skills get excluded. <code>/context</code> shows "excluded-skills" warning with which skills were dropped</td></tr>
+          <tr><td>What loads at activation</td><td>Full SKILL.md content loads only when Claude decides to activate a skill — not at startup</td></tr>
+          <tr><td>Override budget</td><td>Set <code>SLASH_COMMAND_TOOL_CHAR_BUDGET</code> env var to a character count override</td></tr>
+        </tbody>
+      </table>
+
+      <span class="pre-label">Debugging skills with /context</span>
+      <pre><span class="t-sl">/context</span>          <span class="t-cm"># view context window state</span>
+                   <span class="t-cm"># shows: loaded skills, token usage</span>
+                   <span class="t-cm"># shows: "excluded-skills" warnings</span>
+                   <span class="t-cm"># shows: which CLAUDE.md files loaded</span>
+
+<span class="t-cm">── If skill isn't in /context output ─────────────</span>
+<span class="t-cm"># 1. Check file is at correct path:</span>
+<span class="t-fn">ls</span> ~/.claude/skills/my-skill/SKILL.md
+<span class="t-fn">ls</span> .claude/skills/my-skill/SKILL.md
+
+<span class="t-cm"># 2. Check frontmatter YAML is valid:</span>
+<span class="t-fn">python3</span> -c <span class="t-st">"import yaml; yaml.safe_load(open('SKILL.md').read().split('---')[1])"</span>
+
+<span class="t-cm"># 3. Check user-invocable isn't false (hides from /menu)</span></pre>
+
+      <div class="tip">
+        <strong>✦ Keep descriptions short and precise</strong>
+        Long descriptions consume more of the token budget. Aim for 1–3 sentences. Include exactly the trigger keywords users will say naturally — don't pad with explanation.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ════════ 09: BUNDLED SKILLS ═════════════════════ -->
+  <div class="section-label" data-n="09">Bundled Skills — Built Into Every Claude Code Session</div>
+
+  <div class="card c-yellow fw">
+    <div class="card-title">📦 Bundled (Built-in) Skills — Always Available</div>
+    <p style="color:var(--muted);font-size:12px;line-height:1.8;margin-bottom:14px;">Bundled skills ship with Claude Code and require no installation. Unlike built-in commands (which execute fixed logic), bundled skills are <strong>prompt-based</strong> — they give Claude a detailed playbook and let it orchestrate the work using its tools. Any custom skill with the same name overrides a bundled skill.</p>
+
+    <table>
+      <thead><tr><th>Slash Command</th><th>What It Does</th><th>Auto-Activates?</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>/claude-api</td>
+          <td>Loads Claude API reference for your project's language (Python, TypeScript, Java, Go, Ruby, C#, PHP, cURL). Covers tool use, streaming, batches, structured outputs, and common pitfalls. Also loads Agent SDK reference for Python and TypeScript.</td>
+          <td>Yes — when your code imports <code>anthropic</code>, <code>@anthropic-ai/sdk</code>, or <code>claude_agent_sdk</code></td>
+        </tr>
+        <tr>
+          <td>Document skills</td>
+          <td>Built-in skills for creating and processing Word (.docx), Excel (.xlsx), PowerPoint (.pptx), and PDF files. Prompt-based orchestration using code execution.</td>
+          <td>Yes — when asked to create/process those file types</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="info">
+      <strong>ℹ Bundled vs Built-in Commands</strong>
+      <code>/help</code>, <code>/compact</code>, <code>/clear</code> are <strong>built-in commands</strong> — they execute fixed hardcoded logic. Bundled skills like <code>/claude-api</code> are <strong>prompt-based</strong> — Claude reads a SKILL.md and orchestrates freely using its tools. Built-in commands cannot be overridden; bundled skills can.
+    </div>
+  </div>
+
+
+  <!-- ════════ 10: REAL-WORLD TEMPLATES ═══════════════ -->
+  <div class="section-label" data-n="10">Real-World SKILL.md Templates</div>
+
+  <div class="g3 fw">
+
+    <!-- Code Review -->
+    <div class="card c-cyan">
+      <div class="card-title">🔍 Code Review (Inline)</div>
+      <span class="tag tc">User + Claude</span><span class="tag tc">inline</span>
+      <pre><span class="t-op">---</span>
+<span class="t-nm">name</span>: <span class="t-st">review</span>
+<span class="t-nm">description</span>: <span class="t-st">Reviews code for bugs, security issues,</span>
+  <span class="t-st">type safety, and performance. Use when asked</span>
+  <span class="t-st">to review, audit, or check a file or PR.</span>
+<span class="t-nm">argument-hint</span>: <span class="t-bi">[file-path or PR number]</span>
+<span class="t-nm">allowed-tools</span>: <span class="t-st">Read Grep Glob Bash(git diff *)</span>
+<span class="t-op">---</span>
+
+Review <span class="t-bi">$ARGUMENTS</span> against these criteria:
+
+<span class="t-h2">## Checklist</span>
+<span class="t-cm">- [ ] Security: no hardcoded secrets, validated inputs</span>
+<span class="t-cm">- [ ] TypeScript: no `any`, types explicit</span>
+<span class="t-cm">- [ ] Errors: caught and logged properly</span>
+<span class="t-cm">- [ ] Tests: coverage for new code</span>
+<span class="t-cm">- [ ] Performance: no N+1 queries</span>
+
+Output: table of issues with severity.</pre>
+    </div>
+
+    <!-- Deploy -->
+    <div class="card c-red">
+      <div class="card-title">🚀 Deploy (Fork + User-Only)</div>
+      <span class="tag tr">User only</span><span class="tag tp">context: fork</span>
+      <pre><span class="t-op">---</span>
+<span class="t-nm">name</span>: <span class="t-st">deploy</span>
+<span class="t-nm">description</span>: <span class="t-st">Deploy the application to production</span>
+<span class="t-nm">argument-hint</span>: <span class="t-bi">[staging|production]</span>
+<span class="t-nm">context</span>: <span class="t-st">fork</span>
+<span class="t-nm">disable-model-invocation</span>: <span class="t-kw">true</span>
+<span class="t-nm">allowed-tools</span>: <span class="t-st">Read Bash(npm *) Bash(git *) Bash(docker *)</span>
+<span class="t-op">---</span>
+
+Deploy to: <span class="t-bi">$ARGUMENTS</span>
+Branch: <span class="t-op">!`git branch --show-current`</span>
+
+<span class="t-h2">## Steps</span>
+<span class="t-cm">1. Run tests: `npm test`</span>
+<span class="t-cm">2. Build: `npm run build`</span>
+<span class="t-cm">3. Push docker image</span>
+<span class="t-cm">4. Verify health check</span>
+<span class="t-cm">5. Report deploy status</span>
+
+<span class="t-cm">STOP if any step fails.</span></pre>
+    </div>
+
+    <!-- PR Summary -->
+    <div class="card c-green">
+      <div class="card-title">📝 PR Summary (Fork + Dynamic)</div>
+      <span class="tag tg">User + Claude</span><span class="tag tp">dynamic !`</span>
+      <pre><span class="t-op">---</span>
+<span class="t-nm">name</span>: <span class="t-st">pr-summary</span>
+<span class="t-nm">description</span>: <span class="t-st">Creates a PR description summarizing</span>
+  <span class="t-st">changes, testing done, and impact. Use when</span>
+  <span class="t-st">asked to write a PR description or changelog.</span>
+<span class="t-nm">context</span>: <span class="t-st">fork</span>
+<span class="t-nm">allowed-tools</span>: <span class="t-st">Read Bash(git *)</span>
+<span class="t-op">---</span>
+
+Branch: <span class="t-op">!`git branch --show-current`</span>
+Diff:   <span class="t-op">!`git diff main --stat`</span>
+Log:    <span class="t-op">!`git log main..HEAD --oneline`</span>
+
+Write a PR description with:
+<span class="t-cm">## What changed and why</span>
+<span class="t-cm">## How to test</span>
+<span class="t-cm">## Breaking changes (if any)</span></pre>
+    </div>
+
+    <!-- Commit -->
+    <div class="card c-orange">
+      <div class="card-title">✍️ Conventional Commit (User-Only)</div>
+      <span class="tag tr">User only</span><span class="tag tc">inline</span>
+      <pre><span class="t-op">---</span>
+<span class="t-nm">name</span>: <span class="t-st">commit</span>
+<span class="t-nm">description</span>: <span class="t-st">Stages changes and creates a Conventional</span>
+  <span class="t-st">Commits message for the current diff</span>
+<span class="t-nm">disable-model-invocation</span>: <span class="t-kw">true</span>
+<span class="t-nm">allowed-tools</span>: <span class="t-st">Bash(git add *) Bash(git commit *) Bash(git status) Bash(git diff *)</span>
+<span class="t-op">---</span>
+
+Changes: <span class="t-op">!`git diff --cached --stat`</span>
+
+<span class="t-cm">1. Run `git status` to see what's staged</span>
+<span class="t-cm">2. If nothing staged, run `git add -A`</span>
+<span class="t-cm">3. Write a Conventional Commit message:</span>
+   <span class="t-cm">type(scope): description (max 72 chars)</span>
+   <span class="t-cm">types: feat|fix|chore|docs|test|refactor</span>
+<span class="t-cm">4. Run `git commit -m "message"`</span></pre>
+    </div>
+
+    <!-- Legacy context background -->
+    <div class="card c-purple">
+      <div class="card-title">📚 Background Knowledge (Claude-Only)</div>
+      <span class="tag tp">Claude only</span><span class="tag tc">passive</span>
+      <pre><span class="t-op">---</span>
+<span class="t-nm">name</span>: <span class="t-st">legacy-api-context</span>
+<span class="t-nm">description</span>: <span class="t-st">Context about our legacy payment API v1.</span>
+  <span class="t-st">Use when working with PaymentService, legacy</span>
+  <span class="t-st">billing code, or payment_v1 endpoints.</span>
+<span class="t-nm">user-invocable</span>: <span class="t-kw">false</span>
+<span class="t-op">---</span>
+
+<span class="t-h1"># Legacy Payment API Context</span>
+
+The PaymentService class uses a custom state
+machine. Key quirks:
+<span class="t-cm">- All amounts stored in cents (integer)</span>
+<span class="t-cm">- `status: "pending_auth"` = card authorized</span>
+<span class="t-cm">- `status: "complete"` = settlement done</span>
+<span class="t-cm">- Never call `.cancel()` directly — use</span>
+  <span class="t-cm">PaymentService.safeCancelTransaction(id)</span>
+
+<span class="t-cm">See: src/legacy/payment/QUIRKS.md</span></pre>
+    </div>
+
+    <!-- Scaffold feature -->
+    <div class="card c-blue">
+      <div class="card-title">🏗 Scaffold Feature (Fork + Args)</div>
+      <span class="tag tb">User + Claude</span><span class="tag tp">context: fork</span>
+      <pre><span class="t-op">---</span>
+<span class="t-nm">name</span>: <span class="t-st">scaffold-feature</span>
+<span class="t-nm">description</span>: <span class="t-st">Scaffolds a new feature with route, handler,</span>
+  <span class="t-st">service, tests, and migration. Use when</span>
+  <span class="t-st">creating a new API feature from scratch.</span>
+<span class="t-nm">argument-hint</span>: <span class="t-bi">[feature-name]</span>
+<span class="t-nm">context</span>: <span class="t-st">fork</span>
+<span class="t-nm">allowed-tools</span>: <span class="t-st">Read Write Edit Bash(npm *) Bash(git *)</span>
+<span class="t-op">---</span>
+
+Feature name: <span class="t-bi">$ARGUMENTS</span>
+
+<span class="t-cm">Create these files (follow existing patterns):</span>
+<span class="t-cm">- src/api/handlers/$ARGUMENTS.ts</span>
+<span class="t-cm">- src/api/routes/$ARGUMENTS.ts</span>
+<span class="t-cm">- src/services/$ARGUMENTS-service.ts</span>
+<span class="t-cm">- __tests__/$ARGUMENTS.test.ts</span>
+<span class="t-cm">- migrations/add_$ARGUMENTS_table.sql</span>
+
+<span class="t-cm">Read an existing feature first for patterns.</span>
+<span class="t-cm">Run `npm test` when done. Report created files.</span></pre>
+    </div>
+  </div>
+
+
+  <!-- ════════ 11: DECISION TREE ══════════════════════ -->
+  <div class="section-label" data-n="11">Decision Tree — Designing Your Skill</div>
+
+  <div class="card c-purple tree fw">
+    <div class="card-title">🌿 Choose the Right Settings for Your Skill</div>
+    <pre><span class="tq">What kind of content is this skill?</span>
+<span class="tln">├─</span> Reference/knowledge (style guides, conventions, domain context)
+<span class="tln">│  └─</span> <span class="tre">context: inline</span>  (default — can see conversation history)
+<span class="tln">│     └─</span> Should it be hidden from the slash menu?
+<span class="tln">│        ├─ YES</span> → <span class="tre">user-invocable: false</span>  (Claude auto-loads, you can't /invoke)
+<span class="tln">│        └─ NO</span>  → leave defaults (both you and Claude can invoke)
+<span class="tln">└─</span> Task with explicit steps (deploy, test, generate, review)
+   <span class="tln">├─</span> Does it have side effects (push, publish, send, deploy)?
+   <span class="tln">│  └─ YES</span> → <span class="tre">disable-model-invocation: true</span>  (user-only control)
+   <span class="tln">│           └─</span> Needs clean isolated context?
+   <span class="tln">│              └─ YES</span> → <span class="tre">context: fork</span>  (isolated subagent)
+   <span class="tln">│              └─ NO</span>  → inline is fine (has conversation history)
+   <span class="tln">└─</span> No side effects (analysis, summarize, explain)?
+      <span class="tln">└─</span> Should Claude auto-activate it?
+         <span class="tln">├─ YES</span> → leave defaults, <span class="tre">write a specific description</span> with trigger keywords
+         <span class="tln">└─ NO</span>  → <span class="tre">disable-model-invocation: true</span>
+
+<span class="tq">Does the skill need tools without permission prompts?</span>
+<span class="tln">└─ YES</span> → add <span class="tre">allowed-tools: Read Grep Bash(npm *)</span>  (minimum needed)
+
+<span class="tq">Does the skill need runtime dynamic context (git branch, env vars)?</span>
+<span class="tln">└─ YES</span> → use <span class="tre">!`command`</span> backtick injection in the skill body
+
+<span class="tq">Does the skill take user input after the /slash-command?</span>
+<span class="tln">└─ YES</span> → use <span class="tre">$ARGUMENTS</span> (all) or <span class="tre">$0 $1 $2</span> (positional)
+          → add <span class="tre">argument-hint: [description]</span> for autocomplete guidance</pre>
+  </div>
+
+
+  <!-- ════════ 12: QUICK REFERENCE ════════════════════ -->
+  <div class="section-label" data-n="12">Complete Quick Reference</div>
+
+  <div class="card c-cyan fw">
+    <div class="card-title">📋 Claude Code Skills Master Reference</div>
+    <table>
+      <thead><tr><th>Concept</th><th>Detail</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Skill file</td><td><code>SKILL.md</code> inside a named directory</td><td>Directory name = default slash command name</td></tr>
+        <tr><td>Personal scope</td><td><code>~/.claude/skills/skill-name/SKILL.md</code></td><td>Available across all projects</td></tr>
+        <tr><td>Project scope</td><td><code>.claude/skills/skill-name/SKILL.md</code></td><td>Commit to git for team-wide access</td></tr>
+        <tr><td>Commands compat</td><td><code>.claude/commands/name.md</code> still works as a skill</td><td>Skills recommended; add SKILL.md dir for extras</td></tr>
+        <tr><td>Max size</td><td>500 lines per SKILL.md</td><td>Move large references to separate files</td></tr>
+        <tr><td>name field</td><td>Slash command name. Lowercase + hyphens, max 64 chars</td><td>Defaults to directory name if omitted</td></tr>
+        <tr><td>description</td><td>How Claude decides when to auto-activate</td><td>Recommended. Include trigger keywords. Default: first paragraph.</td></tr>
+        <tr><td>argument-hint</td><td>Text shown in autocomplete dropdown</td><td>e.g. <code>[file or PR number]</code></td></tr>
+        <tr><td>disable-model-invocation</td><td><code>true</code> → user can invoke, Claude cannot auto-trigger</td><td>Use for side-effect commands</td></tr>
+        <tr><td>user-invocable</td><td><code>false</code> → hidden from / menu, Claude-only background knowledge</td><td>Use for passive context loaders</td></tr>
+        <tr><td>context: inline</td><td>Runs in current session with conversation history access</td><td>Default. Use for reference / knowledge content.</td></tr>
+        <tr><td>context: fork</td><td>Runs as isolated subagent. No conversation history.</td><td>SKILL.md content = full agent prompt. Only for task skills with steps.</td></tr>
+        <tr><td>agent</td><td>Specific subagent type when using <code>context: fork</code></td><td>e.g. <code>agent: Explore</code></td></tr>
+        <tr><td>allowed-tools</td><td>Tools that run without permission prompts while skill is active</td><td>Same syntax as permissions allow rules. Scoped to skill lifetime.</td></tr>
+        <tr><td>model</td><td>Override model for this skill</td><td><code>haiku</code> / <code>sonnet</code> / <code>opus</code> / <code>inherit</code> (default)</td></tr>
+        <tr><td>$ARGUMENTS</td><td>Everything typed after <code>/skill-name</code></td><td>Auto-appended to end if not included in body</td></tr>
+        <tr><td>$0 $1 $2</td><td>Positional args (space-separated)</td><td>e.g. <code>/migrate SearchBar React Vue</code> → $0=SearchBar</td></tr>
+        <tr><td>!`command`</td><td>Shell command injected at skill load time. Output replaces placeholder.</td><td>Runs once on load — not on each turn</td></tr>
+        <tr><td>$CLAUDE_SESSION_ID</td><td>Current session identifier</td><td>Available in skill body and backtick commands</td></tr>
+        <tr><td>$CLAUDE_PLUGIN_ROOT</td><td>Absolute path to skill directory (plugin skills)</td><td>Use to reference scripts: <code>${CLAUDE_PLUGIN_ROOT}/scripts/</code></td></tr>
+        <tr><td>hooks in frontmatter</td><td>PreToolUse, PostToolUse, Stop — scoped to skill lifetime</td><td>Supports <code>once: true</code>. Stop auto-converts to SubagentStop for fork skills.</td></tr>
+        <tr><td>Token budget</td><td>2% of context window (16,000 char fallback) for all skill descriptions</td><td>Check <code>/context</code> for excluded-skills warnings</td></tr>
+        <tr><td>Priority on conflict</td><td>Enterprise → Personal → Project → Bundled</td><td>Higher layer silently overrides lower layer</td></tr>
+        <tr><td>Bundled /claude-api</td><td>Auto-loads API reference when code imports Anthropic SDK</td><td>Available in every session without installation</td></tr>
+        <tr><td>Open Standard fields</td><td><code>name description license compatibility metadata allowed-tools</code></td><td>Portable across 25+ agents (agentskills.io)</td></tr>
+        <tr><td>SKILL.md validator</td><td>May show false-positive warnings for Claude Code extended fields</td><td>Extended fields (context, hooks, model, etc.) are valid Claude Code frontmatter</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <span>CLAUDE CODE — SKILLS CHEATSHEET &nbsp;·&nbsp; MAR 2026 &nbsp;·&nbsp; OFFICIAL ANTHROPIC DOCS</span>
+    <span>docs.anthropic.com/en/docs/claude-code/skills &nbsp;·&nbsp; SKILL.md · .claude/skills/ · Agent Skills Open Standard</span>
+  </div>
+
+</div>
+</body>
+</html>

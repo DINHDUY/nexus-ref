@@ -1,0 +1,1916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Microsoft Agent Framework — Cheatsheet</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,500;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0a0c10;
+    --surface:   #0f1218;
+    --panel:     #141820;
+    --border:    #1e2533;
+    --border2:   #252d3d;
+    --cyan:      #00e5ff;
+    --cyan-dim:  #00aacc;
+    --green:     #39ff84;
+    --green-dim: #20c060;
+    --amber:     #ffb700;
+    --amber-dim: #cc8800;
+    --magenta:   #ff4af0;
+    --magenta-dim:#cc20c0;
+    --blue:      #4a9eff;
+    --text:      #c8d4e8;
+    --text-dim:  #667799;
+    --text-muted:#3a4a60;
+    --code-bg:   #080b10;
+    --glow-cyan: 0 0 12px rgba(0,229,255,0.25);
+    --glow-green:0 0 12px rgba(57,255,132,0.2);
+    --glow-amber:0 0 12px rgba(255,183,0,0.2);
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+  html{scroll-behavior:smooth}
+
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Space Mono',monospace;
+    font-size:13px;
+    line-height:1.6;
+    min-height:100vh;
+    /* scanline overlay */
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,229,255,0.015) 2px,
+        rgba(0,229,255,0.015) 4px
+      );
+  }
+
+  /* HEADER */
+  .header{
+    background:linear-gradient(135deg,#050810 0%,#0a1020 50%,#050810 100%);
+    border-bottom:2px solid var(--border);
+    padding:36px 40px 28px;
+    position:relative;
+    overflow:hidden;
+  }
+  .header::before{
+    content:'';
+    position:absolute;inset:0;
+    background:
+      radial-gradient(ellipse 60% 60% at 80% 50%, rgba(0,229,255,0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 80% at 10% 50%, rgba(57,255,132,0.04) 0%, transparent 70%);
+    pointer-events:none;
+  }
+  .header::after{
+    content:'';
+    position:absolute;bottom:0;left:0;right:0;height:1px;
+    background:linear-gradient(90deg,transparent,var(--cyan-dim),var(--green-dim),transparent);
+  }
+  .tag{
+    font-family:'Space Mono',monospace;
+    font-size:10px;
+    color:var(--cyan);
+    letter-spacing:3px;
+    text-transform:uppercase;
+    margin-bottom:10px;
+    opacity:.8;
+  }
+  .header h1{
+    font-family:'Bricolage Grotesque',sans-serif;
+    font-size:clamp(26px,4vw,42px);
+    font-weight:800;
+    color:#fff;
+    letter-spacing:-0.5px;
+    line-height:1.1;
+    position:relative;
+  }
+  .header h1 span{color:var(--cyan);}
+  .header-meta{
+    margin-top:14px;
+    display:flex;gap:20px;flex-wrap:wrap;align-items:center;
+  }
+  .badge{
+    display:inline-flex;align-items:center;gap:6px;
+    background:rgba(0,229,255,0.08);
+    border:1px solid rgba(0,229,255,0.2);
+    border-radius:4px;
+    padding:4px 10px;
+    font-size:10px;color:var(--cyan-dim);letter-spacing:1px;text-transform:uppercase;
+  }
+  .badge.green{background:rgba(57,255,132,0.07);border-color:rgba(57,255,132,0.2);color:var(--green-dim);}
+  .badge.amber{background:rgba(255,183,0,0.07);border-color:rgba(255,183,0,0.2);color:var(--amber);}
+  .badge .dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;}
+
+  /* LAYOUT */
+  .wrapper{max-width:1440px;margin:0 auto;padding:28px 28px 60px;}
+
+  /* NAV TABS */
+  .nav{
+    display:flex;flex-wrap:wrap;gap:6px;
+    margin-bottom:24px;
+    border-bottom:1px solid var(--border);
+    padding-bottom:16px;
+  }
+  .nav-btn{
+    background:transparent;
+    border:1px solid var(--border);
+    border-radius:4px;
+    color:var(--text-dim);
+    font-family:'Space Mono',monospace;
+    font-size:10px;letter-spacing:1.5px;text-transform:uppercase;
+    padding:6px 12px;cursor:pointer;transition:all .15s;
+  }
+  .nav-btn:hover,.nav-btn.active{
+    background:rgba(0,229,255,0.08);
+    border-color:var(--cyan-dim);
+    color:var(--cyan);
+    box-shadow:var(--glow-cyan);
+  }
+
+  /* SECTION */
+  .section{display:none}
+  .section.active{display:block}
+
+  /* GRID */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(460px,1fr));gap:16px;}
+  .grid-3{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
+  .grid-wide{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:900px){.grid,.grid-wide{grid-template-columns:1fr;}}
+
+  /* CARD */
+  .card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:6px;
+    overflow:hidden;
+    transition:border-color .2s;
+  }
+  .card:hover{border-color:var(--border2);}
+  .card.cyan:hover{border-color:rgba(0,229,255,0.3);}
+  .card.green:hover{border-color:rgba(57,255,132,0.3);}
+  .card.amber:hover{border-color:rgba(255,183,0,0.3);}
+  .card.magenta:hover{border-color:rgba(255,74,240,0.3);}
+
+  .card-header{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 14px;
+    border-bottom:1px solid var(--border);
+    background:var(--panel);
+  }
+  .card-icon{font-size:14px;line-height:1;}
+  .card-title{
+    font-family:'Bricolage Grotesque',sans-serif;
+    font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+    color:var(--text);
+  }
+  .card.cyan .card-title{color:var(--cyan);}
+  .card.green .card-title{color:var(--green);}
+  .card.amber .card-title{color:var(--amber);}
+  .card.magenta .card-title{color:var(--magenta);}
+  .card-body{padding:14px;}
+
+  /* CODE BLOCKS */
+  pre{
+    background:var(--code-bg);
+    border:1px solid var(--border);
+    border-radius:4px;
+    padding:12px 14px;
+    overflow-x:auto;
+    font-family:'Space Mono',monospace;
+    font-size:11.5px;
+    line-height:1.7;
+    color:#a8c0d8;
+    position:relative;
+  }
+  pre+pre{margin-top:8px;}
+  .lang{
+    position:absolute;top:6px;right:8px;
+    font-size:9px;letter-spacing:2px;text-transform:uppercase;
+    color:var(--text-muted);
+  }
+
+  /* SYNTAX HIGHLIGHT */
+  .kw{color:#c792ea;}   /* keywords */
+  .fn{color:#82aaff;}   /* functions */
+  .str{color:#c3e88d;}  /* strings */
+  .num{color:#f78c6c;}  /* numbers */
+  .cmt{color:#546e7a;font-style:italic;} /* comments */
+  .cls{color:#ffcb6b;}  /* classes */
+  .var{color:#89ddff;}  /* variables/props */
+  .op{color:#89ddff;}   /* operators */
+  .cy{color:#00e5ff;}   /* cyan accent */
+  .gr{color:#39ff84;}   /* green accent */
+  .am{color:#ffb700;}   /* amber accent */
+  .mg{color:#ff4af0;}   /* magenta accent */
+
+  /* INFO ROWS */
+  .info-row{display:flex;gap:8px;align-items:flex-start;padding:5px 0;border-bottom:1px solid var(--border);}
+  .info-row:last-child{border-bottom:none;}
+  .info-key{color:var(--cyan-dim);min-width:130px;flex-shrink:0;font-size:11px;}
+  .info-val{color:var(--text);font-size:11px;}
+
+  /* PILLS */
+  .pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+  .pill{
+    background:rgba(0,229,255,0.07);border:1px solid rgba(0,229,255,0.18);
+    border-radius:3px;padding:3px 8px;font-size:10px;color:var(--cyan-dim);letter-spacing:.5px;
+  }
+  .pill.green{background:rgba(57,255,132,0.07);border-color:rgba(57,255,132,0.18);color:var(--green-dim);}
+  .pill.amber{background:rgba(255,183,0,0.07);border-color:rgba(255,183,0,0.18);color:var(--amber);}
+  .pill.magenta{background:rgba(255,74,240,0.07);border-color:rgba(255,74,240,0.2);color:var(--magenta);}
+
+  /* SECTION HEADER */
+  .sec-header{
+    display:flex;align-items:center;gap:12px;
+    margin-bottom:18px;padding-bottom:12px;
+    border-bottom:1px solid var(--border);
+  }
+  .sec-header h2{
+    font-family:'Bricolage Grotesque',sans-serif;
+    font-size:18px;font-weight:800;color:#fff;
+  }
+  .sec-label{
+    font-size:10px;letter-spacing:2px;text-transform:uppercase;
+    color:var(--text-muted);
+  }
+
+  /* DIVIDER */
+  .divider{height:1px;background:linear-gradient(90deg,var(--border),transparent);margin:16px 0;}
+
+  /* NOTE BOX */
+  .note{
+    display:flex;gap:10px;
+    background:rgba(255,183,0,0.06);border:1px solid rgba(255,183,0,0.2);
+    border-radius:4px;padding:10px 12px;margin:10px 0;font-size:11px;color:var(--amber);
+  }
+  .note.green{background:rgba(57,255,132,0.06);border-color:rgba(57,255,132,0.2);color:var(--green-dim);}
+  .note.cyan{background:rgba(0,229,255,0.06);border-color:rgba(0,229,255,0.2);color:var(--cyan-dim);}
+
+  /* TABLE */
+  table{width:100%;border-collapse:collapse;font-size:11px;}
+  th{text-align:left;color:var(--cyan);padding:6px 10px;border-bottom:1px solid var(--border);
+    font-family:'Bricolage Grotesque',sans-serif;font-weight:700;letter-spacing:.5px;font-size:11px;}
+  td{padding:6px 10px;border-bottom:1px solid var(--border);color:var(--text);}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:rgba(255,255,255,0.02);}
+
+  /* WORKFLOW DIAGRAM */
+  .wf-diagram{
+    display:flex;align-items:center;gap:0;
+    flex-wrap:wrap;padding:14px;background:var(--code-bg);
+    border:1px solid var(--border);border-radius:4px;
+  }
+  .wf-node{
+    background:var(--panel);border:1px solid var(--border2);
+    border-radius:4px;padding:5px 10px;
+    font-size:10px;color:var(--cyan);text-align:center;min-width:80px;
+  }
+  .wf-arrow{color:var(--text-muted);padding:0 6px;font-size:14px;}
+  .wf-node.green{border-color:rgba(57,255,132,0.3);color:var(--green);}
+  .wf-node.amber{border-color:rgba(255,183,0,0.3);color:var(--amber);}
+  .wf-node.magenta{border-color:rgba(255,74,240,0.3);color:var(--magenta);}
+
+  /* FULL WIDTH CARDS */
+  .card-full{grid-column:1/-1;}
+
+  p{margin:6px 0;font-size:11.5px;color:var(--text);}
+  ul{margin:6px 0 6px 16px;}
+  li{font-size:11.5px;color:var(--text);margin-bottom:3px;}
+  strong{color:#fff;font-weight:700;}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="tag">▸ Reference v1.0.0b260212</div>
+  <h1>Microsoft <span>Agent Framework</span></h1>
+  <div class="header-meta">
+    <span class="badge"><span class="dot"></span>Python + .NET</span>
+    <span class="badge green"><span class="dot"></span>Public Preview</span>
+    <span class="badge amber"><span class="dot"></span>MIT License</span>
+    <span class="badge"><span class="dot"></span>AutoGen + Semantic Kernel Successor</span>
+    <span style="color:var(--text-muted);font-size:10px;margin-left:auto;">github.com/microsoft/agent-framework</span>
+  </div>
+</header>
+
+<div class="wrapper">
+
+  <nav class="nav">
+    <button class="nav-btn active" onclick="show('install')">📦 Install</button>
+    <button class="nav-btn" onclick="show('agents')">🤖 Agents</button>
+    <button class="nav-btn" onclick="show('tools')">🔧 Tools</button>
+    <button class="nav-btn" onclick="show('mcp')">🔌 MCP</button>
+    <button class="nav-btn" onclick="show('memory')">🧠 Memory</button>
+    <button class="nav-btn" onclick="show('middleware')">⚙️ Middleware</button>
+    <button class="nav-btn" onclick="show('workflows')">🔀 Workflows</button>
+    <button class="nav-btn" onclick="show('orchestrations')">🎭 Orchestrations</button>
+    <button class="nav-btn" onclick="show('observability')">📡 Observability</button>
+    <button class="nav-btn" onclick="show('hosting')">🚀 Hosting</button>
+    <button class="nav-btn" onclick="show('providers')">🌐 Providers</button>
+    <button class="nav-btn" onclick="show('devui')">🖥 DevUI</button>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════════════════ INSTALL -->
+  <div id="tab-install" class="section active">
+    <div class="sec-header">
+      <div>
+        <div class="sec-label">Section 01</div>
+        <h2>Installation &amp; Setup</h2>
+      </div>
+    </div>
+    <div class="grid">
+
+      <div class="card cyan">
+        <div class="card-header"><span class="card-icon">🐍</span><span class="card-title">Python — Installation</span></div>
+        <div class="card-body">
+          <pre><span class="cmt"># Full bundle (all sub-packages)</span>
+pip install agent-framework <span class="op">--</span>pre
+
+<span class="cmt"># Individual packages</span>
+pip install agent-framework-core <span class="op">--</span>pre
+pip install agent-framework-azure-ai <span class="op">--</span>pre
+pip install agent-framework-openai <span class="op">--</span>pre
+pip install agent-framework-anthropic <span class="op">--</span>pre
+pip install agent-framework-redis <span class="op">--</span>pre
+pip install agent-framework-devui <span class="op">--</span>pre<span class="lang">BASH</span></pre>
+          <div class="note cyan">⚠ Still in pre-release. Use <strong>--pre</strong> flag. May take 1 min on Windows first install.</div>
+        </div>
+      </div>
+
+      <div class="card green">
+        <div class="card-header"><span class="card-icon">🔷</span><span class="card-title">.NET — Installation</span></div>
+        <div class="card-body">
+          <pre><span class="cmt">// Core agent package</span>
+dotnet add package Microsoft.Agents.AI <span class="op">--</span>prerelease
+
+<span class="cmt">// OpenAI provider</span>
+dotnet add package Microsoft.Agents.AI.OpenAI <span class="op">--</span>prerelease
+
+<span class="cmt">// Azure OpenAI + identity</span>
+dotnet add package Azure.AI.OpenAI <span class="op">--</span>prerelease
+dotnet add package Azure.Identity
+
+<span class="cmt">// MCP hosting support</span>
+dotnet add package Microsoft.Extensions.Hosting
+dotnet add package ModelContextProtocol <span class="op">--</span>prerelease
+
+<span class="cmt">// Workflow support</span>
+dotnet add package Microsoft.Agents.AI.Workflows <span class="op">--</span>prerelease<span class="lang">BASH</span></pre>
+        </div>
+      </div>
+
+      <div class="card amber">
+        <div class="card-header"><span class="card-icon">🔑</span><span class="card-title">Environment Variables</span></div>
+        <div class="card-body">
+          <pre><span class="cmt"># .env (load with dotenv manually)</span>
+<span class="var">AZURE_OPENAI_ENDPOINT</span>=https://&lt;resource&gt;.openai.azure.com/openai/v1
+<span class="var">AZURE_OPENAI_RESPONSES_DEPLOYMENT_NAME</span>=gpt-4o-mini
+<span class="var">AZURE_OPENAI_API_VERSION</span>=2025-04-01-preview
+<span class="var">AZURE_OPENAI_API_KEY</span>=&lt;key&gt;          <span class="cmt"># optional with AzureCLI</span>
+
+<span class="var">AZURE_AI_PROJECT_ENDPOINT</span>=https://&lt;project&gt;.services.ai.azure.com/api/projects/&lt;id&gt;
+<span class="var">AZURE_AI_MODEL_DEPLOYMENT_NAME</span>=gpt-4o-mini
+
+<span class="var">OPENAI_API_KEY</span>=sk-...
+<span class="var">GITHUB_PAT</span>=ghp_...
+<span class="var">MCP_SERVER_URL</span>=https://your-mcp.example.com
+<span class="var">MCP_API_KEY</span>=...<span class="lang">ENV</span></pre>
+          <div class="note">⚠ Agent Framework does NOT auto-load .env files. Call <strong>load_dotenv()</strong> at app start.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-icon">📋</span><span class="card-title">Architecture Overview</span></div>
+        <div class="card-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div>
+              <p style="color:var(--cyan);font-size:10px;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">Core Primitives</p>
+              <div class="pills">
+                <span class="pill">Agent</span>
+                <span class="pill">AgentSession</span>
+                <span class="pill">Message</span>
+                <span class="pill">Tool</span>
+                <span class="pill">ContextProvider</span>
+                <span class="pill">Middleware</span>
+              </div>
+            </div>
+            <div>
+              <p style="color:var(--green);font-size:10px;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">Workflow Primitives</p>
+              <div class="pills">
+                <span class="pill green">Executor</span>
+                <span class="pill green">Edge</span>
+                <span class="pill green">WorkflowBuilder</span>
+                <span class="pill green">WorkflowEvent</span>
+              </div>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div>
+              <p style="color:var(--amber);font-size:10px;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">Orchestration Patterns</p>
+              <div class="pills">
+                <span class="pill amber">Sequential</span>
+                <span class="pill amber">Concurrent</span>
+                <span class="pill amber">Handoff</span>
+                <span class="pill amber">GroupChat</span>
+                <span class="pill amber">Magentic</span>
+              </div>
+            </div>
+            <div>
+              <p style="color:var(--magenta);font-size:10px;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">Interop Standards</p>
+              <div class="pills">
+                <span class="pill magenta">MCP</span>
+                <span class="pill magenta">A2A</span>
+                <span class="pill magenta">AG-UI</span>
+                <span class="pill magenta">OpenAPI</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ AGENTS -->
+  <div id="tab-agents" class="section">
+    <div class="sec-header">
+      <div>
+        <div class="sec-label">Section 02</div>
+        <h2>Creating Agents</h2>
+      </div>
+    </div>
+    <div class="grid">
+
+      <div class="card cyan">
+        <div class="card-header"><span class="card-icon">🐍</span><span class="card-title">Basic Agent — Python (Azure OpenAI Responses)</span></div>
+        <div class="card-body">
+          <pre><span class="kw">import</span> asyncio
+<span class="kw">from</span> <span class="cls">agent_framework</span>.azure <span class="kw">import</span> <span class="cls">AzureOpenAIResponsesClient</span>
+<span class="kw">from</span> <span class="cls">azure</span>.identity <span class="kw">import</span> <span class="cls">AzureCliCredential</span>
+
+<span class="kw">async def</span> <span class="fn">main</span>():
+    agent = <span class="cls">AzureOpenAIResponsesClient</span>(
+        credential=<span class="cls">AzureCliCredential</span>(),
+    ).as_agent(
+        name=<span class="str">"HaikuBot"</span>,
+        instructions=<span class="str">"You are an upbeat assistant that writes beautifully."</span>,
+    )
+    <span class="fn">print</span>(<span class="kw">await</span> agent.run(<span class="str">"Write a haiku about Agent Framework."</span>))
+
+asyncio.run(main())<span class="lang">PYTHON</span></pre>
+        </div>
+      </div>
+
+      <div class="card green">
+        <div class="card-header"><span class="card-icon">🔷</span><span class="card-title">Basic Agent — .NET (Azure OpenAI)</span></div>
+        <div class="card-body">
+          <pre><span class="cmt">// using Azure.AI.OpenAI; Azure.Identity; Microsoft.Agents.AI;</span>
+<span class="cls">AIAgent</span> agent = <span class="kw">new</span> <span class="cls">AzureOpenAIClient</span>(
+    <span class="kw">new</span> <span class="cls">Uri</span>(Environment.GetEnvironmentVariable(<span class="str">"AZURE_OPENAI_ENDPOINT"</span>)<span class="op">!</span>),
+    <span class="kw">new</span> <span class="cls">AzureCliCredential</span>())
+  .GetChatClient(<span class="str">"gpt-4o-mini"</span>)
+  .AsAIAgent(instructions: <span class="str">"You are a friendly assistant."</span>);
+
+Console.WriteLine(<span class="kw">await</span> agent.RunAsync(<span class="str">"What is the largest city in France?"</span>));<span class="lang">C#</span></pre>
+        </div>
+      </div>
+
+      <div class="card amber">
+        <div class="card-header"><span class="card-icon">🐍</span><span class="card-title">Basic Agent — Python (OpenAI)</span></div>
+        <div class="card-body">
+          <pre><span class="kw">from</span> <span class="cls">agent_framework</span>.openai <span class="kw">import</span> <span class="cls">OpenAIResponsesClient</span>
+
+agent = <span class="cls">OpenAIResponsesClient</span>().as_agent(
+    name=<span class="str">"Helper"</span>,
+    instructions=<span class="str">"You are a helpful assistant."</span>,
+)
+
+<span class="cmt"># Single-turn</span>
+result = <span class="kw">await</span> agent.run(<span class="str">"Explain quantum computing in 2 sentences."</span>)
+
+<span class="cmt"># Streaming</span>
+<span class="kw">async for</span> chunk <span class="kw">in</span> agent.run_streaming(<span class="str">"Tell me a story."</span>):
+    <span class="fn">print</span>(chunk, end=<span class="str">""</span>, flush=<span class="cls">True</span>)<span class="lang">PYTHON</span></pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-icon">💬</span><span class="card-title">Multi-Turn Conversations (Session)</span></div>
+        <div class="card-body">
+          <pre><span class="kw">from</span> <span class="cls">agent_framework</span>.openai <span class="kw">import</span> <span class="cls">OpenAIResponsesClient</span>
+
+agent = <span class="cls">OpenAIResponsesClient</span>().as_agent(
+    name=<span class="str">"ConversationBot"</span>,
+    instructions=<span class="str">"You are a helpful assistant."</span>,
+)
+
+<span class="cmt"># Create a persistent session (thread)</span>
+thread = agent.get_new_thread()
+
+<span class="cmt"># Each call continues the same conversation</span>
+r1 = <span class="kw">await</span> agent.run(<span class="str">"My name is Duy."</span>, thread=thread)
+r2 = <span class="kw">await</span> agent.run(<span class="str">"What is my name?"</span>, thread=thread)
+<span class="fn">print</span>(r2)  <span class="cmt"># "Your name is Duy."</span><span class="lang">PYTHON</span></pre>
+          <div class="note cyan">Threads manage conversation history. Without a thread, each call is stateless.</div>
+        </div>
+      </div>
+
+      <div class="card cyan">
+        <div class="card-header"><span class="card-icon">🔷</span><span class="card-title">Multi-Turn — .NET</span></div>
+        <div class="card-body">
+          <pre><span class="kw">var</span> thread = agent.GetNewThread();
+
+<span class="kw">var</span> r1 = <span class="kw">await</span> agent.RunAsync(<span class="str">"My name is Duy."</span>, thread: thread);
+<span class="kw">var</span> r2 = <span class="kw">await</span> agent.RunAsync(<span class="str">"What is my name?"</span>, thread: thread);
+Console.WriteLine(r2); <span class="cmt">// "Your name is Duy."</span>
+
+<span class="cmt">// Streaming multi-turn</span>
+<span class="kw">await foreach</span> (<span class="kw">var</span> update <span class="kw">in</span>
+    agent.RunStreamingAsync(<span class="str">"Continue the story."</span>, thread: thread))
+{
+    Console.Write(update.Text);
+}<span class="lang">C#</span></pre>
+        </div>
+      </div>
+
+      <div class="card green">
+        <div class="card-header"><span class="card-icon">📝</span><span class="card-title">Agent Properties Reference</span></div>
+        <div class="card-body">
+          <table>
+            <tr><th>Property</th><th>Type</th><th>Description</th></tr>
+            <tr><td><code>name</code></td><td>str</td><td>Agent identifier</td></tr>
+            <tr><td><code>instructions</code></td><td>str</td><td>System prompt / persona</td></tr>
+            <tr><td><code>description</code></td><td>str</td><td>Used when agent is exposed as MCP tool</td></tr>
+            <tr><td><code>tools</code></td><td>list</td><td>Functions or MCP tools</td></tr>
+            <tr><td><code>context_providers</code></td><td>list</td><td>Memory / context injectors</td></tr>
+            <tr><td><code>middleware</code></td><td>list</td><td>Request/response pipeline</td></tr>
+            <tr><td><code>model</code></td><td>str</td><td>Model override (if client supports)</td></tr>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ TOOLS -->
+  <div id="tab-tools" class="section">
+    <div class="sec-header"><div><div class="sec-label">Section 03</div><h2>Tools &amp; Function Calling</h2></div></div>
+    <div class="grid">
+
+      <div class="card cyan">
+        <div class="card-header"><span class="card-icon">⚡</span><span class="card-title">Function Tools — Python</span></div>
+        <div class="card-body">
+          <pre><span class="kw">from</span> <span class="cls">typing</span> <span class="kw">import</span> <span class="cls">Annotated</span>
+<span class="kw">from</span> <span class="cls">agent_framework</span>.openai <span class="kw">import</span> <span class="cls">OpenAIResponsesClient</span>
+
+<span class="cmt"># Annotated return type = tool description (auto-registered)</span>
+<span class="kw">def</span> <span class="fn">get_weather</span>(
+    city: <span class="cls">Annotated</span>[str, <span class="str">"The city to get weather for"</span>],
+) <span class="op">-></span> <span class="cls">Annotated</span>[str, <span class="str">"Current weather description"</span>]:
+    <span class="kw">return</span> <span class="str">f"Sunny, 22°C in {city}"</span>
+
+<span class="kw">def</span> <span class="fn">get_item_price</span>(
+    item: <span class="cls">Annotated</span>[str, <span class="str">"Name of the menu item"</span>],
+) <span class="op">-></span> <span class="cls">Annotated</span>[str, <span class="str">"Price of the item"</span>]:
+    prices = {<span class="str">"pizza"</span>: <span class="str">"$12"</span>, <span class="str">"pasta"</span>: <span class="str">"$9"</span>}
+    <span class="kw">return</span> prices.get(item, <span class="str">"$10"</span>)
+
+agent = <span class="cls">OpenAIResponsesClient</span>().as_agent(
+    name=<span class="str">"ToolAgent"</span>,
+    instructions=<span class="str">"Use tools to answer questions."</span>,
+    tools=[get_weather, get_item_price],  <span class="cmt"># pass list of callables</span>
+)
+result = <span class="kw">await</span> agent.run(<span class="str">"What's the weather in Tokyo?"</span>)<span class="lang">PYTHON</span></pre>
+        </div>
+      </div>
+
+      <div class="card green">
+        <div class="card-header"><span class="card-icon">🔷</span><span class="card-title">Function Tools — .NET</span></div>
+        <div class="card-body">
+          <pre><span class="cmt">// using Microsoft.Extensions.AI;</span>
+
+<span class="kw">async</span> Task&lt;<span class="kw">string</span>&gt; GetWeatherAsync(<span class="kw">string</span> city) =>
+    $<span class="str">"Sunny, 22°C in {city}"</span>;
+
+<span class="kw">var</span> agent = chatClient.AsAIAgent(
+    instructions: <span class="str">"Use tools to answer questions."</span>,
+    tools: [AIFunctionFactory.Create(GetWeatherAsync)]
+);
+
+<span class="cmt">// Or with explicit descriptor</span>
+<span class="kw">var</span> weatherTool = AIFunctionFactory.Create(
+    GetWeatherAsync,
+    name: <span class="str">"get_weather"</span>,
+    description: <span class="str">"Returns current weather for a city"</span>
+);<span class="lang">C#</span></pre>
+        </div>
+      </div>
+
+      <div class="card amber">
+        <div class="card-header"><span class="card-icon">🏗️</span><span class="card-title">Built-In Tools (Azure AI Agent)</span></div>
+        <div class="card-body">
+          <pre><span class="kw">from</span> <span class="cls">agent_framework</span>.azure <span class="kw">import</span> <span class="cls">AzureAIAgentClient</span>
+
+<span class="kw">async with</span> <span class="cls">AzureAIAgentClient</span>(credential=credential) <span class="kw">as</span> client:
+    agent = client.as_agent(
+        name=<span class="str">"DataAgent"</span>,
+        instructions=<span class="str">"Analyze data and answer questions."</span>,
+        tools=[
+            client.get_code_interpreter(),  <span class="cmt"># Python sandbox</span>
+            client.get_file_search(),        <span class="cmt"># RAG over uploaded files</span>
+            client.get_bing_grounding(),     <span class="cmt"># Live Bing web search</span>
+        ],
+    )
+    result = <span class="kw">await</span> agent.run(<span class="str">"Analyze this CSV and create a chart."</span>)<span class="lang">PYTHON</span></pre>
+          <div class="pills" style="margin-top:10px;">
+            <span class="pill amber">code_interpreter</span>
+            <span class="pill amber">file_search</span>
+            <span class="pill amber">bing_grounding</span>
+            <span class="pill amber">azure_ai_search</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card magenta">
+        <div class="card-header"><span class="card-icon">🤖</span><span class="card-title">Agent-as-Tool (Python)</span></div>
+        <div class="card-body">
+          <pre><span class="cmt"># A specialist agent called by an orchestrator agent</span>
+specialist = <span class="cls">OpenAIResponsesClient</span>().as_agent(
+    name=<span class="str">"MathExpert"</span>,
+    description=<span class="str">"Solves complex math problems."</span>,
+    instructions=<span class="str">"You are a mathematics expert."</span>,
+)
+
+orchestrator = <span class="cls">OpenAIResponsesClient</span>().as_agent(
+    name=<span class="str">"Orchestrator"</span>,
+    instructions=<span class="str">"Route tasks to the correct specialist."</span>,
+    tools=[specialist.as_tool()],  <span class="cmt"># expose agent as callable tool</span>
+)
+
+result = <span class="kw">await</span> orchestrator.run(<span class="str">"What is the integral of x^2?"</span>)<span class="lang">PYTHON</span></pre>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ MCP -->
+  <div id="tab-mcp" class="section">
+    <div class="sec-header"><div><div class="sec-label">Section 04</div><h2>Model Context Protocol (MCP)</h2></div></div>
+    <div class="grid">
+
+      <div class="card cyan">
+        <div class="card-header"><span class="card-icon">🔌</span><span class="card-title">Local MCP Server (stdio) — Python</span></div>
+        <div class="card-body">
+          <pre><span class="kw">from</span> <span class="cls">agent_framework</span> <span class="kw">import</span> <span class="cls">Agent</span>, <span class="cls">MCPStdioTool</span>
+<span class="kw">from</span> <span class="cls">agent_framework</span>.openai <span class="kw">import</span> <span class="cls">OpenAIResponsesClient</span>
+
+<span class="kw">async with</span> (
+    <span class="cls">MCPStdioTool</span>(
+        name=<span class="str">"filesystem"</span>,
+        command=<span class="str">"uvx"</span>,
+        args=[<span class="str">"mcp-server-filesystem"</span>, <span class="str">"/tmp"</span>],
+    ) <span class="kw">as</span> fs_server,
+    <span class="cls">OpenAIResponsesClient</span>().as_agent(
+        name=<span class="str">"FileAgent"</span>,
+        instructions=<span class="str">"Help with filesystem tasks."</span>,
+    ) <span class="kw">as</span> agent,
+):
+    result = <span class="kw">await</span> agent.run(
+        <span class="str">"List files in /tmp"</span>,
+        tools=fs_server,
+    )
+    <span class="fn">print</span>(result)<span class="lang">PYTHON</span></pre>
+          <div class="note green">Use <code>async with</code> to ensure the MCP client connection is properly closed.</div>
+        </div>
+      </div>
+
+      <div class="card green">
+        <div class="card-header"><span class="card-icon">🌐</span><span class="card-title">Remote Streamable HTTP MCP — Python</span></div>
+        <div class="card-body">
+          <pre><span class="kw">from</span> <span class="cls">agent_framework</span> <span class="kw">import</span> <span class="cls">MCPStreamableHTTPTool</span>
+<span class="kw">from</span> <span class="cls">agent_framework</span>.openai <span class="kw">import</span> <span class="cls">OpenAIResponsesClient</span>
+
+<span class="kw">async with</span> (
+    <span class="cls">MCPStreamableHTTPTool</span>(
+        name=<span class="str">"learn-docs"</span>,
+        url=<span class="str">"https://learn.microsoft.com/api/mcp"</span>,
+    ) <span class="kw">as</span> learn_server,
+    <span class="cls">OpenAIResponsesClient</span>().as_agent(
+        name=<span class="str">"DocsAgent"</span>,
+        instructions=<span class="str">"Answer using Microsoft Learn docs."</span>,
+    ) <span class="kw">as</span> agent,
+):
+    result = <span class="kw">await</span> agent.run(
+        <span class="str">"Summarize Agent Framework workflows."</span>,
+        tools=learn_server,
+    )
+    <span class="fn">print</span>(result)<span class="lang">PYTHON</span></pre>
+        </div>
+      </div>
+
+      <div class="card amber">
+        <div class="card-header"><span class="card-icon">🔌</span><span class="card-title">WebSocket MCP — Python</span></div>
+        <div class="card-body">
+          <pre><span class="kw">from</span> <span class="cls">agent_framework</span> <span class="kw">import</span> <span class="cls">MCPWebsocketTool</span>
+<span class="kw">from</span> <span class="cls">agent_framework</span>.openai <span class="kw">import</span> <span class="cls">OpenAIChatClient</span>
+
+<span class="kw">async with</span> (
+    <span class="cls">MCPWebsocketTool</span>(
+        name=<span class="str">"realtime-data"</span>,
+        url=<span class="str">"wss://api.example.com/mcp"</span>,
+    ) <span class="kw">as</span> mcp_server,
+    <span class="cls">OpenAIChatClient</span>().as_agent(
+        name=<span class="str">"DataAgent"</span>,
+        instructions=<span class="str">"Provide real-time data insights."</span>,
+    ) <span class="kw">as</span> agent,
+):
+    result = <span class="kw">await</span> agent.run(
+        <span class="str">"What is the current market status?"</span>,
+        tools=mcp_server,
+    )
+    <span class="fn">print</span>(result)<span class="lang">PYTHON</span></pre>
+        </div>
+      </div>
+
+      <div class="card magenta">
+        <div class="card-header"><span class="card-icon">🔐</span><span class="card-title">MCP Authentication — API Key</span></div>
+        <div class="card-body">
+          <pre><span class="kw">import</span> os
+<span class="kw">from</span> <span class="cls">agent_framework</span> <span class="kw">import</span> <span class="cls">MCPStreamableHTTPTool</span>
+
+api_key = os.getenv(<span class="str">"MCP_API_KEY"</span>)
+auth_headers = {
+    <span class="str">"Authorization"</span>: <span class="str">f"Bearer {api_key}"</span>,  <span class="cmt"># Bearer token</span>
+    <span class="cmt"># "X-API-Key": api_key,             # API key header</span>
+    <span class="cmt"># "Authorization": f"ApiKey {api_key}", # Custom</span>
+}
+
+<span class="kw">async with</span> <span class="cls">MCPStreamableHTTPTool</span>(
+    name=<span class="str">"secure-mcp"</span>,
+    url=os.getenv(<span class="str">"MCP_SERVER_URL"</span>),
+    headers=auth_headers,
+) <span class="kw">as</span> mcp_server:
+    result = <span class="kw">await</span> agent.run(<span class="str">"Query secure data."</span>, tools=mcp_server)
+
+<span class="cmt"># Headers can also be passed per-run (not persisted)</span>
+result = <span class="kw">await</span> agent.run(
+    <span class="str">"Query."</span>,
+    tools=mcp_server,
+    tool_resources={<span class="str">"headers"</span>: auth_headers},  <span class="cmt"># ephemeral</span>
+)<span class="lang">PYTHON</span></pre>
+        </div>
+      </div>
+
+      <div class="card cyan">
+        <div class="card-header"><span class="card-icon">🏗️</span><span class="card-title">Hosted MCP — Azure AI Foundry</span></div>
+        <div class="card-body">
+          <pre><span class="kw">from</span> <span class="cls">agent_framework</span>.azure <span class="kw">import</span> <span class="cls">AzureAIAgentClient</span>
+<span class="kw">from</span> <span class="cls">azure</span>.identity.aio <span class="kw">import</span> <span class="cls">AzureCliCredential</span>
+
+<span class="kw">async with</span> (
+    <span class="cls">AzureCliCredential</span>() <span class="kw">as</span> credential,
+    <span class="cls">AzureAIAgentClient</span>(credential=credential) <span class="kw">as</span> client,
+):
+    <span class="cmt"># Foundry hosts + manages the MCP server</span>
+    learn_mcp = client.get_mcp_tool(
+        name=<span class="str">"Microsoft Learn MCP"</span>,
+        url=<span class="str">"https://learn.microsoft.com/api/mcp"</span>,
+    )
+    github_mcp = client.get_mcp_tool(
+        name=<span class="str">"GitHub MCP"</span>,
+        url=<span class="str">"https://api.githubcopilot.com/mcp/"</span>,
+        headers={<span class="str">"Authorization"</span>: <span class="str">f"Bearer {pat}"</span>},
+    )
+    agent = client.as_agent(
+        name=<span class="str">"MultiMCPAgent"</span>,
+        instructions=<span class="str">"Use docs and GitHub to answer."</span>,
+        tools=[learn_mcp, github_mcp],  <span class="cmt"># multiple MCPs</span>
+    )
+    result = <span class="kw">await</span> agent.run(<span class="str">"Find open issues in the agent-framework repo."</span>)<span class="lang">PYTHON</span></pre>
+        </div>
+      </div>
+
+      <div class="card green">
+        <div class="card-header"><span class="card-icon">📤</span><span class="card-title">Expose Agent as MCP Server</span></div>
+        <div class="card-body">
+          <pre><span class="cmt"># Python — expose your agent over MCP protocol</span>
+agent = <span class="cls">OpenAIResponsesClient</span>().as_agent(
+    name=<span class="str">"RestaurantAgent"</span>,
+    description=<span class="str">"Answer questions about the menu."</span>,
+    tools=[get_specials, get_item_price],
+)
+
+<span class="cmt"># Start HTTP MCP server (accessible to MCP clients)</span>
+mcp_server = agent.as_mcp_server()
+mcp_server.run(host=<span class="str">"0.0.0.0"</span>, port=<span class="num">8000</span>)<span class="lang">PYTHON</span></pre>
+          <div class="divider"></div>
+          <pre><span class="cmt">// .NET — wrap agent as McpServerTool</span>
+<span class="cmt">// dotnet add package ModelContextProtocol</span>
+<span class="kw">var</span> mcpTool = McpServerTool.Create(
+    (<span class="kw">string</span> question) => agent.RunAsync(question),
+    name: <span class="str">"restaurant_agent"</span>,
+    description: <span class="str">"Answer restaurant menu questions"</span>
+);
+<span class="cmt">// Register with IServiceCollection / MCP server host</span><span class="lang">C#</span></pre>
+        </div>
+      </div>
+
+      <div class="card amber card-full">
+        <div class="card-header"><span class="card-icon">📋</span><span class="card-title">Common MCP Servers</span></div>
+        <div class="card-body">
+          <table>
+            <tr><th>Server</th><th>Command</th><th>Capabilities</th></tr>
+            <tr><td><span class="cy">Calculator</span></td><td><code>uvx mcp-server-calculator</code></td><td>Mathematical computations</td></tr>
+            <tr><td><span class="cy">Filesystem</span></td><td><code>uvx mcp-server-filesystem /path</code></td><td>File system read/write</td></tr>
+            <tr><td><span class="cy">GitHub</span></td><td><code>npx @modelcontextprotocol/server-github</code></td><td>Repos, issues, PRs</td></tr>
+            <tr><td><span class="cy">MS Learn</span></td><td><code>https://learn.microsoft.com/api/mcp</code></td><td>Documentation search</td></tr>
+            <tr><td><span class="cy">GitHub Copilot</span></td><td><code>https://api.githubcopilot.com/mcp/</code></td><td>Copilot tools (PAT auth)</td></tr>
+            <tr><td><span class="cy">MarkItDown</span></td><td><code>uvx markitdown-mcp</code></td><td>Document parsing (PDF, DOCX)</td></tr>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ MEMORY -->
+  <div id="tab-memory" class="section">
+    <div class="sec-header"><div><div class="sec-label">Section 05</div><h2>Memory &amp; Context Providers</h2></div></div>
+    <div class="grid">
+
+      <div class="card cyan">
+        <div class="card-header"><span class="card-icon">🧠</span><span class="card-title">Session-Based Memory (Default)</span></div>
+        <div class="card-body">
+          <pre><span class="kw">from</span> <span class="cls">agent_framework</span>.openai <span class="kw">import</span> <span class="cls">OpenAIResponsesClient</span>
+
+agent = <span class="cls">OpenAIResponsesClient</span>().as_agent(
+    name=<span class="str">"MemBot"</span>,
+    instructions=<span class="str">"You remember everything."</span>,
+)
+
+<span class="cmt"># Session = in-memory conversation thread</span>
+thread = agent.get_new_thread()
+<span class="kw">await</span> agent.run(<span class="str">"Remember: my favorite color is teal."</span>, thread=thread)
+r = <span class="kw">await</span> agent.run(<span class="str">"What is my favorite color?"</span>, thread=thread)
+<span class="fn">print</span>(r)  <span class="cmt"># "Your favorite color is teal."</span>
+
+<span class="cmt"># Inspect thread messages</span>
+<span class="kw">async for</span> msg <span class="kw">in</span> thread.get_messages():
+    <span class="fn">print</span>(msg.role, msg.text)<span class="lang">PYTHON</span></pre>
+        </div>
+      </div>
+
+      <div class="card green">
+        <div class="card-header"><span class="card-icon">💾</span><span class="card-title">Mem0 — Advanced Memory Provider</span></div>
+        <div class="card-body">
+          <pre><span class="kw">from</span> <span class="cls">agent_framework</span>.mem0 <span class="kw">import</span> <span class="cls">Mem0Provider</span>
+<span class="kw">from</span> <span class="cls">agent_framework</span>.openai <span class="kw">import</span> <span class="cls">OpenAIChatClient</span>
+<span class="kw">from</span> <span class="cls">agent_framework</span> <span class="kw">import</span> <span class="cls">Agent</span>
+
+<span class="cmt"># Long-term, cross-session, per-user memory</span>
+memory = <span class="cls">Mem0Provider</span>(
+    api_key=<span class="str">"your-mem0-api-key"</span>,
+    user_id=<span class="str">"user_123"</span>,
+    application_id=<span class="str">"my_app"</span>,
+)
+
+agent = <span class="cls">Agent</span>(
+    chat_client=<span class="cls">OpenAIChatClient</span>(),
+    instructions=<span class="str">"You are a helpful assistant with memory."</span>,
+    context_providers=[memory],   <span class="cmt"># injected as context on every call</span>
+)
+
+result = <span class="kw">await</span> agent.run(<span class="str">"What do you know about me?"</span>)<span class="lang">PYTHON</span></pre>
+        </div>
+      </div>
+
+      <div class="card amber">
+        <div class="card-header"><span class="card-icon">🗄️</span><span class="card-title">Custom Context Provider</span></div>
+        <div class="card-body">
+          <pre><span class="kw">from</span> <span class="cls">agent_framework</span> <span class="kw">import</span> <span class="cls">ContextProvider</span>, <span class="cls">AgentContext</span>
+
+<span class="kw">class</span> <span class="cls">UserProfileProvider</span>(<span class="cls">ContextProvider</span>):
+    <span class="str">"""Injects user profile data into every agent call."""</span>
+
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, user_id: str):
+        self.user_id = user_id
+
+    <span class="kw">async def</span> <span class="fn">get_context</span>(self, context: <span class="cls">AgentContext</span>) <span class="op">-></span> str:
+        <span class="cmt"># Fetch from DB, cache, vector store, etc.</span>
+        profile = <span class="kw">await</span> fetch_user_profile(self.user_id)
+        <span class="kw">return</span> <span class="str">f"User profile: {profile}"</span>
+
+agent = <span class="cls">OpenAIResponsesClient</span>().as_agent(
+    name=<span class="str">"PersonalAgent"</span>,
+    instructions=<span class="str">"Use the user profile context."</span>,
+    context_providers=[<span class="cls">UserProfileProvider</span>(user_id=<span class="str">"u123"</span>)],
+)<span class="lang">PYTHON</span></pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-icon">📊</span><span class="card-title">Vector Store / RAG Connectors</span></div>
+        <div class="card-body">
+          <div class="note cyan">Connect via existing Semantic Kernel connectors, exposed as context providers or tools.</div>
+          <div class="pills" style="margin-top:10px;">
+            <span class="pill">Azure AI Search</span>
+            <span class="pill">Pinecone</span>
+            <span class="pill">Qdrant</span>
+            <span class="pill">Redis</span>
+            <span class="pill">Postgres (pgvector)</span>
+            <span class="pill">Cosmos DB</span>
+            <span class="pill">Elasticsearch</span>
+            <span class="pill">Microsoft Fabric</span>
+            <span class="pill">SharePoint</span>
+          </div>
+          <pre style="margin-top:10px;"><span class="cmt"># File search (Azure AI built-in RAG)</span>
+agent = client.as_agent(
+    tools=[client.get_file_search()],
+)
+<span class="cmt"># Upload files to agent's vector store</span>
+<span class="kw">await</span> client.upload_file(<span class="str">"company_docs.pdf"</span>)<span class="lang">PYTHON</span></pre>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ MIDDLEWARE -->
+  <div id="tab-middleware" class="section">
+    <div class="sec-header"><div><div class="sec-label">Section 06</div><h2>Middleware</h2></div></div>
+    <div class="grid">
+
+      <div class="card cyan">
+        <div class="card-header"><span class="card-icon">⚙️</span><span class="card-title">Chat Middleware (Request/Response)</span></div>
+        <div class="card-body">
+          <pre><span class="kw">from</span> <span class="cls">agent_framework</span> <span class="kw">import</span> <span class="cls">ChatMiddleware</span>, <span class="cls">ChatContext</span>
+
+<span class="kw">class</span> <span class="cls">LoggingMiddleware</span>(<span class="cls">ChatMiddleware</span>):
+    <span class="str">"""Logs every request + response to/from LLM."""</span>
+
+    <span class="kw">async def</span> <span class="fn">on_invoke</span>(self, ctx: <span class="cls">ChatContext</span>, next) <span class="op">-></span> str:
+        <span class="fn">print</span>(<span class="str">f"→ Request: {ctx.messages[-1].content[:80]}"</span>)
+        response = <span class="kw">await</span> <span class="fn">next</span>(ctx)          <span class="cmt"># call next handler</span>
+        <span class="fn">print</span>(<span class="str">f"← Response: {str(response)[:80]}"</span>)
+        <span class="kw">return</span> response
+
+<span class="kw">class</span> <span class="cls">RateLimitMiddleware</span>(<span class="cls">ChatMiddleware</span>):
+    <span class="kw">async def</span> <span class="fn">on_invoke</span>(self, ctx: <span class="cls">ChatContext</span>, next):
+        <span class="kw">await</span> self.throttle()
+        <span class="kw">return</span> <span class="kw">await</span> <span class="fn">next</span>(ctx)
+
+agent = <span class="cls">OpenAIResponsesClient</span>().as_agent(
+    name=<span class="str">"MiddlewareAgent"</span>,
+    instructions=<span class="str">"You are helpful."</span>,
+    middleware=[<span class="cls">LoggingMiddleware</span>(), <span class="cls">RateLimitMiddleware</span>()],
+)<span class="lang">PYTHON</span></pre>
+        </div>
+      </div>
+
+      <div class="card green">
+        <div class="card-header"><span class="card-icon">🔧</span><span class="card-title">Function (Tool) Middleware</span></div>
+        <div class="card-body">
+          <pre><span class="kw">from</span> <span class="cls">agent_framework</span> <span class="kw">import</span> <span class="cls">FunctionMiddleware</span>, <span class="cls">FunctionContext</span>
+
+<span class="kw">class</span> <span class="cls">AuditToolMiddleware</span>(<span class="cls">FunctionMiddleware</span>):
+    <span class="str">"""Audits every tool call before execution."""</span>
+
+    <span class="kw">async def</span> <span class="fn">on_invoke</span>(self, ctx: <span class="cls">FunctionContext</span>, next):
+        <span class="fn">print</span>(<span class="str">f"TOOL CALL: {ctx.function_name}({ctx.arguments})"</span>)
+        result = <span class="kw">await</span> <span class="fn">next</span>(ctx)              <span class="cmt"># execute tool</span>
+        <span class="fn">print</span>(<span class="str">f"TOOL RESULT: {str(result)[:100]}"</span>)
+        <span class="kw">return</span> result
+
+<span class="kw">class</span> <span class="cls">ApprovalMiddleware</span>(<span class="cls">FunctionMiddleware</span>):
+    <span class="str">"""Human-in-the-loop: approve dangerous tools."""</span>
+
+    <span class="kw">async def</span> <span class="fn">on_invoke</span>(self, ctx: <span class="cls">FunctionContext</span>, next):
+        <span class="kw">if</span> <span class="str">"delete"</span> <span class="kw">in</span> ctx.function_name:
+            confirm = <span class="fn">input</span>(<span class="str">f"Approve {ctx.function_name}? [y/N]: "</span>)
+            <span class="kw">if</span> confirm.lower() != <span class="str">"y"</span>:
+                <span class="kw">return</span> <span class="str">"User declined."</span>
+        <span class="kw">return</span> <span class="kw">await</span> <span class="fn">next</span>(ctx)<span class="lang">PYTHON</span></pre>
+        </div>
+      </div>
+
+      <div class="card amber">
+        <div class="card-header"><span class="card-icon">🔷</span><span class="card-title">Middleware — .NET</span></div>
+        <div class="card-body">
+          <pre><span class="cmt">// using Microsoft.Agents.AI;</span>
+
+<span class="kw">var</span> agent = chatClient
+    .AsAIAgent(instructions: <span class="str">"You are helpful."</span>)
+    .AsBuilder()
+    .UseOpenTelemetry(sourceName: <span class="str">"MyApp"</span>)   <span class="cmt">// built-in OTel</span>
+    .Use(<span class="kw">async</span> (ctx, next) =>               <span class="cmt">// inline middleware</span>
+    {
+        Console.WriteLine(<span class="str">$"→ {ctx.Messages.Last().Text}"</span>);
+        <span class="kw">var</span> result = <span class="kw">await</span> next(ctx);
+        Console.WriteLine(<span class="str">$"← {result}"</span>);
+        <span class="kw">return</span> result;
+    })
+    .Build();
+
+<span class="cmt">// Exception handling middleware</span>
+.Use(<span class="kw">async</span> (ctx, next) =>
+{
+    <span class="kw">try</span> { <span class="kw">return</span> <span class="kw">await</span> next(ctx); }
+    <span class="kw">catch</span> (<span class="cls">Exception</span> ex)
+    { Console.Error.WriteLine(ex); <span class="kw">return</span> <span class="str">"Error occurred."</span>; }
+})<span class="lang">C#</span></pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-icon">📋</span><span class="card-title">Middleware Pipeline Order</span></div>
+        <div class="card-body">
+          <div class="wf-diagram">
+            <div class="wf-node">User Input</div>
+            <div class="wf-arrow">→</div>
+            <div class="wf-node">Middleware 1<br><span style="font-size:9px;color:var(--text-dim)">(Auth/Rate)</span></div>
+            <div class="wf-arrow">→</div>
+            <div class="wf-node">Middleware 2<br><span style="font-size:9px;color:var(--text-dim)">(Logging)</span></div>
+            <div class="wf-arrow">→</div>
+            <div class="wf-node green">LLM Call</div>
+            <div class="wf-arrow">→</div>
+            <div class="wf-node amber">Tool Call</div>
+            <div class="wf-arrow">→</div>
+            <div class="wf-node">Response</div>
+          </div>
+          <p style="margin-top:8px;font-size:11px;color:var(--text-dim);">Chat middleware wraps LLM calls. Function middleware wraps individual tool invocations. Both can call <code>next(ctx)</code> to continue or short-circuit by returning directly.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ WORKFLOWS -->
+  <div id="tab-workflows" class="section">
+    <div class="sec-header"><div><div class="sec-label">Section 07</div><h2>Workflows — Graph-Based Orchestration</h2></div></div>
+    <div class="grid">
+
+      <div class="card cyan">
+        <div class="card-header"><span class="card-icon">🔀</span><span class="card-title">WorkflowBuilder — Direct Edges</span></div>
+        <div class="card-body">
+          <pre><span class="kw">from</span> <span class="cls">agent_framework</span> <span class="kw">import</span> <span class="cls">WorkflowBuilder</span>
+
+<span class="cmt"># Executors are callables or agents</span>
+<span class="kw">def</span> <span class="fn">preprocess</span>(msg): <span class="kw">return</span> msg.upper()
+<span class="kw">def</span> <span class="fn">summarize</span>(msg): <span class="kw">return</span> msg[:<span class="num">100</span>]
+
+builder = <span class="cls">WorkflowBuilder</span>()
+builder.add_edge(preprocess, summarize)
+builder.set_start_executor(preprocess)
+
+workflow = builder.build()
+result = <span class="kw">await</span> workflow.run(<span class="str">"Hello World"</span>)
+
+<span class="cmt"># Streaming execution</span>
+<span class="kw">async for</span> event <span class="kw">in</span> workflow.run(<span class="str">"Hello"</span>, stream=<span class="cls">True</span>):
+    <span class="kw">if</span> event.type == <span class="str">"output"</span>:
+        <span class="fn">print</span>(event.data)<span class="lang">PYTHON</span></pre>
+        </div>
+      </div>
+
+      <div class="card green">
+        <div class="card-header"><span class="card-icon">🔀</span><span class="card-title">Conditional Edges</span></div>
+        <div class="card-body">
+          <pre><span class="kw">from</span> <span class="cls">agent_framework</span> <span class="kw">import</span> <span class="cls">WorkflowBuilder</span>, <span class="cls">ConditionalEdge</span>
+<span class="kw">from</span> <span class="cls">pydantic</span> <span class="kw">import</span> <span class="cls">BaseModel</span>
+
+<span class="kw">class</span> <span class="cls">RouteDecision</span>(<span class="cls">BaseModel</span>):
+    route: str  <span class="cmt"># "billing" | "support" | "sales"</span>
+
+<span class="kw">def</span> <span class="fn">router</span>(msg) <span class="op">-></span> <span class="cls">RouteDecision</span>:
+    <span class="cmt"># Use LLM structured output for reliable routing</span>
+    <span class="kw">return</span> <span class="cls">RouteDecision</span>(route=<span class="str">"billing"</span>)
+
+builder = <span class="cls">WorkflowBuilder</span>()
+builder.add_conditional_edge(
+    source=router,
+    path_map={
+        <span class="str">"billing"</span>:  billing_agent,
+        <span class="str">"support"</span>:  support_agent,
+        <span class="str">"sales"</span>:    sales_agent,
+    },
+    condition=<span class="kw">lambda</span> result: result.route,
+)
+builder.set_start_executor(router)
+workflow = builder.build()<span class="lang">PYTHON</span></pre>
+        </div>
+      </div>
+
+      <div class="card amber">
+        <div class="card-header"><span class="card-icon">⑂</span><span class="card-title">Fan-Out + Fan-In Edges (Parallel)</span></div>
+        <div class="card-body">
+          <pre><span class="kw">from</span> <span class="cls">agent_framework</span> <span class="kw">import</span> <span class="cls">WorkflowBuilder</span>
+
+<span class="cmt"># Fan-out: one executor → multiple parallel branches</span>
+builder = <span class="cls">WorkflowBuilder</span>()
+builder.add_fan_out_edge(
+    source=dispatcher,
+    targets=[research_agent, pricing_agent, legal_agent],
+)
+
+<span class="cmt"># Fan-in: all branches → one aggregator</span>
+builder.add_fan_in_edge(
+    sources=[research_agent, pricing_agent, legal_agent],
+    target=aggregator,
+)
+
+workflow = builder.build()
+<span class="cmt"># All branches run in parallel; aggregator waits for all</span><span class="lang">PYTHON</span></pre>
+          <div class="wf-diagram" style="margin-top:10px;flex-direction:column;gap:8px;">
+            <div style="display:flex;justify-content:center;"><div class="wf-node">Input</div></div>
+            <div style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap;">
+              <div class="wf-node">Research</div>
+              <div class="wf-node amber">Pricing</div>
+              <div class="wf-node green">Legal</div>
+            </div>
+            <div style="display:flex;justify-content:center;"><div class="wf-node magenta">Aggregator</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card magenta">
+        <div class="card-header"><span class="card-icon">📡</span><span class="card-title">Workflow Events</span></div>
+        <div class="card-body">
+          <pre><span class="kw">async for</span> event <span class="kw">in</span> workflow.run(<span class="str">"Analyze this."</span>, stream=<span class="cls">True</span>):
+    <span class="kw">match</span> event.type:
+        <span class="kw">case</span> <span class="str">"output"</span>:
+            <span class="fn">print</span>(<span class="str">"Final:"</span>, event.data)
+        <span class="kw">case</span> <span class="str">"executor_invoked"</span>:
+            <span class="fn">print</span>(<span class="str">"Start:"</span>, event.executor_name, event.input)
+        <span class="kw">case</span> <span class="str">"executor_completed"</span>:
+            <span class="fn">print</span>(<span class="str">"Done:"</span>, event.executor_name, event.output)
+        <span class="kw">case</span> <span class="str">"checkpoint"</span>:
+            <span class="fn">print</span>(<span class="str">"Checkpoint saved."</span>)
+        <span class="kw">case</span> <span class="str">"error"</span>:
+            <span class="fn">print</span>(<span class="str">"Error:"</span>, event.error)<span class="lang">PYTHON</span></pre>
+          <div class="pills" style="margin-top:8px;">
+            <span class="pill magenta">output</span>
+            <span class="pill magenta">executor_invoked</span>
+            <span class="pill magenta">executor_completed</span>
+            <span class="pill magenta">checkpoint</span>
+            <span class="pill magenta">error</span>
+            <span class="pill magenta">lifecycle</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card cyan card-full">
+        <div class="card-header"><span class="card-icon">📄</span><span class="card-title">Declarative YAML Workflows</span></div>
+        <div class="card-body">
+          <div class="grid-wide">
+            <pre><span class="cmt"># workflow.yaml — YAML-based multi-agent workflow</span>
+<span class="var">name</span>: content-pipeline
+<span class="var">start</span>: researcher
+
+<span class="var">agents</span>:
+  <span class="var">researcher</span>:
+    <span class="var">instructions</span>: <span class="str">"Research the topic thoroughly."</span>
+    <span class="var">model</span>: gpt-4o-mini
+  <span class="var">writer</span>:
+    <span class="var">instructions</span>: <span class="str">"Write a blog post from the research."</span>
+    <span class="var">model</span>: gpt-4o
+  <span class="var">editor</span>:
+    <span class="var">instructions</span>: <span class="str">"Edit and finalize the blog post."</span>
+    <span class="var">model</span>: gpt-4o
+
+<span class="var">edges</span>:
+  - <span class="var">from</span>: researcher
+    <span class="var">to</span>: writer
+  - <span class="var">from</span>: writer
+    <span class="var">to</span>: editor<span class="lang">YAML</span></pre>
+            <pre><span class="cmt"># Load and run a YAML workflow</span>
+<span class="kw">from</span> <span class="cls">agent_framework</span> <span class="kw">import</span> <span class="cls">WorkflowLoader</span>
+<span class="kw">from</span> <span class="cls">agent_framework</span>.azure <span class="kw">import</span> <span class="cls">AzureOpenAIResponsesClient</span>
+
+<span class="cmt"># Load from YAML</span>
+workflow = <span class="cls">WorkflowLoader</span>.load(<span class="str">"workflow.yaml"</span>)
+
+<span class="cmt"># Run the declarative workflow</span>
+result = <span class="kw">await</span> workflow.run(
+    <span class="str">"Write a blog post about AI agents."</span>
+)
+<span class="fn">print</span>(result)
+
+<span class="cmt"># Streaming declarative workflow</span>
+<span class="kw">async for</span> event <span class="kw">in</span> workflow.run(
+    <span class="str">"Write a blog post."</span>, stream=<span class="cls">True</span>
+):
+    <span class="kw">if</span> event.type == <span class="str">"output"</span>:
+        <span class="fn">print</span>(event.data)<span class="lang">PYTHON</span></pre>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ ORCHESTRATIONS -->
+  <div id="tab-orchestrations" class="section">
+    <div class="sec-header"><div><div class="sec-label">Section 08</div><h2>Orchestration Patterns</h2></div></div>
+    <div class="grid">
+
+      <div class="card cyan">
+        <div class="card-header"><span class="card-icon">➡️</span><span class="card-title">Sequential Orchestration</span></div>
+        <div class="card-body">
+          <div class="wf-diagram" style="margin-bottom:10px;">
+            <div class="wf-node">Writer</div><div class="wf-arrow">→</div>
+            <div class="wf-node amber">Reviewer</div><div class="wf-arrow">→</div>
+            <div class="wf-node green">Editor</div>
+          </div>
+          <pre><span class="kw">from</span> <span class="cls">agent_framework</span>.orchestrations <span class="kw">import</span> <span class="cls">SequentialBuilder</span>
+<span class="kw">from</span> <span class="cls">agent_framework</span>.azure <span class="kw">import</span> <span class="cls">AzureOpenAIChatClient</span>
+<span class="kw">from</span> <span class="cls">azure</span>.identity <span class="kw">import</span> <span class="cls">AzureCliCredential</span>
+
+client = <span class="cls">AzureOpenAIChatClient</span>(credential=<span class="cls">AzureCliCredential</span>())
+
+writer = client.as_agent(
+    instructions=<span class="str">"Write a punchy marketing sentence."</span>, name=<span class="str">"writer"</span>)
+reviewer = client.as_agent(
+    instructions=<span class="str">"Give brief feedback on the previous message."</span>, name=<span class="str">"reviewer"</span>)
+
+workflow = <span class="cls">SequentialBuilder</span>(participants=[writer, reviewer]).build()
+
+<span class="kw">async for</span> event <span class="kw">in</span> workflow.run(
+    <span class="str">"Write a tagline for a budget-friendly eBike."</span>, stream=<span class="cls">True</span>
+):
+    <span class="kw">if</span> event.type == <span class="str">"output"</span>:
+        <span class="kw">for</span> msg <span class="kw">in</span> event.data:
+            <span class="fn">print</span>(<span class="str">f"[{msg.author_name}]: {msg.text}"</span>)<span class="lang">PYTHON</span></pre>
+        </div>
+      </div>
+
+      <div class="card green">
+        <div class="card-header"><span class="card-icon">⚡</span><span class="card-title">Concurrent Orchestration</span></div>
+        <div class="card-body">
+          <div class="wf-diagram" style="margin-bottom:10px;flex-direction:column;gap:8px;">
+            <div style="display:flex;justify-content:center;"><div class="wf-node">Input</div></div>
+            <div style="display:flex;justify-content:center;gap:10px;">
+              <div class="wf-node">ResearchAgent</div>
+              <div class="wf-node amber">PricingAgent</div>
+            </div>
+            <div style="display:flex;justify-content:center;"><div class="wf-node green">Aggregator</div></div>
+          </div>
+          <pre><span class="kw">from</span> <span class="cls">agent_framework</span>.orchestrations <span class="kw">import</span> <span class="cls">ConcurrentBuilder</span>
+
+research = client.as_agent(instructions=<span class="str">"Research the market."</span>, name=<span class="str">"research"</span>)
+pricing  = client.as_agent(instructions=<span class="str">"Analyze pricing trends."</span>, name=<span class="str">"pricing"</span>)
+summary  = client.as_agent(instructions=<span class="str">"Summarize all inputs."</span>, name=<span class="str">"summary"</span>)
+
+workflow = <span class="cls">ConcurrentBuilder</span>(
+    participants=[research, pricing],
+    aggregator=summary,
+).build()
+
+result = <span class="kw">await</span> workflow.run(<span class="str">"Analyze EV market in 2025."</span>)<span class="lang">PYTHON</span></pre>
+        </div>
+      </div>
+
+      <div class="card amber">
+        <div class="card-header"><span class="card-icon">🤝</span><span class="card-title">Handoff Orchestration</span></div>
+        <div class="card-body">
+          <div class="wf-diagram" style="margin-bottom:10px;flex-wrap:wrap;gap:4px;">
+            <div class="wf-node">Triage</div>
+            <div class="wf-arrow">⇝</div>
+            <div class="wf-node amber">Billing</div>
+            <div class="wf-arrow">⇝</div>
+            <div class="wf-node green">Support</div>
+            <div class="wf-arrow">⇝</div>
+            <div class="wf-node magenta">Sales</div>
+          </div>
+          <pre><span class="kw">from</span> <span class="cls">agent_framework</span>.orchestrations <span class="kw">import</span> <span class="cls">HandoffBuilder</span>
+
+triage  = client.as_agent(instructions=<span class="str">"Route customer requests."</span>, name=<span class="str">"triage"</span>)
+billing = client.as_agent(instructions=<span class="str">"Handle billing issues."</span>, name=<span class="str">"billing"</span>)
+support = client.as_agent(instructions=<span class="str">"Handle tech support."</span>, name=<span class="str">"support"</span>)
+
+<span class="cmt"># Full control transfer — receiving agent takes over entirely</span>
+workflow = (
+    <span class="cls">AgentWorkflowBuilder</span>
+    .CreateHandoffBuilderWith(triage)
+    .WithHandoffs(triage,   [billing, support])
+    .WithHandoffs(billing,  [support, triage])
+    .Build()
+)
+
+result = <span class="kw">await</span> workflow.run(<span class="str">"I was charged twice on my bill."</span>)<span class="lang">PYTHON</span></pre>
+          <div class="note">Handoff = full control transfer. Different from agent-as-tool where primary agent retains control.</div>
+        </div>
+      </div>
+
+      <div class="card magenta">
+        <div class="card-header"><span class="card-icon">💬</span><span class="card-title">Group Chat Orchestration</span></div>
+        <div class="card-body">
+          <pre><span class="kw">from</span> <span class="cls">agent_framework</span>.orchestrations <span class="kw">import</span> <span class="cls">GroupChatBuilder</span>
+
+designer  = client.as_agent(instructions=<span class="str">"Propose UI designs."</span>, name=<span class="str">"designer"</span>)
+engineer  = client.as_agent(instructions=<span class="str">"Assess technical feasibility."</span>, name=<span class="str">"engineer"</span>)
+pm        = client.as_agent(instructions=<span class="str">"Moderate and decide."</span>, name=<span class="str">"pm"</span>)
+
+<span class="cmt"># All agents collaborate on the same thread</span>
+workflow = <span class="cls">GroupChatBuilder</span>(
+    participants=[designer, engineer, pm],
+    max_turns=<span class="num">6</span>,
+    termination_phrase=<span class="str">"DECISION MADE"</span>,
+).build()
+
+result = <span class="kw">await</span> workflow.run(<span class="str">"Design a new onboarding flow."</span>)<span class="lang">PYTHON</span></pre>
+        </div>
+      </div>
+
+      <div class="card cyan">
+        <div class="card-header"><span class="card-icon">🧲</span><span class="card-title">Magentic Orchestration (Manager + Subagents)</span></div>
+        <div class="card-body">
+          <pre><span class="kw">from</span> <span class="cls">agent_framework</span>.orchestrations <span class="kw">import</span> <span class="cls">MagenticBuilder</span>
+
+<span class="cmt"># Manager agent creates + assigns tasks dynamically</span>
+manager  = client.as_agent(
+    instructions=<span class="str">"Orchestrate subagents to complete the goal."</span>,
+    name=<span class="str">"manager"</span>
+)
+coder    = client.as_agent(instructions=<span class="str">"Write Python code."</span>, name=<span class="str">"coder"</span>)
+tester   = client.as_agent(instructions=<span class="str">"Write and run tests."</span>, name=<span class="str">"tester"</span>)
+reviewer = client.as_agent(instructions=<span class="str">"Review code quality."</span>, name=<span class="str">"reviewer"</span>)
+
+workflow = <span class="cls">MagenticBuilder</span>(
+    manager=manager,
+    participants=[coder, tester, reviewer],
+).build()
+
+result = <span class="kw">await</span> workflow.run(<span class="str">"Build a REST API with tests."</span>)<span class="lang">PYTHON</span></pre>
+          <div class="note cyan">Magentic = manager dynamically creates a task list and coordinates subagents. Inspired by AutoGen's GroupChat pattern.</div>
+        </div>
+      </div>
+
+      <div class="card green">
+        <div class="card-header"><span class="card-icon">🔷</span><span class="card-title">Workflow Orchestration — .NET</span></div>
+        <div class="card-body">
+          <pre><span class="cmt">// using Microsoft.Agents.AI.Workflows;</span>
+<span class="kw">var</span> writer   = <span class="kw">new</span> <span class="cls">ChatClientAgent</span>(chatClient, <span class="str">"Write a punchy sentence."</span>, <span class="str">"writer"</span>);
+<span class="kw">var</span> reviewer = <span class="kw">new</span> <span class="cls">ChatClientAgent</span>(chatClient, <span class="str">"Give brief feedback."</span>, <span class="str">"reviewer"</span>);
+
+<span class="cmt">// Sequential</span>
+<span class="cls">Workflow</span> seq = <span class="cls">AgentWorkflowBuilder</span>.BuildSequential(writer, reviewer);
+
+<span class="cmt">// Handoff</span>
+<span class="cls">Workflow</span> hof = <span class="cls">AgentWorkflowBuilder</span>
+    .CreateHandoffBuilderWith(triageAgent)
+    .WithHandoffs(triageAgent, [billingAgent, supportAgent])
+    .Build();
+
+<span class="cmt">// Run with streaming</span>
+List&lt;<span class="cls">ChatMessage</span>&gt; msgs = [<span class="kw">new</span>(<span class="cls">ChatRole</span>.User, <span class="str">"Write tagline for eBike."</span>)];
+<span class="kw">await using var</span> run = <span class="kw">await</span> <span class="cls">InProcessExecution</span>.StreamAsync(seq, msgs);
+<span class="kw">await</span> run.TrySendMessageAsync(<span class="kw">new</span> <span class="cls">TurnToken</span>(emitEvents: <span class="kw">true</span>));
+<span class="kw">await foreach</span> (<span class="kw">var</span> evt <span class="kw">in</span> run.WatchStreamAsync())
+    <span class="kw">if</span> (evt <span class="kw">is</span> <span class="cls">AgentResponseUpdateEvent</span> e)
+        Console.Write(e.Update.Text);<span class="lang">C#</span></pre>
+        </div>
+      </div>
+
+      <div class="card amber">
+        <div class="card-header"><span class="card-icon">⏸️</span><span class="card-title">Checkpointing &amp; Human-in-the-Loop</span></div>
+        <div class="card-body">
+          <pre><span class="kw">from</span> <span class="cls">agent_framework</span> <span class="kw">import</span> <span class="cls">WorkflowBuilder</span>, <span class="cls">HumanApprovalNode</span>
+
+<span class="kw">async def</span> <span class="fn">dangerous_action</span>(msg): ...
+
+<span class="cmt"># Add human approval before dangerous step</span>
+builder = <span class="cls">WorkflowBuilder</span>()
+approval = <span class="cls">HumanApprovalNode</span>(
+    prompt=<span class="str">"Approve this action? [y/N]: "</span>,
+    approved_target=dangerous_action,
+    rejected_target=cancel_handler,
+)
+builder.add_edge(classifier, approval)
+builder.add_edge(approval, dangerous_action)
+workflow = builder.build()
+
+<span class="cmt"># Save checkpoint (resume later)</span>
+checkpoint_id = <span class="kw">await</span> workflow.save_checkpoint()
+<span class="cmt"># Resume from checkpoint</span>
+<span class="kw">await</span> workflow.resume_from(checkpoint_id)<span class="lang">PYTHON</span></pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-icon">📋</span><span class="card-title">Pattern Comparison</span></div>
+        <div class="card-body">
+          <table>
+            <tr><th>Pattern</th><th>Control</th><th>Use Case</th></tr>
+            <tr><td><span class="cy">Sequential</span></td><td>Linear, deterministic</td><td>Pipeline: draft → review → edit</td></tr>
+            <tr><td><span class="gr">Concurrent</span></td><td>Parallel, fan-out/in</td><td>Multi-source research/analysis</td></tr>
+            <tr><td><span class="am">Handoff</span></td><td>Full transfer</td><td>Customer service routing</td></tr>
+            <tr><td><span class="mg">Group Chat</span></td><td>Collaborative, shared</td><td>Design/decision discussions</td></tr>
+            <tr><td><span class="cy">Magentic</span></td><td>Manager-driven</td><td>Complex task decomposition</td></tr>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ OBSERVABILITY -->
+  <div id="tab-observability" class="section">
+    <div class="sec-header"><div><div class="sec-label">Section 09</div><h2>Observability &amp; Telemetry</h2></div></div>
+    <div class="grid">
+
+      <div class="card cyan">
+        <div class="card-header"><span class="card-icon">📡</span><span class="card-title">Quick Setup — Python</span></div>
+        <div class="card-body">
+          <pre><span class="cmt"># One-liner setup (reads env vars automatically)</span>
+<span class="kw">from</span> <span class="cls">agent_framework</span>.observability <span class="kw">import</span> setup_observability
+<span class="kw">from</span> <span class="cls">agent_framework</span> <span class="kw">import</span> setup_logging
+
+setup_observability()
+setup_logging()
+
+<span class="cmt"># Or programmatic control</span>
+setup_observability(
+    enable_sensitive_data=<span class="cls">True</span>,
+    otlp_endpoint=<span class="str">"http://localhost:4317"</span>,
+    applicationinsights_connection_string=<span class="str">"InstrumentationKey=..."</span>,
+    vs_code_extension_port=<span class="num">4317</span>,
+)<span class="lang">PYTHON</span></pre>
+          <div class="note cyan">Automatically emits traces, logs, metrics per OpenTelemetry GenAI Semantic Conventions.</div>
+        </div>
+      </div>
+
+      <div class="card green">
+        <div class="card-header"><span class="card-icon">🔧</span><span class="card-title">Custom OTLP Exporters — Python</span></div>
+        <div class="card-body">
+          <pre><span class="kw">from</span> <span class="cls">opentelemetry</span>.exporter.otlp.proto.grpc.trace_exporter <span class="kw">import</span> <span class="cls">OTLPSpanExporter</span>
+<span class="kw">from</span> <span class="cls">opentelemetry</span>.exporter.otlp.proto.grpc._log_exporter <span class="kw">import</span> <span class="cls">OTLPLogExporter</span>
+<span class="kw">from</span> <span class="cls">opentelemetry</span>.exporter.otlp.proto.grpc.metric_exporter <span class="kw">import</span> <span class="cls">OTLPMetricExporter</span>
+<span class="kw">from</span> <span class="cls">agent_framework</span>.observability <span class="kw">import</span> configure_otel_providers
+
+exporters = [
+    <span class="cls">OTLPSpanExporter</span>(endpoint=<span class="str">"http://localhost:4317"</span>),
+    <span class="cls">OTLPLogExporter</span>(endpoint=<span class="str">"http://localhost:4317"</span>),
+    <span class="cls">OTLPMetricExporter</span>(endpoint=<span class="str">"http://localhost:4317"</span>),
+]
+configure_otel_providers(exporters=exporters, enable_sensitive_data=<span class="cls">True</span>)
+
+<span class="cmt"># Azure Monitor / Application Insights</span>
+<span class="kw">from</span> <span class="cls">azure</span>.monitor.opentelemetry <span class="kw">import</span> configure_azure_monitor
+<span class="kw">from</span> <span class="cls">agent_framework</span>.observability <span class="kw">import</span> enable_instrumentation
+configure_azure_monitor(connection_string=<span class="str">"InstrumentationKey=..."</span>)
+enable_instrumentation()<span class="lang">PYTHON</span></pre>
+        </div>
+      </div>
+
+      <div class="card amber">
+        <div class="card-header"><span class="card-icon">📊</span><span class="card-title">Environment Variables (OTel)</span></div>
+        <div class="card-body">
+          <table>
+            <tr><th>Variable</th><th>Purpose</th></tr>
+            <tr><td><code>ENABLE_INSTRUMENTATION</code></td><td>Set <code>true</code> to enable</td></tr>
+            <tr><td><code>ENABLE_CONSOLE_EXPORTERS</code></td><td>Print spans to console</td></tr>
+            <tr><td><code>OTEL_EXPORTER_OTLP_ENDPOINT</code></td><td>OTLP base endpoint</td></tr>
+            <tr><td><code>OTEL_EXPORTER_OTLP_TRACES_ENDPOINT</code></td><td>Traces endpoint</td></tr>
+            <tr><td><code>OTEL_EXPORTER_OTLP_METRICS_ENDPOINT</code></td><td>Metrics endpoint</td></tr>
+            <tr><td><code>OTEL_EXPORTER_OTLP_LOGS_ENDPOINT</code></td><td>Logs endpoint</td></tr>
+            <tr><td><code>APPLICATIONINSIGHTS_CONNECTION_STRING</code></td><td>Azure Monitor export</td></tr>
+            <tr><td><code>VS_CODE_EXTENSION_PORT</code></td><td>AI Toolkit port (default 4317)</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="card magenta">
+        <div class="card-header"><span class="card-icon">🔷</span><span class="card-title">Observability — .NET</span></div>
+        <div class="card-body">
+          <pre><span class="cmt">// Agent with OTel middleware</span>
+<span class="kw">var</span> agent = <span class="kw">new</span> <span class="cls">ChatClientAgent</span>(
+    instrumentedClient, name: <span class="str">"OTelAgent"</span>,
+    instructions: <span class="str">"You are helpful."</span>)
+  .AsBuilder()
+  .UseOpenTelemetry(
+      sourceName: <span class="str">"MyApp"</span>,
+      configure: cfg => cfg.EnableSensitiveData = <span class="kw">true</span>)
+  .Build();
+
+<span class="cmt">// TracerProvider setup</span>
+<span class="kw">var</span> tracer = <span class="cls">Sdk</span>.CreateTracerProviderBuilder()
+    .AddSource(<span class="str">"*Microsoft.Agents.AI"</span>)
+    .AddOtlpExporter(opt =>
+        opt.Endpoint = <span class="kw">new</span> <span class="cls">Uri</span>(<span class="str">"http://localhost:4317"</span>))
+    .Build();<span class="lang">C#</span></pre>
+        </div>
+      </div>
+
+      <div class="card cyan">
+        <div class="card-header"><span class="card-icon">🔍</span><span class="card-title">Custom Spans &amp; Metrics</span></div>
+        <div class="card-body">
+          <pre><span class="kw">from</span> <span class="cls">agent_framework</span>.observability <span class="kw">import</span> get_tracer, get_meter
+
+tracer = get_tracer()
+meter  = get_meter()
+
+<span class="kw">with</span> tracer.start_as_current_span(<span class="str">"my_custom_span"</span>) <span class="kw">as</span> span:
+    span.set_attribute(<span class="str">"user.id"</span>, <span class="str">"user_123"</span>)
+    span.set_attribute(<span class="str">"agent.name"</span>, <span class="str">"MyAgent"</span>)
+    result = <span class="kw">await</span> agent.run(<span class="str">"Hello"</span>)
+    span.set_attribute(<span class="str">"response.length"</span>, <span class="fn">len</span>(result))
+
+<span class="cmt"># Custom metrics</span>
+counter = meter.create_counter(<span class="str">"agent.requests"</span>)
+histogram = meter.create_histogram(<span class="str">"agent.response_ms"</span>)
+counter.add(<span class="num">1</span>, {<span class="str">"agent"</span>: <span class="str">"MyAgent"</span>, <span class="str">"status"</span>: <span class="str">"success"</span>})
+histogram.record(<span class="num">234</span>, {<span class="str">"agent"</span>: <span class="str">"MyAgent"</span>})<span class="lang">PYTHON</span></pre>
+        </div>
+      </div>
+
+      <div class="card green">
+        <div class="card-header"><span class="card-icon">📋</span><span class="card-title">Auto-Generated Spans</span></div>
+        <div class="card-body">
+          <table>
+            <tr><th>Span Name</th><th>Description</th></tr>
+            <tr><td><code>invoke_agent &lt;name&gt;</code></td><td>Top-level agent invocation (parent of all)</td></tr>
+            <tr><td><code>chat_completion</code></td><td>LLM API call span</td></tr>
+            <tr><td><code>tool_call &lt;fn&gt;</code></td><td>Each tool/function invocation</td></tr>
+            <tr><td><code>mcp_call &lt;tool&gt;</code></td><td>MCP server tool call</td></tr>
+            <tr><td><code>workflow_step</code></td><td>Workflow executor step</td></tr>
+          </table>
+          <div class="note green">Zero-code instrumentation: <code>opentelemetry-instrument python app.py</code></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ HOSTING -->
+  <div id="tab-hosting" class="section">
+    <div class="sec-header"><div><div class="sec-label">Section 10</div><h2>Hosting &amp; Deployment</h2></div></div>
+    <div class="grid">
+
+      <div class="card cyan">
+        <div class="card-header"><span class="card-icon">⚡</span><span class="card-title">Azure Functions (Serverless)</span></div>
+        <div class="card-body">
+          <pre><span class="cmt"># function_app.py</span>
+<span class="kw">import</span> azure.functions <span class="kw">as</span> func
+<span class="kw">from</span> <span class="cls">agent_framework</span>.integrations.azure_functions <span class="kw">import</span> agent_function
+<span class="kw">from</span> <span class="cls">agent_framework</span>.openai <span class="kw">import</span> <span class="cls">OpenAIResponsesClient</span>
+
+agent = <span class="cls">OpenAIResponsesClient</span>().as_agent(
+    name=<span class="str">"FunctionAgent"</span>,
+    instructions=<span class="str">"You are a serverless agent."</span>,
+)
+
+app = func.FunctionApp()
+
+<span class="op">@</span>app.route(route=<span class="str">"agent"</span>, methods=[<span class="str">"POST"</span>])
+<span class="op">@</span>agent_function(agent)
+<span class="kw">async def</span> <span class="fn">agent_endpoint</span>(req: func.HttpRequest) <span class="op">-></span> func.HttpResponse:
+    <span class="kw">pass</span>  <span class="cmt"># decorator handles request/response</span><span class="lang">PYTHON</span></pre>
+        </div>
+      </div>
+
+      <div class="card green">
+        <div class="card-header"><span class="card-icon">⚙️</span><span class="card-title">Durable Task (Long-Running)</span></div>
+        <div class="card-body">
+          <pre><span class="kw">from</span> <span class="cls">agent_framework</span>.integrations.durable_task <span class="kw">import</span> (
+    DurableWorkflowRunner,
+    checkpoint_enabled,
+)
+
+<span class="op">@</span>checkpoint_enabled
+<span class="kw">async def</span> <span class="fn">long_workflow</span>(ctx, input_data):
+    result1 = <span class="kw">await</span> ctx.call_activity(step_one, input_data)
+    <span class="kmt"># State saved here — survives restarts/crashes</span>
+    result2 = <span class="kw">await</span> ctx.call_activity(step_two, result1)
+    <span class="kw">return</span> result2
+
+runner = <span class="cls">DurableWorkflowRunner</span>()
+instance_id = <span class="kw">await</span> runner.start(long_workflow, input=<span class="str">"start"</span>)
+status = <span class="kw">await</span> runner.get_status(instance_id)<span class="lang">PYTHON</span></pre>
+          <div class="note cyan">Durable Task = Workflow state persisted to Azure Storage. Survives crashes and restarts.</div>
+        </div>
+      </div>
+
+      <div class="card amber">
+        <div class="card-header"><span class="card-icon">🌐</span><span class="card-title">ASP.NET Core / FastAPI Hosting</span></div>
+        <div class="card-body">
+          <pre><span class="cmt"># FastAPI example</span>
+<span class="kw">from</span> <span class="cls">fastapi</span> <span class="kw">import</span> <span class="cls">FastAPI</span>
+<span class="kw">from</span> <span class="cls">fastapi</span>.responses <span class="kw">import</span> <span class="cls">StreamingResponse</span>
+<span class="kw">from</span> <span class="cls">agent_framework</span>.openai <span class="kw">import</span> <span class="cls">OpenAIResponsesClient</span>
+
+app = <span class="cls">FastAPI</span>()
+agent = <span class="cls">OpenAIResponsesClient</span>().as_agent(
+    name=<span class="str">"WebAgent"</span>, instructions=<span class="str">"You are a web agent."</span>
+)
+
+<span class="op">@</span>app.post(<span class="str">"/chat"</span>)
+<span class="kw">async def</span> <span class="fn">chat</span>(body: dict):
+    result = <span class="kw">await</span> agent.run(body[<span class="str">"message"</span>])
+    <span class="kw">return</span> {<span class="str">"response"</span>: result}
+
+<span class="op">@</span>app.post(<span class="str">"/stream"</span>)
+<span class="kw">async def</span> <span class="fn">stream</span>(body: dict):
+    <span class="kw">async def</span> <span class="fn">gen</span>():
+        <span class="kw">async for</span> chunk <span class="kw">in</span> agent.run_streaming(body[<span class="str">"message"</span>]):
+            <span class="kw">yield</span> chunk
+    <span class="kw">return</span> <span class="cls">StreamingResponse</span>(gen(), media_type=<span class="str">"text/plain"</span>)<span class="lang">PYTHON</span></pre>
+        </div>
+      </div>
+
+      <div class="card magenta">
+        <div class="card-header"><span class="card-icon">🤝</span><span class="card-title">A2A Protocol (Agent-to-Agent)</span></div>
+        <div class="card-body">
+          <pre><span class="kw">from</span> <span class="cls">agent_framework</span>.integrations.a2a <span class="kw">import</span> A2AClient, A2AServer
+
+<span class="cmt"># Expose your agent over A2A protocol</span>
+server = <span class="cls">A2AServer</span>(agent=my_agent, port=<span class="num">9000</span>)
+<span class="kw">await</span> server.start()
+
+<span class="cmt"># Call a remote A2A agent from another agent</span>
+remote = <span class="cls">A2AClient</span>(url=<span class="str">"http://remote-agent:9000"</span>)
+result = <span class="kw">await</span> remote.run(<span class="str">"Analyze this data."</span>)
+
+<span class="cmt"># Use remote agent as a tool in a local agent</span>
+local_agent = <span class="cls">OpenAIResponsesClient</span>().as_agent(
+    name=<span class="str">"Orchestrator"</span>,
+    tools=[remote.as_tool(name=<span class="str">"remote_analyzer"</span>)],
+)<span class="lang">PYTHON</span></pre>
+          <div class="note">A2A enables cross-framework, cross-runtime agent collaboration — even between .NET and Python agents.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ PROVIDERS -->
+  <div id="tab-providers" class="section">
+    <div class="sec-header"><div><div class="sec-label">Section 11</div><h2>Providers &amp; Model Clients</h2></div></div>
+    <div class="grid">
+
+      <div class="card cyan">
+        <div class="card-header"><span class="card-icon">☁️</span><span class="card-title">Azure OpenAI</span></div>
+        <div class="card-body">
+          <pre><span class="cmt"># Chat Completions (stateless)</span>
+<span class="kw">from</span> <span class="cls">agent_framework</span>.azure <span class="kw">import</span> <span class="cls">AzureOpenAIChatClient</span>
+client = <span class="cls">AzureOpenAIChatClient</span>(credential=<span class="cls">AzureCliCredential</span>())
+
+<span class="cmt"># Responses API (stateful, non-CRUD)</span>
+<span class="kw">from</span> <span class="cls">agent_framework</span>.azure <span class="kw">import</span> <span class="cls">AzureOpenAIResponsesClient</span>
+client = <span class="cls">AzureOpenAIResponsesClient</span>(
+    endpoint=<span class="str">"https://&lt;resource&gt;.openai.azure.com/openai/v1"</span>,
+    deployment_name=<span class="str">"gpt-4o-mini"</span>,
+    credential=<span class="cls">AzureCliCredential</span>(),
+)
+
+<span class="cmt"># Azure AI Agent (CRUD, server-managed threads)</span>
+<span class="kw">from</span> <span class="cls">agent_framework</span>.azure <span class="kw">import</span> <span class="cls">AzureAIAgentClient</span>
+client = <span class="cls">AzureAIAgentClient</span>(credential=<span class="cls">AzureCliCredential</span>())<span class="lang">PYTHON</span></pre>
+          <div class="note cyan">
+            <strong>AzureOpenAIResponsesClient</strong> = lightweight, recommended for orchestration.<br>
+            <strong>AzureAIAgentClient</strong> = server-managed threads, file search, code interpreter.
+          </div>
+        </div>
+      </div>
+
+      <div class="card green">
+        <div class="card-header"><span class="card-icon">🤖</span><span class="card-title">OpenAI</span></div>
+        <div class="card-body">
+          <pre><span class="kw">from</span> <span class="cls">agent_framework</span>.openai <span class="kw">import</span> (
+    <span class="cls">OpenAIChatClient</span>,       <span class="cmt"># Chat Completions</span>
+    <span class="cls">OpenAIResponsesClient</span>,  <span class="cmt"># Responses API (stateful)</span>
+)
+
+<span class="cmt"># Chat client</span>
+client = <span class="cls">OpenAIChatClient</span>(api_key=<span class="str">"sk-..."</span>)
+
+<span class="cmt"># Responses client (recommended for production)</span>
+client = <span class="cls">OpenAIResponsesClient</span>(
+    api_key=os.getenv(<span class="str">"OPENAI_API_KEY"</span>),
+    model=<span class="str">"gpt-4o"</span>,
+)
+
+agent = client.as_agent(
+    name=<span class="str">"MyAgent"</span>,
+    instructions=<span class="str">"You are helpful."</span>,
+)<span class="lang">PYTHON</span></pre>
+        </div>
+      </div>
+
+      <div class="card amber">
+        <div class="card-header"><span class="card-icon">🐙</span><span class="card-title">GitHub Models</span></div>
+        <div class="card-body">
+          <pre><span class="kw">from</span> <span class="cls">agent_framework</span>.github <span class="kw">import</span> <span class="cls">GitHubModelsClient</span>
+
+<span class="cmt"># Free access via GitHub PAT — great for prototyping</span>
+client = <span class="cls">GitHubModelsClient</span>(
+    token=os.getenv(<span class="str">"GITHUB_PAT"</span>),
+    model=<span class="str">"gpt-4o"</span>,   <span class="cmt"># or "Llama-3.3-70B-Instruct"</span>
+)
+
+agent = client.as_agent(
+    name=<span class="str">"ProtoAgent"</span>,
+    instructions=<span class="str">"You are a prototype agent."</span>,
+)
+
+<span class="cmt"># Supported models via GitHub Models</span>
+<span class="cmt"># GPT-4o, GPT-4o-mini, Llama 3.3 70B, Mistral, Phi-4, etc.</span><span class="lang">PYTHON</span></pre>
+        </div>
+      </div>
+
+      <div class="card magenta">
+        <div class="card-header"><span class="card-icon">🟠</span><span class="card-title">Anthropic (Claude)</span></div>
+        <div class="card-body">
+          <pre><span class="cmt"># pip install agent-framework-anthropic</span>
+<span class="kw">from</span> <span class="cls">agent_framework</span>.anthropic <span class="kw">import</span> <span class="cls">AnthropicChatClient</span>
+
+client = <span class="cls">AnthropicChatClient</span>(
+    api_key=os.getenv(<span class="str">"ANTHROPIC_API_KEY"</span>),
+    model=<span class="str">"claude-sonnet-4-6"</span>,
+)
+
+agent = client.as_agent(
+    name=<span class="str">"ClaudeAgent"</span>,
+    instructions=<span class="str">"You are a helpful Claude-powered agent."</span>,
+)<span class="lang">PYTHON</span></pre>
+        </div>
+      </div>
+
+      <div class="card cyan">
+        <div class="card-header"><span class="card-icon">🏠</span><span class="card-title">Local Models (Ollama)</span></div>
+        <div class="card-body">
+          <pre><span class="kw">from</span> <span class="cls">agent_framework</span>.ollama <span class="kw">import</span> <span class="cls">OllamaChatClient</span>
+
+<span class="cmt"># Run: ollama serve (local Ollama instance)</span>
+client = <span class="cls">OllamaChatClient</span>(
+    model=<span class="str">"llama3.2"</span>,
+    base_url=<span class="str">"http://localhost:11434"</span>,
+)
+
+agent = client.as_agent(
+    name=<span class="str">"LocalAgent"</span>,
+    instructions=<span class="str">"You run fully locally."</span>,
+)
+
+result = <span class="kw">await</span> agent.run(<span class="str">"Hello!"</span>)<span class="lang">PYTHON</span></pre>
+        </div>
+      </div>
+
+      <div class="card green">
+        <div class="card-header"><span class="card-icon">☁️</span><span class="card-title">AWS Bedrock</span></div>
+        <div class="card-body">
+          <pre><span class="kw">from</span> <span class="cls">agent_framework</span>.aws <span class="kw">import</span> <span class="cls">BedrockChatClient</span>
+
+client = <span class="cls">BedrockChatClient</span>(
+    model_id=<span class="str">"anthropic.claude-3-5-sonnet-20241022-v2:0"</span>,
+    region_name=<span class="str">"us-east-1"</span>,
+)
+
+agent = client.as_agent(
+    name=<span class="str">"BedrockAgent"</span>,
+    instructions=<span class="str">"You run on AWS Bedrock."</span>,
+)<span class="lang">PYTHON</span></pre>
+        </div>
+      </div>
+
+      <div class="card amber card-full">
+        <div class="card-header"><span class="card-icon">📋</span><span class="card-title">Provider Comparison</span></div>
+        <div class="card-body">
+          <table>
+            <tr><th>Provider</th><th>Package</th><th>Client Classes</th><th>Best For</th></tr>
+            <tr><td><span class="cy">Azure OpenAI</span></td><td><code>agent-framework-azure-ai</code></td><td>AzureOpenAI{Chat,Responses}Client, AzureAIAgentClient</td><td>Production, enterprise, file search</td></tr>
+            <tr><td><span class="gr">OpenAI</span></td><td><code>agent-framework-openai</code></td><td>OpenAI{Chat,Responses}Client</td><td>General purpose</td></tr>
+            <tr><td><span class="am">GitHub Models</span></td><td><code>agent-framework-github</code></td><td>GitHubModelsClient</td><td>Free prototyping, open models</td></tr>
+            <tr><td><span class="mg">Anthropic</span></td><td><code>agent-framework-anthropic</code></td><td>AnthropicChatClient</td><td>Claude models</td></tr>
+            <tr><td><span class="cy">Ollama</span></td><td><code>agent-framework-ollama</code></td><td>OllamaChatClient</td><td>Local/offline, privacy</td></tr>
+            <tr><td><span class="gr">AWS Bedrock</span></td><td><code>agent-framework-aws</code></td><td>BedrockChatClient</td><td>AWS ecosystem</td></tr>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ DEVUI -->
+  <div id="tab-devui" class="section">
+    <div class="sec-header"><div><div class="sec-label">Section 12</div><h2>DevUI, DevEx &amp; Migration</h2></div></div>
+    <div class="grid">
+
+      <div class="card cyan">
+        <div class="card-header"><span class="card-icon">🖥</span><span class="card-title">DevUI — Interactive Developer Dashboard</span></div>
+        <div class="card-body">
+          <pre><span class="cmt"># pip install agent-framework-devui</span>
+<span class="kw">from</span> <span class="cls">agent_framework</span>.devui <span class="kw">import</span> DevUI
+<span class="kw">from</span> <span class="cls">agent_framework</span>.openai <span class="kw">import</span> <span class="cls">OpenAIResponsesClient</span>
+
+agent = <span class="cls">OpenAIResponsesClient</span>().as_agent(
+    name=<span class="str">"DebugAgent"</span>, instructions=<span class="str">"You are helpful."</span>
+)
+
+<span class="cmt"># Launch DevUI at http://localhost:8090</span>
+<span class="cls">DevUI</span>(agent).run(port=<span class="num">8090</span>)  <span class="cmt"># browser opens automatically</span><span class="lang">PYTHON</span></pre>
+          <div class="pills" style="margin-top:10px;">
+            <span class="pill">Chain-of-thought visualization</span>
+            <span class="pill">Real-time state monitoring</span>
+            <span class="pill">Tool call inspection</span>
+            <span class="pill">Conversation replay</span>
+            <span class="pill">Context window viewer</span>
+          </div>
+          <div class="note amber" style="margin-top:10px;">DevUI is Python-only. .NET DevUI integration is planned but not yet released.</div>
+        </div>
+      </div>
+
+      <div class="card green">
+        <div class="card-header"><span class="card-icon">🔄</span><span class="card-title">Migrate from AutoGen</span></div>
+        <div class="card-body">
+          <pre><span class="cmt"># BEFORE — AutoGen</span>
+<span class="kw">from</span> <span class="cls">autogen</span> <span class="kw">import</span> <span class="cls">AssistantAgent</span>
+agent = <span class="cls">AssistantAgent</span>(
+    name=<span class="str">"assistant"</span>,
+    llm_config={<span class="str">"model"</span>: <span class="str">"gpt-4o"</span>},
+    system_message=<span class="str">"You are helpful."</span>,
+)
+
+<span class="cmt"># AFTER — Agent Framework</span>
+<span class="kw">from</span> <span class="cls">agent_framework</span>.openai <span class="kw">import</span> <span class="cls">OpenAIResponsesClient</span>
+agent = <span class="cls">OpenAIResponsesClient</span>(model=<span class="str">"gpt-4o"</span>).as_agent(
+    name=<span class="str">"assistant"</span>,
+    instructions=<span class="str">"You are helpful."</span>,
+)<span class="lang">PYTHON</span></pre>
+          <table style="margin-top:10px;">
+            <tr><th>AutoGen</th><th>Agent Framework</th></tr>
+            <tr><td>AssistantAgent</td><td>as_agent() / ChatAgent</td></tr>
+            <tr><td>GroupChat</td><td>GroupChatBuilder</td></tr>
+            <tr><td>GraphFlow</td><td>WorkflowBuilder</td></tr>
+            <tr><td>initiate_chat()</td><td>agent.run()</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="card amber">
+        <div class="card-header"><span class="card-icon">🔄</span><span class="card-title">Migrate from Semantic Kernel</span></div>
+        <div class="card-body">
+          <pre><span class="cmt"># BEFORE — Semantic Kernel</span>
+<span class="kw">from</span> <span class="cls">semantic_kernel</span> <span class="kw">import</span> <span class="cls">Kernel</span>
+kernel = <span class="cls">Kernel</span>()
+kernel.add_plugin(my_plugin, plugin_name=<span class="str">"MyPlugin"</span>)
+
+<span class="cmt"># AFTER — Agent Framework</span>
+<span class="kw">from</span> <span class="cls">agent_framework</span>.openai <span class="kw">import</span> <span class="cls">OpenAIResponsesClient</span>
+agent = <span class="cls">OpenAIResponsesClient</span>().as_agent(
+    tools=[my_function],  <span class="cmt"># SK plugins → functions</span>
+)
+
+<span class="cmt"># SK connectors → agent-framework connectors</span>
+<span class="cmt"># Bing, Google, OpenAPI, MS Graph all port directly</span>
+<span class="cmt"># as tools, often via MCP or OpenAPI</span><span class="lang">PYTHON</span></pre>
+          <table style="margin-top:10px;">
+            <tr><th>Semantic Kernel</th><th>Agent Framework</th></tr>
+            <tr><td>Plugin / KernelFunction</td><td>Tool (function)</td></tr>
+            <tr><td>Kernel</td><td>Agent + client</td></tr>
+            <tr><td>Filter</td><td>Middleware</td></tr>
+            <tr><td>Memory store</td><td>ContextProvider</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="card magenta">
+        <div class="card-header"><span class="card-icon">🔗</span><span class="card-title">Key Links &amp; Resources</span></div>
+        <div class="card-body">
+          <div class="info-row"><span class="info-key">📚 MS Learn Docs</span><span class="info-val">learn.microsoft.com/en-us/agent-framework</span></div>
+          <div class="info-row"><span class="info-key">🐙 GitHub Repo</span><span class="info-val">github.com/microsoft/agent-framework</span></div>
+          <div class="info-row"><span class="info-key">📦 PyPI</span><span class="info-val">pypi.org/project/agent-framework</span></div>
+          <div class="info-row"><span class="info-key">📦 NuGet</span><span class="info-val">nuget.org/profiles/MicrosoftAgentFramework</span></div>
+          <div class="info-row"><span class="info-key">💬 Discord</span><span class="info-val">discord.gg/b5zjErwbQM (Azure AI Foundry)</span></div>
+          <div class="info-row"><span class="info-key">🎥 Intro Video</span><span class="info-val">youtube.com/watch?v=AAgdMhftj8w (30 min)</span></div>
+          <div class="info-row"><span class="info-key">🐍 Python Samples</span><span class="info-val">github.com/microsoft/agent-framework/tree/main/python/samples</span></div>
+          <div class="info-row"><span class="info-key">🔷 .NET Samples</span><span class="info-val">github.com/microsoft/agent-framework/tree/main/dotnet/samples</span></div>
+          <div class="info-row"><span class="info-key">🏃 AG Samples Repo</span><span class="info-val">github.com/microsoft/Agent-Framework-Samples</span></div>
+          <div class="info-row"><span class="info-key">📅 Office Hours</span><span class="info-val">Weekly — see COMMUNITY.md in repo</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /wrapper -->
+
+<script>
+function show(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+</script>
+</body>
+</html>

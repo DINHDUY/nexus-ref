@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code — Rules</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bricolage+Grotesque:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #070b10;
+    --bg2:      #0b1118;
+    --bg3:      #111820;
+    --bg4:      #161f2a;
+    --border:   #1c2635;
+    --border2:  #263345;
+    --text:     #ccd6e0;
+    --muted:    #607585;
+    --dim:      #2d3f52;
+    --cyan:     #00d4f5;
+    --purple:   #a78bfa;
+    --green:    #2eeba8;
+    --orange:   #f59e42;
+    --yellow:   #fcd34d;
+    --pink:     #f472b6;
+    --red:      #f87171;
+    --blue:     #60a5fa;
+    --code-bg:  #060a0f;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.65;
+    padding: 36px 20px 80px;
+  }
+
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 2px,
+      rgba(0,212,245,0.012) 2px, rgba(0,212,245,0.012) 4px
+    );
+    pointer-events: none; z-index: 0;
+  }
+
+  body::after {
+    content: ''; position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 10% 0%,  rgba(0,212,245,0.04)  0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 90% 100%, rgba(248,113,113,0.03) 0%, transparent 60%);
+    pointer-events: none; z-index: 0;
+  }
+
+  .container { max-width: 1280px; margin: 0 auto; position: relative; z-index: 1; }
+
+  /* ── HEADER ─────────────────────────────────── */
+  .header {
+    display: grid; grid-template-columns: 1fr auto;
+    align-items: end; gap: 24px;
+    margin-bottom: 36px; padding-bottom: 24px;
+    border-bottom: 1px solid var(--border2);
+  }
+  .eyebrow {
+    font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--cyan); margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .eyebrow::before { content: ''; width: 20px; height: 1px; background: var(--cyan); }
+  h1 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: clamp(28px, 4.5vw, 54px);
+    font-weight: 800; line-height: 0.95; letter-spacing: -0.03em; color: #fff;
+  }
+  h1 em { font-style: normal; color: var(--cyan); }
+  .header-sub { margin-top: 12px; font-size: 11.5px; color: var(--muted); letter-spacing: 0.04em; max-width: 680px; }
+  .meta-pills { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+  .pill {
+    background: var(--bg3); border: 1px solid var(--border2);
+    padding: 6px 14px; font-size: 10px; letter-spacing: 0.08em;
+    white-space: nowrap; color: var(--muted);
+  }
+  .pill strong { color: var(--green); }
+
+  /* ── SECTION LABELS ─────────────────────────── */
+  .section-label {
+    font-size: 9px; font-weight: 700; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--muted);
+    display: flex; align-items: center; gap: 10px; margin: 32px 0 14px;
+  }
+  .section-label::before { content: attr(data-n); color: var(--cyan); font-size: 11px; }
+  .section-label::after  { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ── GRIDS ───────────────────────────────────── */
+  .g2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(520px, 1fr)); gap: 14px; margin-bottom: 14px; }
+  .g3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 14px; margin-bottom: 14px; }
+  .g4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-bottom: 14px; }
+  .fw { margin-bottom: 14px; }
+
+  /* ── CARDS ───────────────────────────────────── */
+  .card {
+    background: var(--bg2); border: 1px solid var(--border);
+    padding: 20px; position: relative; overflow: hidden;
+  }
+  .card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--ac), transparent);
+  }
+  .c-cyan   { --ac: var(--cyan); }
+  .c-purple { --ac: var(--purple); }
+  .c-green  { --ac: var(--green); }
+  .c-orange { --ac: var(--orange); }
+  .c-yellow { --ac: var(--yellow); }
+  .c-pink   { --ac: var(--pink); }
+  .c-red    { --ac: var(--red); }
+  .c-blue   { --ac: var(--blue); }
+
+  .card-title {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--ac); margin-bottom: 14px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .card-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ── CODE BLOCKS ────────────────────────────── */
+  pre {
+    background: var(--code-bg); border: 1px solid var(--border);
+    border-left: 3px solid var(--ac, var(--cyan));
+    padding: 13px 16px; font-family: 'Space Mono', monospace;
+    font-size: 11.5px; line-height: 1.75; overflow-x: auto; margin-bottom: 10px;
+  }
+  pre:last-child { margin-bottom: 0; }
+  .pre-label {
+    font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--dim); margin-bottom: 5px; display: block;
+  }
+
+  .t-cm { color: var(--muted); font-style: italic; }
+  .t-kw { color: var(--pink); }
+  .t-st { color: var(--green); }
+  .t-nm { color: var(--orange); }
+  .t-fn { color: var(--blue); }
+  .t-op { color: var(--cyan); }
+  .t-h1 { color: #fff; font-weight: 700; }
+  .t-h2 { color: var(--cyan); }
+  .t-h3 { color: var(--purple); }
+  .t-bi { color: var(--yellow); }
+  .t-er { color: var(--red); }
+  .t-sl { color: var(--green); font-weight: 700; }
+  .hl   { background: rgba(0,212,245,0.07);   display: block; margin: 0 -16px; padding: 0 16px; }
+  .hl-g { background: rgba(46,235,168,0.07);  display: block; margin: 0 -16px; padding: 0 16px; }
+  .hl-r { background: rgba(248,113,113,0.07); display: block; margin: 0 -16px; padding: 0 16px; }
+  .hl-y { background: rgba(252,211,77,0.06);  display: block; margin: 0 -16px; padding: 0 16px; }
+
+  code {
+    background: var(--bg4); border: 1px solid var(--border2);
+    padding: 1px 5px; font-size: 11px; color: var(--cyan);
+  }
+
+  /* ── CALLOUTS ───────────────────────────────── */
+  .tip, .warn, .info, .key, .danger {
+    padding: 9px 13px; font-size: 11px; margin-bottom: 8px;
+    border-left: 2px solid; line-height: 1.7;
+  }
+  .tip    { background: rgba(46,235,168,0.04);  border-color: var(--green); }
+  .warn   { background: rgba(245,158,66,0.05);  border-color: var(--orange); }
+  .info   { background: rgba(0,212,245,0.04);   border-color: var(--cyan); }
+  .key    { background: rgba(167,139,250,0.05); border-color: var(--purple); }
+  .danger { background: rgba(248,113,113,0.05); border-color: var(--red); }
+  .tip strong, .warn strong, .info strong, .key strong, .danger strong {
+    display: block; font-size: 8.5px; letter-spacing: 0.14em;
+    text-transform: uppercase; margin-bottom: 2px;
+  }
+  .tip strong    { color: var(--green); }
+  .warn strong   { color: var(--orange); }
+  .info strong   { color: var(--cyan); }
+  .key strong    { color: var(--purple); }
+  .danger strong { color: var(--red); }
+
+  /* ── TABLE ──────────────────────────────────── */
+  table { width: 100%; border-collapse: collapse; font-size: 11.5px; margin-bottom: 10px; }
+  th {
+    text-align: left; font-size: 9px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--muted);
+    padding: 6px 10px; border-bottom: 1px solid var(--border2);
+  }
+  td { padding: 7px 10px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.55; }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { color: var(--cyan); font-weight: 700; }
+  td:nth-child(2) { color: var(--muted); }
+  td:nth-child(3) { color: var(--muted); }
+
+  /* ── TAGS ───────────────────────────────────── */
+  .tag {
+    display: inline-block; padding: 2px 7px; font-size: 8.5px;
+    letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700;
+    border: 1px solid; margin: 2px 3px 2px 0;
+  }
+  .tc { color: var(--cyan);   border-color: var(--cyan); }
+  .tp { color: var(--purple); border-color: var(--purple); }
+  .tg { color: var(--green);  border-color: var(--green); }
+  .to { color: var(--orange); border-color: var(--orange); }
+  .ty { color: var(--yellow); border-color: var(--yellow); }
+  .tk { color: var(--pink);   border-color: var(--pink); }
+  .tr { color: var(--red);    border-color: var(--red); }
+  .tb { color: var(--blue);   border-color: var(--blue); }
+
+  /* ── PRIORITY STACK ──────────────────────────── */
+  .hier-stack { border: 1px solid var(--border); overflow: hidden; margin-bottom: 12px; }
+  .hier-row {
+    display: grid; grid-template-columns: 28px 170px 1fr auto;
+    border-bottom: 1px solid var(--border); align-items: stretch;
+  }
+  .hier-row:last-child { border-bottom: none; }
+  .hier-num {
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700; color: #000;
+    border-right: 1px solid var(--border);
+  }
+  .hier-label {
+    padding: 9px 12px; border-right: 1px solid var(--border);
+    font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+    display: flex; align-items: center;
+  }
+  .hier-body {
+    padding: 9px 14px; font-size: 11.5px; color: var(--muted);
+    display: flex; align-items: center; line-height: 1.55;
+  }
+  .hier-body strong { color: var(--text); }
+  .hier-body code  { font-size: 10.5px; }
+  .hier-scope {
+    padding: 9px 12px; border-left: 1px solid var(--border);
+    font-size: 9px; color: var(--dim); display: flex;
+    align-items: center; justify-content: center;
+    text-align: center; min-width: 90px; line-height: 1.4;
+  }
+
+  /* ── PERMISSION MODE CARDS ───────────────────── */
+  .mode-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 12px; }
+  .mode-card {
+    background: var(--bg3); border: 1px solid var(--border2);
+    padding: 13px 14px;
+  }
+  .mode-card .mode-name {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; margin-bottom: 5px;
+  }
+  .mode-card .mode-key {
+    font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--dim); margin-bottom: 6px; font-family: 'Space Mono', monospace;
+  }
+  .mode-card .mode-desc { font-size: 11px; color: var(--muted); line-height: 1.6; }
+  .mode-card.m-default  { border-color: rgba(0,212,245,0.3); }
+  .mode-card.m-accept   { border-color: rgba(46,235,168,0.3); }
+  .mode-card.m-plan     { border-color: rgba(167,139,250,0.3); }
+  .mode-card.m-dontask  { border-color: rgba(245,158,66,0.3); }
+  .mode-card.m-bypass   { border-color: rgba(248,113,113,0.3); }
+  .mode-card.m-default  .mode-name { color: var(--cyan); }
+  .mode-card.m-accept   .mode-name { color: var(--green); }
+  .mode-card.m-plan     .mode-name { color: var(--purple); }
+  .mode-card.m-dontask  .mode-name { color: var(--orange); }
+  .mode-card.m-bypass   .mode-name { color: var(--red); }
+
+  /* ── HOOKS TABLE ─────────────────────────────── */
+  .hooks-table td:first-child { white-space: nowrap; color: var(--yellow); }
+  .hooks-table td:nth-child(2) { color: var(--muted); max-width: 240px; }
+  .hooks-table td:nth-child(3) { color: var(--cyan); font-size: 10.5px; }
+  .hooks-table td:nth-child(4) { color: var(--green); }
+
+  /* ── DECISION TREE ──────────────────────────── */
+  .tree pre { border-left-color: var(--purple); }
+  .tq  { color: var(--text); }
+  .tya { color: var(--green); }
+  .tno { color: var(--orange); }
+  .tre { color: var(--cyan); font-weight: 700; }
+  .tln { color: var(--dim); }
+
+  /* ── FLOW ROW ───────────────────────────────── */
+  .flow-row { display: flex; align-items: center; gap: 0; flex-wrap: wrap; margin: 10px 0; }
+  .fnode {
+    padding: 7px 12px; font-size: 11px;
+    border: 1px solid var(--border2); background: var(--bg3); white-space: nowrap;
+  }
+  .fnode.c1 { border-color: var(--cyan);   color: var(--cyan); }
+  .fnode.c2 { border-color: var(--green);  color: var(--green); }
+  .fnode.c3 { border-color: var(--orange); color: var(--orange); }
+  .fnode.c4 { border-color: var(--red);    color: var(--red); }
+  .fnode.c5 { border-color: var(--purple); color: var(--purple); }
+  .fnode.c6 { border-color: var(--yellow); color: var(--yellow); }
+  .farrow { color: var(--dim); padding: 0 6px; font-size: 14px; }
+
+  /* ── FOOTER ─────────────────────────────────── */
+  .footer {
+    margin-top: 48px; padding-top: 20px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between;
+    flex-wrap: wrap; gap: 10px;
+    font-size: 10px; color: var(--dim); letter-spacing: 0.08em;
+  }
+
+  @media (max-width: 680px) {
+    .g2, .g3, .g4 { grid-template-columns: 1fr; }
+    .header { grid-template-columns: 1fr; }
+    .meta-pills { align-items: flex-start; }
+    .hier-row { grid-template-columns: 28px 1fr; }
+    .hier-scope { display: none; }
+    .mode-grid { grid-template-columns: 1fr; }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .card { animation: fadeUp 0.4s ease both; }
+  .card:nth-child(1){animation-delay:.04s}
+  .card:nth-child(2){animation-delay:.08s}
+  .card:nth-child(3){animation-delay:.12s}
+  .card:nth-child(4){animation-delay:.16s}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ══════════════════ HEADER ══════════════════════ -->
+  <div class="header">
+    <div>
+      <div class="eyebrow">Official Docs · code.claude.com/docs/en/permissions · Mar 2026</div>
+      <h1>Claude Code —<em>Rules</em></h1>
+      <p class="header-sub">// settings.json · allow / deny / ask rules · Permission Modes · Hooks · Settings Hierarchy · Sandboxing · CLI flags — complete reference from the official docs</p>
+    </div>
+    <div class="meta-pills">
+      <div class="pill">Source <strong>code.claude.com/docs/en/permissions</strong></div>
+      <div class="pill">Permission modes since <strong>v1.x</strong> · Hooks since <strong>v1.x</strong></div>
+      <div class="pill">PermissionRequest hook <strong>v2.0.45+</strong></div>
+      <div class="pill">Hook timeout <strong>10 min (v2.1.3+)</strong></div>
+    </div>
+  </div>
+
+
+  <!-- ════════ 01: EVALUATION FLOW ═══════════════════ -->
+  <div class="section-label" data-n="01">Permission Evaluation Flow — How Every Tool Call Is Decided</div>
+
+  <div class="card c-cyan fw">
+    <div class="card-title">⚙️ The Decision Pipeline (Applied in This Exact Order)</div>
+    <div class="flow-row">
+      <div class="fnode c4">① Deny rules<br><span style="font-size:9px;opacity:.7">deny always wins</span></div>
+      <div class="farrow">→</div>
+      <div class="fnode c5">② Permission mode<br><span style="font-size:9px;opacity:.7">bypass/acceptEdits/…</span></div>
+      <div class="farrow">→</div>
+      <div class="fnode c2">③ Allow rules<br><span style="font-size:9px;opacity:.7">settings.json allow</span></div>
+      <div class="farrow">→</div>
+      <div class="fnode c3">④ canUseTool<br><span style="font-size:9px;opacity:.7">runtime prompt user</span></div>
+      <div class="farrow">→</div>
+      <div class="fnode c6">⑤ dontAsk mode<br><span style="font-size:9px;opacity:.7">deny if unresolved</span></div>
+    </div>
+    <div style="margin-top:10px;">
+      <table>
+        <thead><tr><th>Step</th><th>What Happens</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>① Deny rules</td>
+            <td>Check <code>deny</code> array in settings.json + <code>--disallowedTools</code> CLI flag. If matched → BLOCKED. No further evaluation.</td>
+            <td>Deny <strong>always</strong> overrides allow at any level. Cannot be overridden by any lower layer.</td>
+          </tr>
+          <tr>
+            <td>② Permission mode</td>
+            <td><code>bypassPermissions</code> → approve all. <code>acceptEdits</code> → approve file ops. Others fall through.</td>
+            <td>Hooks still run even in bypassPermissions and can block.</td>
+          </tr>
+          <tr>
+            <td>③ Allow rules</td>
+            <td>Check <code>allow</code> array in settings.json + <code>--allowedTools</code> CLI. If matched → APPROVED.</td>
+            <td>First match wins. Rules evaluated top-to-bottom.</td>
+          </tr>
+          <tr>
+            <td>④ canUseTool callback</td>
+            <td>Runtime prompt to user for approval. Session-level "Always allow" adds to allow list.</td>
+            <td>Skipped in <code>dontAsk</code> mode.</td>
+          </tr>
+          <tr>
+            <td>⑤ dontAsk fallback</td>
+            <td>If <code>dontAsk</code> mode and no rule matched → DENIED without prompting.</td>
+            <td>TypeScript SDK only. Use for fixed headless agent surfaces.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="danger">
+      <strong>⚠ Critical Rule: Deny Always Wins</strong>
+      If a tool is denied at <em>any</em> settings layer (enterprise, user, project, local), no other layer can allow it. <code>--allowedTools</code> CLI flag cannot override a managed-settings deny. A deny in project settings overrides an allow in user settings.
+    </div>
+  </div>
+
+
+  <!-- ════════ 02: SETTINGS HIERARCHY ════════════════ -->
+  <div class="section-label" data-n="02">Settings Files — Hierarchy &amp; Locations</div>
+
+  <div class="card c-orange fw">
+    <div class="card-title">📍 5 Settings Layers — Priority Highest → Lowest</div>
+
+    <div class="hier-stack">
+      <div class="hier-row">
+        <div class="hier-num" style="background:var(--red);">1</div>
+        <div class="hier-label" style="color:var(--red);">Enterprise Managed</div>
+        <div class="hier-body">
+          macOS: <code>/Library/Application Support/ClaudeCode/claude_desktop_config.json</code><br>
+          Linux/Windows: MDM / plist / HKLM registry policies<br>
+          <strong>Cannot be overridden by any lower level.</strong> Deny rules here are absolute.
+        </div>
+        <div class="hier-scope">org-wide<br>enforced</div>
+      </div>
+      <div class="hier-row">
+        <div class="hier-num" style="background:var(--orange);">2</div>
+        <div class="hier-label" style="color:var(--orange);">CLI Flags</div>
+        <div class="hier-body">
+          <code>--allowedTools</code> / <code>--disallowedTools</code> / <code>--permission-mode</code><br>
+          Per-invocation overrides. <code>--disallowedTools</code> adds restrictions on top of managed settings.
+        </div>
+        <div class="hier-scope">per-run<br>CLI</div>
+      </div>
+      <div class="hier-row">
+        <div class="hier-num" style="background:var(--yellow);">3</div>
+        <div class="hier-label" style="color:var(--yellow);">Local Project</div>
+        <div class="hier-body">
+          <code>.claude/settings.local.json</code> — auto-gitignored by Claude Code<br>
+          Personal machine-specific settings for this project. Overrides shared project settings.
+        </div>
+        <div class="hier-scope">personal<br>gitignored</div>
+      </div>
+      <div class="hier-row">
+        <div class="hier-num" style="background:var(--cyan);">4</div>
+        <div class="hier-label" style="color:var(--cyan);">Shared Project</div>
+        <div class="hier-body">
+          <code>.claude/settings.json</code> — commit to git, team-wide<br>
+          Overrides user settings. All team members benefit from the same rules.
+        </div>
+        <div class="hier-scope">project<br>team-shared</div>
+      </div>
+      <div class="hier-row">
+        <div class="hier-num" style="background:var(--purple);">5</div>
+        <div class="hier-label" style="color:var(--purple);">User Global</div>
+        <div class="hier-body">
+          <code>~/.claude/settings.json</code> — applies to all projects on this machine<br>
+          Your personal defaults: preferred mode, personal allow/deny list, global hooks.
+        </div>
+        <div class="hier-scope">all<br>projects</div>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>✦ Precedence in practice</strong>
+      If a permission is <strong>allowed</strong> in user settings but <strong>denied</strong> in project settings → project setting wins and the permission is blocked. Deny rules from higher-priority layers propagate down. Use <code>.claude/settings.local.json</code> for personal overrides that shouldn't be committed.
+    </div>
+  </div>
+
+
+  <!-- ════════ 03: RULE SYNTAX ════════════════════════ -->
+  <div class="section-label" data-n="03">Rule Syntax — allow · deny · ask</div>
+
+  <div class="g2 fw">
+
+    <div class="card c-cyan">
+      <div class="card-title">🔧 settings.json Structure &amp; Rule Arrays</div>
+      <span class="pre-label">Complete settings.json anatomy</span>
+      <pre><span class="t-op">{</span>
+  <span class="t-nm">"model"</span>: <span class="t-st">"claude-sonnet-4-6"</span>,
+  <span class="t-nm">"permissions"</span>: <span class="t-op">{</span>
+    <span class="t-nm">"defaultMode"</span>: <span class="t-st">"acceptEdits"</span>,
+    <span class="t-nm">"allow"</span>: <span class="t-op">[</span>
+<span class="hl-g">      <span class="t-st">"Read"</span>,                       <span class="t-cm">// all reads</span></span>
+<span class="hl-g">      <span class="t-st">"Edit(src/**)"</span>,               <span class="t-cm">// glob path</span></span>
+<span class="hl-g">      <span class="t-st">"Bash(npm run *)"</span>,            <span class="t-cm">// bash glob</span></span>
+<span class="hl-g">      <span class="t-st">"Bash(git commit *)"</span>,         <span class="t-cm">// bash exact prefix</span></span>
+<span class="hl-g">      <span class="t-st">"WebFetch(domain:github.com)"</span>, <span class="t-cm">// domain rule</span></span>
+<span class="hl-g">      <span class="t-st">"mcp__puppeteer"</span>,             <span class="t-cm">// entire MCP server</span></span>
+<span class="hl-g">      <span class="t-st">"Agent(reviewer)"</span>             <span class="t-cm">// named subagent</span></span>
+    <span class="t-op">]</span>,
+    <span class="t-nm">"deny"</span>: <span class="t-op">[</span>
+<span class="hl-r">      <span class="t-st">"Read(.env*)"</span>,                 <span class="t-cm">// block .env files</span></span>
+<span class="hl-r">      <span class="t-st">"Read(secrets/**)"</span>,           <span class="t-cm">// block dir tree</span></span>
+<span class="hl-r">      <span class="t-st">"Edit(//etc/**)"</span>,             <span class="t-cm">// absolute path</span></span>
+<span class="hl-r">      <span class="t-st">"Bash(rm -rf *)"</span>,             <span class="t-cm">// dangerous command</span></span>
+<span class="hl-r">      <span class="t-st">"Bash(sudo *)"</span>,               <span class="t-cm">// no sudo</span></span>
+<span class="hl-r">      <span class="t-st">"Bash(git push *)"</span>            <span class="t-cm">// always ask before push</span></span>
+    <span class="t-op">]</span>,
+    <span class="t-nm">"ask"</span>: <span class="t-op">[</span>
+<span class="hl-y">      <span class="t-st">"Bash(git push *)"</span>,           <span class="t-cm">// prompt user first</span></span>
+<span class="hl-y">      <span class="t-st">"Bash(npm install *)"</span>,        <span class="t-cm">// install = ask</span></span>
+<span class="hl-y">      <span class="t-st">"WebFetch"</span>                    <span class="t-cm">// all fetches = ask</span></span>
+    <span class="t-op">]</span>,
+    <span class="t-nm">"additionalDirectories"</span>: <span class="t-op">[</span>
+      <span class="t-st">"../shared-lib"</span>, <span class="t-st">"../docs"</span>
+    <span class="t-op">]</span>
+  <span class="t-op">}</span>
+<span class="t-op">}</span></pre>
+    </div>
+
+    <div class="card c-green">
+      <div class="card-title">📐 All Rule Syntaxes by Tool</div>
+
+      <span class="pre-label">Bash rules — glob patterns, space boundary matters</span>
+      <pre><span class="t-cm">── Exact command ──────────────────────────────── </span>
+<span class="t-st">"Bash(npm run build)"</span>      <span class="t-cm"># exact match only</span>
+
+<span class="t-cm">── Prefix glob ────────────────────────────────── </span>
+<span class="t-st">"Bash(npm run *)"</span>          <span class="t-cm"># npm run test, npm run dev…</span>
+<span class="t-st">"Bash(git * main)"</span>         <span class="t-cm"># git checkout main, git merge main</span>
+<span class="t-st">"Bash(* --version)"</span>        <span class="t-cm"># any --version command</span>
+
+<span class="t-cm">── Space-boundary rule (important!) ─────────────</span>
+<span class="t-st">"Bash(ls *)"</span>    <span class="t-cm"># ✓ matches: ls -la    ✗ does NOT match: lsof</span>
+<span class="t-st">"Bash(ls*)"</span>     <span class="t-cm"># ✓ matches: ls -la    ✓ ALSO matches: lsof</span>
+
+<span class="t-cm">── ⚠ DEPRECATED (still works but avoid) ─────────</span>
+<span class="t-st">"Bash(npm:*)"</span>   <span class="t-cm"># old :* suffix syntax → use space+* instead</span></pre>
+
+      <span class="pre-label">Read / Edit rules — gitignore-style paths</span>
+      <pre><span class="t-st">"Read"</span>               <span class="t-cm"># all reads (no parens = all)</span>
+<span class="t-st">"Edit(src/**)"</span>       <span class="t-cm"># recursive under src/</span>
+<span class="t-st">"Edit(*.ts)"</span>         <span class="t-cm"># .ts files anywhere (one level)</span>
+<span class="t-st">"Read(.env*)"</span>        <span class="t-cm"># .env, .env.local, .env.prod</span>
+
+<span class="t-cm">── Absolute path: use double leading slash ───────</span>
+<span class="t-st">"Edit(//tmp/scratch.txt)"</span>  <span class="t-cm"># absolute: /tmp/scratch.txt</span>
+<span class="t-st">"Read(//Users/alice/**)"</span>   <span class="t-cm"># absolute dir tree</span>
+<span class="t-cm"># "Read(/Users/alice)" → NOT absolute: relative to project root!</span></pre>
+
+      <span class="pre-label">WebFetch / MCP / Agent rules</span>
+      <pre><span class="t-st">"WebFetch(domain:docs.anthropic.com)"</span>  <span class="t-cm"># allow domain</span>
+<span class="t-st">"WebFetch"</span>                              <span class="t-cm"># all fetches</span>
+
+<span class="t-st">"mcp__puppeteer"</span>              <span class="t-cm"># all tools from server</span>
+<span class="t-st">"mcp__puppeteer__*"</span>           <span class="t-cm"># wildcard (same effect)</span>
+<span class="t-st">"mcp__github__create_pr"</span>      <span class="t-cm"># specific tool</span>
+
+<span class="t-st">"Agent(my-custom-agent)"</span>      <span class="t-cm"># named subagent</span></pre>
+
+      <div class="warn">
+        <strong>⚠ Bash argument patterns are fragile</strong>
+        <code>Bash(curl http://github.com/ *)</code> won't match <code>curl -X GET https://…</code> because options may precede the URL. For reliable URL filtering, block <code>Bash(curl *)</code> in deny and use <code>WebFetch(domain:github.com)</code> instead.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ════════ 04: PERMISSION MODES ══════════════════ -->
+  <div class="section-label" data-n="04">Permission Modes — 5 Operating Modes</div>
+
+  <div class="card c-purple fw">
+    <div class="card-title">🎛 5 Modes — Match the Mode to Your Context</div>
+    <div class="mode-grid">
+      <div class="mode-card m-default">
+        <div class="mode-name">default</div>
+        <div class="mode-key">shift+tab → cycle · /mode default</div>
+        <div class="mode-desc">Prompts for approval on every modification. Read ops are auto-allowed. Safest for unknown codebases or when reviewing AI changes carefully.</div>
+      </div>
+      <div class="mode-card m-accept">
+        <div class="mode-name">acceptEdits</div>
+        <div class="mode-key">shift+tab · "defaultMode": "acceptEdits"</div>
+        <div class="mode-desc">Auto-approves all file operations (Read, Write, Edit). Bash commands that aren't filesystem ops still require approval. Best for prototyping or trusted isolated dirs.</div>
+      </div>
+      <div class="mode-card m-plan">
+        <div class="mode-name">plan</div>
+        <div class="mode-key">/plan · --mode=plan · shift+tab</div>
+        <div class="mode-desc">Claude reads and proposes a plan but cannot execute tools or modify files. Use for exploration, architecture discussion, and reviewing intent before execution.</div>
+      </div>
+      <div class="mode-card m-dontask">
+        <div class="mode-name">dontAsk</div>
+        <div class="mode-key">TypeScript SDK only · permission_mode="dontAsk"</div>
+        <div class="mode-desc">Pre-approved tools from allow rules run; everything else is silently DENIED without prompting. Best for headless agents with a fixed, explicit tool surface. Not available in Python SDK.</div>
+      </div>
+      <div class="mode-card m-bypass">
+        <div class="mode-name">bypassPermissions</div>
+        <div class="mode-key">--dangerously-skip-permissions · only in sandboxed env</div>
+        <div class="mode-desc">ALL tool calls approved without any prompts. Hooks still execute and can block. Use ONLY inside Docker/container with no sensitive data. Never in production or unprotected directories.</div>
+      </div>
+    </div>
+    <div class="info">
+      <strong>ℹ Cycle modes in-session</strong>
+      Press <code>shift+tab</code> to cycle through modes without leaving the session. Set <code>"defaultMode"</code> in settings.json to persist across sessions. The mode can also be changed dynamically mid-session via SDK streaming.
+    </div>
+    <div class="danger">
+      <strong>⚠ bypassPermissions + allowed_tools gotcha</strong>
+      <code>allowed_tools=["Read"]</code> + <code>permission_mode="bypassPermissions"</code> still approves ALL tools including Bash/Write/Edit — <code>allowed_tools</code> only pre-approves, it does not restrict. To actually block tools in bypass mode, use <code>disallowed_tools</code> (deny rules).
+    </div>
+  </div>
+
+
+  <!-- ════════ 05: HOOKS REFERENCE ═══════════════════ -->
+  <div class="section-label" data-n="05">Hooks — Lifecycle Automation</div>
+
+  <div class="card c-yellow fw">
+    <div class="card-title">🔗 All Hook Events — Complete Reference</div>
+    <table class="hooks-table">
+      <thead><tr><th>Event</th><th>Fires When</th><th>Matcher Field</th><th>Can Block?</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>PreToolUse</td>
+          <td>Before any tool call. Can modify input, approve, deny, or inject context.</td>
+          <td>Tool name / pattern e.g. <code>Bash</code>, <code>Edit|Write</code></td>
+          <td>✓ exit 2 or <code>permissionDecision: "deny"</code></td>
+        </tr>
+        <tr>
+          <td>PermissionRequest</td>
+          <td>When a permission dialog appears for the user (v2.0.45+). Can auto-approve/deny.</td>
+          <td>Tool name pattern</td>
+          <td>✓ decision: allow / deny / ask</td>
+        </tr>
+        <tr>
+          <td>PostToolUse</td>
+          <td>After successful tool completion. Can provide feedback. Cannot undo the operation.</td>
+          <td>Tool name / pattern</td>
+          <td>✗ can't undo · can give feedback</td>
+        </tr>
+        <tr>
+          <td>PostToolUseFailure</td>
+          <td>When a tool call fails. Useful for structured error logging with full context.</td>
+          <td>Tool name / pattern</td>
+          <td>✗ informational only</td>
+        </tr>
+        <tr>
+          <td>UserPromptSubmit</td>
+          <td>Before Claude processes a user prompt. Can inject additionalContext or block bad prompts.</td>
+          <td><code>*</code> (all) or text pattern</td>
+          <td>✓ exit 2 blocks prompt; stdout added as context</td>
+        </tr>
+        <tr>
+          <td>Stop</td>
+          <td>When main agent finishes responding. Can force continuation (<code>decision: "block"</code>).</td>
+          <td>— (no matcher)</td>
+          <td>✓ decision: "block" + reason forces Claude to continue</td>
+        </tr>
+        <tr>
+          <td>SubagentStop</td>
+          <td>When a subagent (Task tool) finishes. Subagent Stop hooks in frontmatter auto-convert to this.</td>
+          <td>— (no matcher)</td>
+          <td>✓ same as Stop</td>
+        </tr>
+        <tr>
+          <td>SubagentStart</td>
+          <td>When a subagent spawns. For DB setup, env prep for specific agents.</td>
+          <td>Agent name or <code>*</code></td>
+          <td>✗ setup only</td>
+        </tr>
+        <tr>
+          <td>SessionStart</td>
+          <td>On new session, resume, /clear, or post-compact. For context injection, env setup. Source field: startup / resume / clear / compact.</td>
+          <td>Session source or <code>*</code></td>
+          <td>✗ stdout added as Claude context</td>
+        </tr>
+        <tr>
+          <td>SessionEnd</td>
+          <td>On exit, SIGINT, or error. For logging, cleanup, transcript export.</td>
+          <td>— (no matcher)</td>
+          <td>✗ cleanup only</td>
+        </tr>
+        <tr>
+          <td>Notification</td>
+          <td>When Claude sends a notification (permission prompt, idle). Fire desktop alerts.</td>
+          <td><code>*</code></td>
+          <td>✗ informational</td>
+        </tr>
+        <tr>
+          <td>PreCompact</td>
+          <td>Before context window compaction. Can inject context to preserve across /compact.</td>
+          <td>— (no matcher)</td>
+          <td>✗ context injection</td>
+        </tr>
+        <tr>
+          <td>Setup</td>
+          <td>Triggered by <code>--init</code>, <code>--init-only</code>, or <code>--maintenance</code> CLI flags. For repo setup tasks.</td>
+          <td>Trigger: init / maintenance</td>
+          <td>✗ setup only</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+
+  <!-- ════════ 06: HOOKS SYNTAX ═══════════════════════ -->
+  <div class="section-label" data-n="06">Hooks Syntax — Config, Exit Codes, JSON Control</div>
+
+  <div class="g2 fw">
+
+    <div class="card c-orange">
+      <div class="card-title">⚙️ Hooks Config in settings.json</div>
+
+      <span class="pre-label">Full hook entry anatomy</span>
+      <pre><span class="t-op">{</span>
+  <span class="t-nm">"hooks"</span>: <span class="t-op">{</span>
+    <span class="t-nm">"PreToolUse"</span>: <span class="t-op">[</span>
+      <span class="t-op">{</span>
+        <span class="t-nm">"matcher"</span>: <span class="t-st">"Bash"</span>,            <span class="t-cm">// tool name / regex</span>
+        <span class="t-nm">"hooks"</span>: <span class="t-op">[</span>
+          <span class="t-op">{</span>
+            <span class="t-nm">"type"</span>: <span class="t-st">"command"</span>,         <span class="t-cm">// command | http | prompt</span>
+            <span class="t-nm">"command"</span>: <span class="t-st">"./scripts/validate.sh"</span>,
+            <span class="t-nm">"timeout"</span>: <span class="t-bi">60</span>             <span class="t-cm">// default: 600s (10min)</span>
+          <span class="t-op">}</span>
+        <span class="t-op">]</span>
+      <span class="t-op">}</span>
+    <span class="t-op">]</span>,
+    <span class="t-nm">"PostToolUse"</span>: <span class="t-op">[</span>
+      <span class="t-op">{</span>
+        <span class="t-nm">"matcher"</span>: <span class="t-st">"Edit|Write|MultiEdit"</span>, <span class="t-cm">// pipe = OR</span>
+        <span class="t-nm">"hooks"</span>: <span class="t-op">[</span>
+          <span class="t-op">{</span>
+            <span class="t-nm">"type"</span>: <span class="t-st">"command"</span>,
+            <span class="t-nm">"command"</span>: <span class="t-st">"npx prettier --write \"$CLAUDE_TOOL_INPUT_FILE_PATH\""</span>
+          <span class="t-op">}</span>
+        <span class="t-op">]</span>
+      <span class="t-op">}</span>
+    <span class="t-op">]</span>,
+    <span class="t-nm">"Stop"</span>: <span class="t-op">[</span>
+      <span class="t-op">{</span>
+        <span class="t-nm">"hooks"</span>: <span class="t-op">[</span>
+          <span class="t-op">{</span>
+            <span class="t-nm">"type"</span>: <span class="t-st">"command"</span>,
+            <span class="t-nm">"command"</span>: <span class="t-st">"osascript -e 'display notification \"Claude done!\"'"</span>
+          <span class="t-op">}</span>
+        <span class="t-op">]</span>
+      <span class="t-op">}</span>
+    <span class="t-op">]</span>
+  <span class="t-op">}</span>
+<span class="t-op">}</span></pre>
+
+      <span class="pre-label">3 hook handler types</span>
+      <pre><span class="t-cm">── type: "command" (most common) ────────────────</span>
+<span class="t-nm">"type"</span>: <span class="t-st">"command"</span>,
+<span class="t-nm">"command"</span>: <span class="t-st">"./scripts/validate.sh"</span>
+<span class="t-cm"># receives JSON via stdin; exit code controls outcome</span>
+
+<span class="t-cm">── type: "http" (v2.x+) ─────────────────────────</span>
+<span class="t-nm">"type"</span>: <span class="t-st">"http"</span>,
+<span class="t-nm">"url"</span>: <span class="t-st">"http://localhost:8080/hooks/pre-tool"</span>,
+<span class="t-nm">"timeout"</span>: <span class="t-bi">30</span>,
+<span class="t-nm">"headers"</span>: <span class="t-op">{</span> <span class="t-nm">"Authorization"</span>: <span class="t-st">"Bearer $MY_TOKEN"</span> <span class="t-op">}</span>,
+<span class="t-nm">"allowedEnvVars"</span>: <span class="t-op">[</span><span class="t-st">"MY_TOKEN"</span><span class="t-op">]</span>
+<span class="t-cm"># POST body = same JSON as stdin for command hooks</span>
+<span class="t-cm"># 4xx/5xx = non-blocking error (CANNOT block via status!)</span>
+<span class="t-cm"># To block: return 2xx + JSON deny in response body</span>
+
+<span class="t-cm">── type: "prompt" (LLM evaluation) ──────────────</span>
+<span class="t-nm">"type"</span>: <span class="t-st">"prompt"</span>,
+<span class="t-nm">"prompt"</span>: <span class="t-st">"Evaluate if this bash command is safe: $ARGUMENTS"</span>
+<span class="t-cm"># Best for Stop/SubagentStop semantic evaluation</span></pre>
+    </div>
+
+    <div class="card c-red">
+      <div class="card-title">🚦 Exit Codes &amp; JSON Control Output</div>
+
+      <span class="pre-label">Exit code behaviour</span>
+      <pre><span class="t-cm">── exit 0 ────────────────────────────────────────</span>
+<span class="t-cm"># Success. stdout parsed as JSON for structured control.</span>
+<span class="t-cm"># JSON only processed on exit 0.</span>
+
+<span class="t-cm">── exit 2 ────────────────────────────────────────</span>
+<span class="t-cm"># BLOCKING ERROR. stdout ignored. stderr fed to Claude.</span>
+<span class="t-cm"># PreToolUse     → BLOCKS the tool call</span>
+<span class="t-cm"># UserPromptSubmit → REJECTS the prompt</span>
+<span class="t-cm"># Stop           → FORCES Claude to keep working</span>
+<span class="t-cm"># Other events   → context-specific blocking</span>
+
+<span class="t-cm">── any other non-zero ────────────────────────────</span>
+<span class="t-cm"># Non-blocking error. stderr shown in verbose mode (Ctrl+O).</span>
+<span class="t-cm"># NOT fed back to Claude. Execution continues.</span>
+
+<span class="t-cm">⚠ Common pitfall: many CLI tools write errors to stdout,</span>
+<span class="t-cm"># NOT stderr. For Claude to receive blocking feedback,</span>
+<span class="t-cm"># explicitly redirect:  echo "blocked" >&2; exit 2</span></pre>
+
+      <span class="pre-label">JSON structured output (stdout on exit 0)</span>
+      <pre><span class="t-cm">── PreToolUse: deny with reason ─────────────────</span>
+<span class="t-op">{</span>
+  <span class="t-nm">"hookSpecificOutput"</span>: <span class="t-op">{</span>
+    <span class="t-nm">"hookEventName"</span>: <span class="t-st">"PreToolUse"</span>,
+    <span class="t-nm">"permissionDecision"</span>: <span class="t-st">"deny"</span>,     <span class="t-cm">// allow|deny|ask</span>
+    <span class="t-nm">"permissionDecisionReason"</span>: <span class="t-st">"DB writes blocked"</span>,
+    <span class="t-nm">"updatedInput"</span>: <span class="t-op">{</span> <span class="t-nm">"command"</span>: <span class="t-st">"modified-cmd"</span> <span class="t-op">}</span>,
+    <span class="t-nm">"additionalContext"</span>: <span class="t-st">"Extra info for Claude"</span>
+  <span class="t-op">}</span>
+<span class="t-op">}</span>
+
+<span class="t-cm">── Stop: force continuation ─────────────────────</span>
+<span class="t-op">{</span>
+  <span class="t-nm">"decision"</span>: <span class="t-st">"block"</span>,
+  <span class="t-nm">"reason"</span>: <span class="t-st">"Tests still failing. Fix them before stopping."</span>
+<span class="t-op">}</span>
+
+<span class="t-cm">── Stop: allow stop cleanly ─────────────────────</span>
+<span class="t-op">{</span>
+  <span class="t-cm">// omit "decision" entirely → Claude stops normally</span>
+  <span class="t-nm">"continue"</span>: <span class="t-kw">false</span>,             <span class="t-cm">// explicit stop</span>
+  <span class="t-nm">"suppressOutput"</span>: <span class="t-kw">true</span>          <span class="t-cm">// hide from transcript</span>
+<span class="t-op">}</span></pre>
+
+      <div class="danger">
+        <strong>⚠ HTTP hooks cannot block via status codes</strong>
+        A 4xx or 5xx from an HTTP hook logs an error but execution continues. To block, return a 2xx response with <code>permissionDecision: "deny"</code> in the JSON body.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ════════ 07: REAL-WORLD HOOK PATTERNS ═══════════ -->
+  <div class="section-label" data-n="07">Real-World Hook Patterns</div>
+
+  <div class="g3 fw">
+
+    <div class="card c-green">
+      <div class="card-title">✨ Auto-Format on File Write</div>
+      <span class="tag tg">PostToolUse</span><span class="tag tc">Always runs</span>
+      <pre><span class="t-nm">"PostToolUse"</span>: <span class="t-op">[{</span>
+  <span class="t-nm">"matcher"</span>: <span class="t-st">"Write|Edit|MultiEdit"</span>,
+  <span class="t-nm">"hooks"</span>: <span class="t-op">[{</span>
+    <span class="t-nm">"type"</span>: <span class="t-st">"command"</span>,
+    <span class="t-nm">"command"</span>: <span class="t-st">"npx prettier --write \"$CLAUDE_TOOL_INPUT_FILE_PATH\""</span>
+  <span class="t-op">}]</span>
+<span class="t-op">}]</span></pre>
+      <div class="tip"><strong>✦ Multiple hooks run in parallel</strong>Add ESLint as a second entry — both run simultaneously before Claude's next response.</div>
+    </div>
+
+    <div class="card c-red">
+      <div class="card-title">🛡 Block Sensitive File Edits</div>
+      <span class="tag tr">PreToolUse</span><span class="tag tr">exit 2</span>
+      <pre><span class="t-nm">"PreToolUse"</span>: <span class="t-op">[{</span>
+  <span class="t-nm">"matcher"</span>: <span class="t-st">"Edit|Write|MultiEdit"</span>,
+  <span class="t-nm">"hooks"</span>: <span class="t-op">[{</span>
+    <span class="t-nm">"type"</span>: <span class="t-st">"command"</span>,
+    <span class="t-nm">"command"</span>: <span class="t-st">"python3 -c \"import json,sys; d=json.load(sys.stdin); p=d.get('tool_input',{}).get('file_path',''); sys.exit(2 if any(x in p for x in ['.env','package-lock.json','.git/']) else 0)\""</span>
+  <span class="t-op">}]</span>
+<span class="t-op">}]</span></pre>
+      <div class="warn"><strong>⚠ Hooks run with your credentials</strong>Audit any hook command before enabling. Review via <code>/hooks</code> menu — changes require explicit confirmation before affecting current session.</div>
+    </div>
+
+    <div class="card c-orange">
+      <div class="card-title">🔔 Desktop Notification on Task Done</div>
+      <span class="tag to">Stop</span><span class="tag tc">macOS + Linux</span>
+      <pre><span class="t-nm">"Stop"</span>: <span class="t-op">[{</span>
+  <span class="t-nm">"hooks"</span>: <span class="t-op">[</span>
+    <span class="t-op">{</span>
+      <span class="t-cm">// macOS</span>
+      <span class="t-nm">"type"</span>: <span class="t-st">"command"</span>,
+      <span class="t-nm">"command"</span>: <span class="t-st">"osascript -e 'display notification \"Claude done!\" with title \"Claude Code\" sound name \"Glass\"'"</span>
+    <span class="t-op">},</span>
+    <span class="t-op">{</span>
+      <span class="t-cm">// Linux (libnotify)</span>
+      <span class="t-nm">"type"</span>: <span class="t-st">"command"</span>,
+      <span class="t-nm">"command"</span>: <span class="t-st">"notify-send 'Claude Code' 'Task complete' -u normal -t 5000"</span>
+    <span class="t-op">}</span>
+  <span class="t-op">]</span>
+<span class="t-op">}]</span></pre>
+    </div>
+
+    <div class="card c-purple">
+      <div class="card-title">🔍 Audit Log All Bash Commands</div>
+      <span class="tag tp">PreToolUse</span><span class="tag tc">non-blocking</span>
+      <pre><span class="t-nm">"PreToolUse"</span>: <span class="t-op">[{</span>
+  <span class="t-nm">"matcher"</span>: <span class="t-st">"Bash"</span>,
+  <span class="t-nm">"hooks"</span>: <span class="t-op">[{</span>
+    <span class="t-nm">"type"</span>: <span class="t-st">"command"</span>,
+    <span class="t-nm">"command"</span>: <span class="t-st">"jq -r '\"\\(.tool_input.command)\"' | xargs -I{} sh -c 'echo \"$(date +%Y-%m-%dT%H:%M:%S) - {}\" >> ~/.claude-audit.log'"</span>
+  <span class="t-op">}]</span>
+<span class="t-op">}]</span></pre>
+    </div>
+
+    <div class="card c-blue">
+      <div class="card-title">🔄 Force Task Completion (Stop)</div>
+      <span class="tag tb">Stop</span><span class="tag tr">blocks stop</span>
+      <pre><span class="t-cm">#!/bin/bash  # .claude/hooks/enforce-complete.sh</span>
+json_input=$(cat)
+<span class="t-cm"># Check if tests pass before allowing stop</span>
+if ! pnpm test --passWithNoTests 2>/dev/null; then
+  echo <span class="t-st">'{"decision":"block","reason":"Tests still failing. Fix before stopping."}'</span>
+  exit 0   <span class="t-cm"># exit 0 so JSON is parsed</span>
+fi
+exit 0     <span class="t-cm"># no decision = Claude stops normally</span></pre>
+      <div class="tip"><strong>✦ decision: "block" requires exit 0</strong>JSON output is only processed on exit 0. Return exit 0 and include <code>decision: "block"</code> in the JSON body to force Claude to continue working.</div>
+    </div>
+
+    <div class="card c-cyan">
+      <div class="card-title">💉 Inject Context at Session Start</div>
+      <span class="tag tc">SessionStart</span><span class="tag tg">context</span>
+      <pre><span class="t-nm">"SessionStart"</span>: <span class="t-op">[{</span>
+  <span class="t-nm">"hooks"</span>: <span class="t-op">[{</span>
+    <span class="t-nm">"type"</span>: <span class="t-st">"command"</span>,
+    <span class="t-nm">"command"</span>: <span class="t-st">"./scripts/load-context.sh"</span>
+  <span class="t-op">}]</span>
+<span class="t-op">}]</span>
+
+<span class="t-cm">#!/bin/bash  # load-context.sh</span>
+<span class="t-cm"># stdout on SessionStart is added to Claude's context</span>
+echo <span class="t-st">"Project: $(git remote get-url origin)"</span>
+echo <span class="t-st">"Branch:  $(git branch --show-current)"</span>
+echo <span class="t-st">"Recent:  $(git log --oneline -5)"</span>
+echo <span class="t-st">"Issues:  $(gh issue list --limit 5 2>/dev/null || echo 'N/A')"</span></pre>
+      <div class="info"><strong>ℹ SessionStart stdout goes to Claude</strong>Unlike most events, UserPromptSubmit and SessionStart stdout is added as context Claude can read — not just shown in verbose mode. Use this for dynamic context injection without modifying CLAUDE.md.</div>
+    </div>
+  </div>
+
+
+  <!-- ════════ 08: DECISION TREE ═══════════════════════ -->
+  <div class="section-label" data-n="08">Decision Tree — Where Does This Permission Belong?</div>
+
+  <div class="card c-purple tree fw">
+    <div class="card-title">🌿 Choose the Right Layer for Your Rule</div>
+    <pre><span class="tq">Is this rule an org-wide security mandate (no one should override)?</span>
+<span class="tln">├─ </span><span class="tya">YES</span> → <span class="tre">Enterprise managed policy file</span> (MDM/plist — sysadmin deploys)
+<span class="tln">└─ </span><span class="tno">NO</span>  → Is this a one-off CLI session (not persistent)?
+   <span class="tln">├─ </span><span class="tya">YES</span> → <span class="tre">--allowedTools / --disallowedTools CLI flags</span> (per-invocation)
+   <span class="tln">└─ </span><span class="tno">NO</span>  → Should it apply to all projects on your machine?
+      <span class="tln">├─ </span><span class="tya">YES</span> → <span class="tre">~/.claude/settings.json</span> (user global defaults)
+      <span class="tln">└─ </span><span class="tno">NO</span>  → Is it project-specific and should be shared with the team?
+         <span class="tln">├─ </span><span class="tya">YES</span> → <span class="tre">.claude/settings.json</span> (commit to git — team-wide)
+         <span class="tln">└─ </span><span class="tno">NO</span>  → Is it a personal override for this project only?
+            <span class="tln">├─ </span><span class="tya">YES</span> → <span class="tre">.claude/settings.local.json</span> (gitignored — your machine only)
+            └─ <span class="tno">NO</span>  → Need runtime logic or dynamic checks?
+                      <span class="tln">├─ </span><span class="tya">YES</span> → Is it before a tool call?
+                      <span class="tln">│  ├─ </span><span class="tya">YES</span> → <span class="tre">PreToolUse hook</span> (can block, modify input, inject context)
+                      <span class="tln">│  └─ </span><span class="tno">NO</span>  → After a tool call?
+                      <span class="tln">│        ├─ </span><span class="tya">YES</span> → <span class="tre">PostToolUse hook</span> (auto-format, lint, log)
+                      <span class="tln">│        └─ </span><span class="tno">NO</span>  → <span class="tre">Stop / SubagentStop hook</span> (enforce completion)</pre>
+  </div>
+
+
+  <!-- ════════ 09: SCENARIO CONFIGS ══════════════════ -->
+  <div class="section-label" data-n="09">Scenario Configs — Ready-to-Use Templates</div>
+
+  <div class="g3 fw">
+
+    <div class="card c-cyan">
+      <div class="card-title">🛡 Secure Team Default</div>
+      <span class="tag tc">Team</span><span class="tag tr">Security</span>
+      <pre><span class="t-op">{</span>
+  <span class="t-nm">"permissions"</span>: <span class="t-op">{</span>
+    <span class="t-nm">"allow"</span>: <span class="t-op">[</span>
+      <span class="t-st">"Read"</span>, <span class="t-st">"Glob"</span>, <span class="t-st">"Grep"</span>,
+      <span class="t-st">"Edit(src/**)"</span>,
+      <span class="t-st">"Bash(npm run *)"</span>,
+      <span class="t-st">"Bash(git add *)"</span>,
+      <span class="t-st">"Bash(git commit *)"</span>,
+      <span class="t-st">"Bash(git status)"</span>,
+      <span class="t-st">"Bash(git diff *)"</span>,
+      <span class="t-st">"Bash(git log *)"</span>
+    <span class="t-op">]</span>,
+    <span class="t-nm">"ask"</span>: <span class="t-op">[</span>
+      <span class="t-st">"Bash(git push *)"</span>,
+      <span class="t-st">"Bash(npm install *)"</span>
+    <span class="t-op">]</span>,
+    <span class="t-nm">"deny"</span>: <span class="t-op">[</span>
+      <span class="t-st">"Read(.env*)"</span>,
+      <span class="t-st">"Read(secrets/**)"</span>,
+      <span class="t-st">"Read(~/.ssh/**)"</span>,
+      <span class="t-st">"Bash(rm -rf *)"</span>,
+      <span class="t-st">"Bash(sudo *)"</span>
+    <span class="t-op">]</span>
+  <span class="t-op">}</span>
+<span class="t-op">}</span></pre>
+    </div>
+
+    <div class="card c-green">
+      <div class="card-title">⚡ Fast Prototyping Mode</div>
+      <span class="tag tg">acceptEdits</span><span class="tag tc">Solo dev</span>
+      <pre><span class="t-op">{</span>
+  <span class="t-nm">"permissions"</span>: <span class="t-op">{</span>
+    <span class="t-nm">"defaultMode"</span>: <span class="t-st">"acceptEdits"</span>,
+    <span class="t-nm">"allow"</span>: <span class="t-op">[</span>
+      <span class="t-st">"Read"</span>, <span class="t-st">"Write(src/**)"</span>,
+      <span class="t-st">"Bash(npm *)"</span>, <span class="t-st">"Bash(git *)"</span>,
+      <span class="t-st">"Bash(pnpm *)"</span>, <span class="t-st">"Bash(node *)"</span>,
+      <span class="t-st">"Bash(ls *)"</span>, <span class="t-st">"Bash(cat *)"</span>,
+      <span class="t-st">"WebFetch(domain:docs.anthropic.com)"</span>,
+      <span class="t-st">"WebFetch(domain:github.com)"</span>
+    <span class="t-op">]</span>,
+    <span class="t-nm">"deny"</span>: <span class="t-op">[</span>
+      <span class="t-st">"Read(.env*)"</span>,
+      <span class="t-st">"Bash(rm *)"</span>,
+      <span class="t-st">"Bash(sudo *)"</span>
+    <span class="t-op">]</span>
+  <span class="t-op">}</span>
+<span class="t-op">}</span></pre>
+    </div>
+
+    <div class="card c-red">
+      <div class="card-title">🤖 Headless CI Agent</div>
+      <span class="tag tr">dontAsk</span><span class="tag tb">CI/CD</span>
+      <pre><span class="t-op">{</span>
+  <span class="t-nm">"permissions"</span>: <span class="t-op">{</span>
+    <span class="t-nm">"defaultMode"</span>: <span class="t-st">"dontAsk"</span>,
+    <span class="t-nm">"allow"</span>: <span class="t-op">[</span>
+      <span class="t-st">"Read"</span>,
+      <span class="t-st">"Write(src/**)"</span>,
+      <span class="t-st">"Edit(src/**)"</span>,
+      <span class="t-st">"Bash(npm run lint)"</span>,
+      <span class="t-st">"Bash(npm run test *)"</span>,
+      <span class="t-st">"Bash(npm run build)"</span>,
+      <span class="t-st">"Bash(git add *)"</span>,
+      <span class="t-st">"Bash(git commit *)"</span>
+    <span class="t-op">]</span>,
+    <span class="t-nm">"deny"</span>: <span class="t-op">[</span>
+      <span class="t-st">"Bash(git push *)"</span>,
+      <span class="t-st">"Bash(rm *)"</span>,
+      <span class="t-st">"WebFetch"</span>
+    <span class="t-op">]</span>
+  <span class="t-op">}</span>
+<span class="t-op">}</span></pre>
+      <div class="warn"><strong>⚠ Use dontAsk only in isolated envs</strong>Docker containers, clean CI runners. Never on a developer machine with prod credentials.</div>
+    </div>
+
+    <div class="card c-yellow">
+      <div class="card-title">🏢 Enterprise Monorepo</div>
+      <span class="tag ty">Enterprise</span><span class="tag tc">Monorepo</span>
+      <pre><span class="t-cm">// Managed policy (read-only for users):</span>
+<span class="t-op">{</span>
+  <span class="t-nm">"permissions"</span>: <span class="t-op">{</span>
+    <span class="t-nm">"deny"</span>: <span class="t-op">[</span>
+      <span class="t-st">"Read(//etc/**)"</span>,
+      <span class="t-st">"Bash(curl *)"</span>,       <span class="t-cm">// use WebFetch only</span>
+      <span class="t-st">"Bash(wget *)"</span>,
+      <span class="t-st">"Read(~/.ssh/**)"</span>,
+      <span class="t-st">"Read(~/.aws/**)"</span>
+    <span class="t-op">]</span>
+  <span class="t-op">}</span>
+<span class="t-op">}</span>
+
+<span class="t-cm">// .claude/settings.json (per project, committed):</span>
+<span class="t-op">{</span>
+  <span class="t-nm">"permissions"</span>: <span class="t-op">{</span>
+    <span class="t-nm">"allow"</span>: <span class="t-op">[</span><span class="t-st">"Read"</span>, <span class="t-st">"Edit(packages/myteam/**)"</span><span class="t-op">]</span>,
+    <span class="t-nm">"deny"</span>: <span class="t-op">[</span><span class="t-st">"Edit(packages/other-team/**)"</span><span class="t-op">]</span>
+  <span class="t-op">}</span>
+<span class="t-op">}</span></pre>
+    </div>
+
+    <div class="card c-purple">
+      <div class="card-title">🔧 Dev with Auto-Quality Gates</div>
+      <span class="tag tp">Hooks</span><span class="tag tg">PostToolUse</span>
+      <pre><span class="t-op">{</span>
+  <span class="t-nm">"permissions"</span>: <span class="t-op">{</span>
+    <span class="t-nm">"defaultMode"</span>: <span class="t-st">"acceptEdits"</span>,
+    <span class="t-nm">"allow"</span>: <span class="t-op">[</span><span class="t-st">"Read"</span>, <span class="t-st">"Edit(src/**)"</span>, <span class="t-st">"Bash(npm *)"</span><span class="t-op">]</span>,
+    <span class="t-nm">"deny"</span>: <span class="t-op">[</span><span class="t-st">"Bash(npm publish *)"</span><span class="t-op">]</span>
+  <span class="t-op">}</span>,
+  <span class="t-nm">"hooks"</span>: <span class="t-op">{</span>
+    <span class="t-nm">"PostToolUse"</span>: <span class="t-op">[{</span>
+      <span class="t-nm">"matcher"</span>: <span class="t-st">"Write|Edit"</span>,
+      <span class="t-nm">"hooks"</span>: <span class="t-op">[</span>
+        <span class="t-op">{</span> <span class="t-nm">"type"</span>: <span class="t-st">"command"</span>, <span class="t-nm">"command"</span>: <span class="t-st">"npx prettier --write \"$CLAUDE_TOOL_INPUT_FILE_PATH\""</span> <span class="t-op">}</span>,
+        <span class="t-op">{</span> <span class="t-nm">"type"</span>: <span class="t-st">"command"</span>, <span class="t-nm">"command"</span>: <span class="t-st">"npx eslint --fix \"$CLAUDE_TOOL_INPUT_FILE_PATH\" 2>/dev/null"</span> <span class="t-op">}</span>
+      <span class="t-op">]</span>
+    <span class="t-op">}]</span>
+  <span class="t-op">}</span>
+<span class="t-op">}</span></pre>
+    </div>
+
+    <div class="card c-blue">
+      <div class="card-title">📦 Plugin / Skill Hooks (Frontmatter)</div>
+      <span class="tag tb">Skill</span><span class="tag tp">Subagent</span>
+      <pre><span class="t-op">---</span>
+<span class="t-nm">name</span>: code-reviewer
+<span class="t-nm">description</span>: Auto-lint review with security validation
+<span class="t-nm">hooks</span>:
+  <span class="t-nm">PreToolUse</span>:
+    <span class="t-nm">- matcher</span>: <span class="t-st">"Bash"</span>
+      <span class="t-nm">hooks</span>:
+        <span class="t-nm">- type</span>: <span class="t-st">command</span>
+          <span class="t-nm">command</span>: <span class="t-st">"./scripts/validate-cmd.sh"</span>
+  <span class="t-nm">PostToolUse</span>:
+    <span class="t-nm">- matcher</span>: <span class="t-st">"Edit|Write"</span>
+      <span class="t-nm">hooks</span>:
+        <span class="t-nm">- type</span>: <span class="t-st">command</span>
+          <span class="t-nm">command</span>: <span class="t-st">"./scripts/run-linter.sh"</span>
+  <span class="t-nm">Stop</span>: <span class="t-cm"># auto-converts to SubagentStop for agents</span>
+    <span class="t-nm">- hooks</span>:
+        <span class="t-nm">- type</span>: <span class="t-st">command</span>
+          <span class="t-nm">command</span>: <span class="t-st">"./scripts/completion-check.sh"</span>
+<span class="t-op">---</span>
+You are an expert code reviewer…</pre>
+      <div class="info"><strong>ℹ Scoped lifetime</strong>Hooks in skill/subagent frontmatter only run while that component is active. They're cleaned up when the skill/agent finishes. <code>once: true</code> is supported in skills and slash commands but NOT in agents.</div>
+    </div>
+  </div>
+
+
+  <!-- ════════ 10: QUICK REFERENCE ════════════════════ -->
+  <div class="section-label" data-n="10">Complete Quick Reference</div>
+
+  <div class="card c-cyan fw">
+    <div class="card-title">📋 Claude Code Permissions Master Reference</div>
+    <table>
+      <thead><tr><th>Concept</th><th>Detail</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Settings files</td><td>Managed → CLI flags → .local.json → .json → user settings.json</td><td>Deny at any level cannot be overridden below it</td></tr>
+        <tr><td>Rule arrays</td><td><code>allow</code> · <code>deny</code> · <code>ask</code> inside <code>permissions</code> object</td><td>First match wins; deny evaluated first</td></tr>
+        <tr><td>Bash glob space</td><td><code>Bash(ls *)</code> requires space before <code>*</code> to enforce word boundary</td><td><code>Bash(ls*)</code> without space also matches <code>lsof</code></td></tr>
+        <tr><td>Absolute paths</td><td>Prefix with <code>//</code>: <code>Edit(//tmp/file)</code> = <code>/tmp/file</code></td><td>Single <code>/</code> = relative to project root, NOT absolute</td></tr>
+        <tr><td>All-tool shorthand</td><td><code>"Read"</code> without parens = all reads. Same for <code>Edit</code>, <code>Write</code></td><td>Add parens + path to scope: <code>Read(src/**)</code></td></tr>
+        <tr><td>MCP tools</td><td><code>mcp__server</code> (all), <code>mcp__server__*</code> (wildcard), <code>mcp__server__tool</code> (specific)</td><td>Server name as configured in Claude Code</td></tr>
+        <tr><td>Subagents</td><td><code>Agent(agent-name)</code> in allow/deny to control which agents Claude can use</td><td>Add to deny array to disable specific agents</td></tr>
+        <tr><td>defaultMode</td><td><code>"defaultMode"</code> key in settings.json permissions object</td><td>default · acceptEdits · plan · dontAsk · bypassPermissions</td></tr>
+        <tr><td>Shift+tab</td><td>Cycle through permission modes in-session without restarting</td><td>Fastest way to change mode mid-session</td></tr>
+        <tr><td>additionalDirectories</td><td>Extend Claude's file access beyond cwd in settings.json</td><td>Same permission rules as working directory apply</td></tr>
+        <tr><td>/permissions</td><td>Interactive UI to manage rules. <code>/</code> to search by tool name (recent)</td><td>Filter, add, remove rules visually</td></tr>
+        <tr><td>/hooks</td><td>Interactive editor for hooks. All changes require explicit review before applying to current session</td><td>Verify hooks are active; review before applying</td></tr>
+        <tr><td>Hook exit 0</td><td>Success. stdout parsed as JSON for structured control (only on exit 0)</td><td>JSON output ignored on non-zero exit</td></tr>
+        <tr><td>Hook exit 2</td><td>Blocking error. stderr fed to Claude. Blocks tool call / prompt / forces continuation</td><td>stdout ignored on exit 2</td></tr>
+        <tr><td>Hook other exit</td><td>Non-blocking. stderr shown verbose (Ctrl+O). Execution continues.</td><td>NOT fed back to Claude</td></tr>
+        <tr><td>Hook timeout</td><td>10 minutes default (increased from 60s in v2.1.3). Per-hook <code>timeout</code> field in seconds.</td><td>Keep hooks fast; SessionStart runs every session</td></tr>
+        <tr><td>HTTP hooks blocking</td><td>Must return 2xx + JSON deny body. 4xx/5xx = non-blocking log only.</td><td>Cannot block via HTTP status codes alone</td></tr>
+        <tr><td>Sandboxing</td><td>OS-level via Linux bubblewrap / macOS Seatbelt. Enable with <code>/sandbox</code>. Filesystem + network isolation.</td><td>Complements permissions — defense in depth</td></tr>
+        <tr><td>:* suffix syntax</td><td>Old <code>Bash(npm:*)</code> syntax still works but is deprecated</td><td>Use <code>Bash(npm *)</code> with space+* instead</td></tr>
+        <tr><td>deprecated legacy</td><td><code>~/.claude.json</code> legacy file — not part of official hierarchy but may still work for some settings</td><td>Migrate to <code>~/.claude/settings.json</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <span>CLAUDE CODE — PERMISSIONS &amp; RULES CHEATSHEET &nbsp;·&nbsp; MAR 2026 &nbsp;·&nbsp; OFFICIAL ANTHROPIC DOCS</span>
+    <span>code.claude.com/docs/en/permissions &nbsp;·&nbsp; settings.json · allow/deny/ask · Hooks · Modes</span>
+  </div>
+
+</div>
+</body>
+</html>

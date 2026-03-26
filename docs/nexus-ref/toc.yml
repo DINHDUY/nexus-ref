@@ -1,0 +1,8 @@
+- name: Home
+  href: articles/index.md
+- name: Getting Started
+  href: articles/getting-started.md
+- name: Architecture
+  href: articles/architecture.md
+- name: Rich Content Examples
+  href: articles/rich-content.md
