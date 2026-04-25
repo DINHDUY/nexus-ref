@@ -17,8 +17,8 @@
     "show-sheet-header": false
   },
   {
-    "id": "ai-agents-workflow",
-    "path": "data/ai-workflows/2-pullback-agent-workflow.html",
+    "id": "pullback-trading-agents-workflow",
+    "path": "data/ai-workflows/2-pullback-trading-agents-workflow.html",
     "type": "html",
     "title": "Pullback Trading Agent Workflow",
     "category": "ai-workflows",
