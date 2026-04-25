@@ -70,6 +70,23 @@
     "show-sheet-header": false
   },
   {
+    "id": "ai-workflow-kit-intro",
+    "path": "data/ai-workflows/5-ai-workflow-kit-intro.html",
+    "type": "html",
+    "title": "AI Workflow Kit — Quick Intro",
+    "category": "ai-workflows",
+    "icon": "⚙️",
+    "accent": "#00d4ff",
+    "description": "AI Workflow Kit is a collection of production-ready multi-agent workflow systems you can instantly drop into any project.",
+    "tags": [
+      "ai",
+      "ai-workflows",
+      "workflow",
+      "kit"
+    ],
+    "show-sheet-header": false
+  },
+  {
     "id": "ai-agents-maf",
     "path": "data/ai-agents/1-maf.html",
     "type": "html",
