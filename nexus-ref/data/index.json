@@ -35,6 +35,41 @@
     "show-sheet-header": false
   },
   {
+    "id": "perf-first-codegen-workflow",
+    "path": "data/ai-workflows/3-perf-first-codegen-workflow.html",
+    "type": "html",
+    "title": "Performance-First Code Generation — Quick Intro",
+    "category": "ai-workflows",
+    "icon": "⚙️",
+    "accent": "#00d4ff",
+    "description": "Performance-First Code Generation Workflow for generating code with high performance and efficiency autonomously.",
+    "tags": [
+      "ai",
+      "ai-workflows",
+      "performance",
+      "codegen",
+      "workflows"
+    ],
+    "show-sheet-header": false
+  },
+  {
+    "id": "workflow-builder-workflow",
+    "path": "data/ai-workflows/4-workflow-builder-workflow.html",
+    "type": "html",
+    "title": "Workflow Builder — Quick Intro",
+    "category": "ai-workflows",
+    "icon": "⚙️",
+    "accent": "#00d4ff",
+    "description": "Workflow Builder orchestrates reasoning, tool use, and execution across multiple steps so the agent can complete complex or long‑running tasks autonomously or semi‑autonomously.",
+    "tags": [
+      "ai",
+      "ai-workflows",
+      "workflow",
+      "builder"
+    ],
+    "show-sheet-header": false
+  },
+  {
     "id": "ai-agents-maf",
     "path": "data/ai-agents/1-maf.html",
     "type": "html",

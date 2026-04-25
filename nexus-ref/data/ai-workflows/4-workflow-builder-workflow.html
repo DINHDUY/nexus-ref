@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workflow Builder — Quick Intro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700&family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:           #08090d;
+      --bg-surface:   #0d0f17;
+      --bg-card:      #12141f;
+      --bg-hover:     #171928;
+      --border:       rgba(255,255,255,0.06);
+      --border-mid:   rgba(255,255,255,0.11);
+      --border-hi:    rgba(255,255,255,0.20);
+      --text:         #e6e8f2;
+      --text-mid:     #888ba6;
+      --text-dim:     #41445a;
+      /* accent palette */
+      --cyan:         #3df5e0;
+      --cyan-dim:     rgba(61,245,224,0.08);
+      --cyan-glow:    rgba(61,245,224,0.20);
+      --violet:       #a78bfa;
+      --violet-dim:   rgba(167,139,250,0.09);
+      --violet-glow:  rgba(167,139,250,0.20);
+      --amber:        #fbbf24;
+      --amber-dim:    rgba(251,191,36,0.09);
+      --amber-glow:   rgba(251,191,36,0.18);
+      --rose:         #fb7185;
+      --rose-dim:     rgba(251,113,133,0.09);
+      --green:        #4ade80;
+      --green-dim:    rgba(74,222,128,0.09);
+      --blue:         #60a5fa;
+      --blue-dim:     rgba(96,165,250,0.09);
+      --radius:       10px;
+      --radius-sm:    6px;
+      --font:         'Bricolage Grotesque', sans-serif;
+      --mono:         'Space Mono', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      padding: 2rem 1rem 5rem;
+      line-height: 1.6;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.04) 2px,rgba(0,0,0,0.04) 4px);
+      pointer-events: none;
+      z-index: 9000;
+    }
+
+    /* ── LAYOUT ─────────────────────────── */
+    .wrap { max-width: 820px; margin: 0 auto; }
+
+    /* ── TOP BAR ────────────────────────── */
+    .top-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.75rem; }
+    .course-id { font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dim); }
+    .timer-wrap { display:flex; align-items:center; gap:8px; }
+    .timer-dot { width:6px; height:6px; border-radius:50%; background:var(--cyan); box-shadow:0 0 8px var(--cyan-glow); animation:pulse 1.4s ease-in-out infinite; }
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+    .timer-val { font-family:var(--mono); font-size:13px; color:var(--cyan); letter-spacing:.06em; }
+
+    /* ── PROGRESS ────────────────────────── */
+    .progress-track { height:2px; background:var(--border); border-radius:2px; margin-bottom:1.75rem; overflow:hidden; }
+    .progress-fill  { height:100%; background:linear-gradient(90deg,var(--cyan),var(--violet)); border-radius:2px; transition:width .5s cubic-bezier(.4,0,.2,1); box-shadow:0 0 10px var(--cyan-glow); }
+
+    /* ── TABS ────────────────────────────── */
+    .module-tabs { display:flex; gap:6px; margin-bottom:2.5rem; overflow-x:auto; padding-bottom:4px; scrollbar-width:none; }
+    .module-tabs::-webkit-scrollbar{display:none}
+    .module-tab {
+      font-family:var(--mono); font-size:10px; letter-spacing:.05em;
+      padding:5px 12px; border-radius:999px;
+      border:1px solid var(--border); cursor:pointer; white-space:nowrap;
+      color:var(--text-dim); background:transparent; transition:all .2s;
+    }
+    .module-tab:hover { border-color:var(--border-mid); color:var(--text-mid); }
+    .module-tab.active { background:var(--cyan-dim); border-color:var(--cyan); color:var(--cyan); box-shadow:0 0 14px var(--cyan-glow); }
+    .module-tab.done   { border-color:var(--border-mid); color:var(--text-mid); }
+
+    /* ── SLIDES ──────────────────────────── */
+    .slide { display:none; animation:fadeUp .3s ease; }
+    .slide.active { display:block; }
+    @keyframes fadeUp{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+
+    /* ── SLIDE HEADER ─────────────────────── */
+    .eyebrow { font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--cyan); margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+    .eyebrow-line { width:24px; height:1px; background:var(--cyan); box-shadow:0 0 6px var(--cyan-glow); }
+    .slide-title { font-size:27px; font-weight:600; color:var(--text); line-height:1.25; margin-bottom:10px; letter-spacing:-.01em; }
+    .slide-sub { font-size:14px; color:var(--text-mid); line-height:1.7; max-width:640px; margin-bottom:2rem; }
+
+    /* ── CARDS ───────────────────────────── */
+    .card-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(175px,1fr)); gap:12px; margin-bottom:2rem; }
+    .card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:1.1rem 1.2rem; transition:border-color .2s; }
+    .card:hover { border-color:var(--border-mid); }
+    .card-tag { font-family:var(--mono); font-size:9px; letter-spacing:.08em; text-transform:uppercase; color:var(--cyan); margin-bottom:8px; }
+    .card-title { font-size:13px; font-weight:600; color:var(--text); margin-bottom:5px; }
+    .card-body { font-size:12px; color:var(--text-mid); line-height:1.55; }
+
+    /* ── STEP TIMELINE ───────────────────── */
+    .timeline { margin-bottom:2rem; }
+    .tl-step { display:flex; gap:16px; padding:14px 0; border-bottom:1px solid var(--border); cursor:pointer; align-items:flex-start; }
+    .tl-step:last-child { border-bottom:none; }
+    .tl-left { display:flex; flex-direction:column; align-items:center; gap:4px; flex-shrink:0; }
+    .tl-num {
+      width:32px; height:32px; border-radius:50%;
+      background:var(--bg-card); border:1px solid var(--border-mid);
+      display:flex; align-items:center; justify-content:center;
+      font-family:var(--mono); font-size:11px; font-weight:700;
+      color:var(--text-dim); transition:all .2s; flex-shrink:0;
+    }
+    .tl-step.active-step .tl-num,
+    .tl-step:hover .tl-num { background:var(--cyan-dim); border-color:var(--cyan); color:var(--cyan); box-shadow:0 0 12px var(--cyan-glow); }
+    .tl-line { width:1px; flex:1; background:var(--border); min-height:12px; }
+    .tl-step:last-child .tl-line { display:none; }
+    .tl-body { flex:1; padding-top:4px; }
+    .tl-mode { display:inline-flex; align-items:center; font-family:var(--mono); font-size:9px; letter-spacing:.06em; text-transform:uppercase; padding:2px 8px; border-radius:999px; margin-bottom:6px; font-weight:700; }
+    .mode-ask    { background:var(--violet-dim); color:var(--violet); border:1px solid rgba(167,139,250,.2); }
+    .mode-plan   { background:var(--amber-dim);  color:var(--amber);  border:1px solid rgba(251,191,36,.2); }
+    .mode-agent  { background:var(--cyan-dim);   color:var(--cyan);   border:1px solid rgba(61,245,224,.2); }
+    .mode-test   { background:var(--rose-dim);   color:var(--rose);   border:1px solid rgba(251,113,133,.2); }
+    .tl-title { font-size:14px; font-weight:600; color:var(--text); margin-bottom:4px; }
+    .tl-desc  { font-size:12px; color:var(--text-mid); line-height:1.55; }
+    .tl-detail { margin-top:10px; display:none; }
+    .tl-step.active-step .tl-detail { display:block; animation:fadeUp .2s ease; }
+
+    /* ── CODE BLOCKS ─────────────────────── */
+    .code-wrap { margin-bottom:14px; }
+    .code-label { font-family:var(--mono); font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-dim); margin-bottom:5px; display:flex; align-items:center; gap:8px; }
+    .code-label::after { content:''; flex:1; height:1px; background:var(--border); }
+    .code-block {
+      background:var(--bg-surface); border:1px solid var(--border);
+      border-radius:var(--radius); padding:1rem 1.2rem;
+      font-family:var(--mono); font-size:12px; line-height:1.75;
+      color:var(--text-mid); overflow-x:auto; position:relative;
+    }
+    .code-block .kw  { color:var(--cyan); }
+    .code-block .str { color:var(--amber); }
+    .code-block .cmt { color:var(--text-dim); font-style:italic; }
+    .code-block .ph  { color:var(--violet); }
+    .code-block .ag  { color:var(--blue); }
+    .copy-btn {
+      position:absolute; top:8px; right:10px;
+      font-family:var(--mono); font-size:9px; letter-spacing:.06em;
+      padding:3px 8px; border-radius:4px;
+      background:var(--bg-card); border:1px solid var(--border-mid);
+      color:var(--text-dim); cursor:pointer; transition:all .15s;
+    }
+    .copy-btn:hover { color:var(--cyan); border-color:var(--cyan); }
+    .copy-btn.copied { color:var(--green); border-color:var(--green); }
+
+    /* ── PIPELINE DIAGRAM ────────────────── */
+    .pipeline-wrap { margin-bottom:2rem; overflow-x:auto; }
+    .pipeline { display:flex; align-items:stretch; gap:0; min-width:560px; }
+    .pipe-node {
+      flex:1; background:var(--bg-card); border:1px solid var(--border);
+      border-radius:var(--radius-sm); padding:10px 8px; text-align:center;
+      cursor:pointer; transition:all .2s;
+    }
+    .pipe-node:hover,.pipe-node.lit { border-color:var(--cyan); box-shadow:0 0 16px var(--cyan-glow); background:var(--cyan-dim); }
+    .pipe-phase { font-family:var(--mono); font-size:9px; letter-spacing:.06em; color:var(--text-dim); margin-bottom:4px; }
+    .pipe-name  { font-size:12px; font-weight:600; color:var(--text); }
+    .pipe-sub   { font-size:10px; color:var(--text-mid); margin-top:3px; line-height:1.3; }
+    .pipe-arrow { display:flex; align-items:center; padding:0 4px; color:var(--text-dim); font-size:14px; flex-shrink:0; }
+    .pipe-panel { background:var(--bg-surface); border:1px solid var(--border-mid); border-radius:var(--radius); padding:1rem 1.2rem; margin-top:12px; display:none; }
+    .pipe-panel.vis { display:block; animation:fadeUp .2s ease; }
+    .pipe-panel-title { font-family:var(--mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--cyan); margin-bottom:10px; }
+    .pipe-row { display:flex; justify-content:space-between; gap:12px; margin-bottom:7px; font-size:12px; }
+    .pipe-row:last-child{margin-bottom:0}
+    .pr-label { color:var(--text-dim); white-space:nowrap; }
+    .pr-val   { color:var(--text); text-align:right; font-family:var(--mono); font-size:11px; }
+
+    /* ── AGENT SPEC TABLE ───────────────── */
+    .spec-table { width:100%; border-collapse:collapse; font-size:12px; margin-bottom:2rem; }
+    .spec-table thead tr { border-bottom:1px solid var(--border-mid); }
+    .spec-table th { font-family:var(--mono); font-size:9px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-dim); padding:0 12px 10px 0; text-align:left; font-weight:400; }
+    .spec-table td { padding:9px 12px 9px 0; border-bottom:1px solid var(--border); color:var(--text-mid); vertical-align:top; }
+    .spec-table tr:last-child td{border-bottom:none}
+    .spec-table td:first-child { font-family:var(--mono); font-size:11px; color:var(--cyan); white-space:nowrap; }
+    .model-pill { display:inline-block; font-family:var(--mono); font-size:9px; padding:2px 7px; border-radius:999px; }
+    .pill-sonnet { background:var(--blue-dim); color:var(--blue); border:1px solid rgba(96,165,250,.2); }
+    .pill-fast   { background:var(--green-dim); color:var(--green); border:1px solid rgba(74,222,128,.2); }
+
+    /* ── CALLOUT ─────────────────────────── */
+    .callout { display:flex; gap:12px; padding:12px 14px; border-radius:var(--radius); margin-bottom:12px; }
+    .callout-icon { font-size:16px; flex-shrink:0; }
+    .callout-body { font-size:13px; line-height:1.6; }
+    .callout-body strong { font-weight:600; }
+    .callout.tip   { background:var(--cyan-dim);   border:1px solid rgba(61,245,224,.15);  color:var(--cyan); }
+    .callout.warn  { background:var(--amber-dim);  border:1px solid rgba(251,191,36,.15);  color:var(--amber); }
+    .callout.info  { background:var(--violet-dim); border:1px solid rgba(167,139,250,.15); color:var(--violet); }
+    .callout.good  { background:var(--green-dim);  border:1px solid rgba(74,222,128,.15);  color:var(--green); }
+    .callout-body { color:inherit; }
+
+    /* ── TEMPLATE BOX ───────────────────── */
+    .template-box {
+      border:1px dashed rgba(61,245,224,.3); border-radius:var(--radius);
+      padding:1rem 1.2rem; margin-bottom:1.5rem;
+      background:rgba(61,245,224,.03);
+    }
+    .template-label { font-family:var(--mono); font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--cyan); margin-bottom:8px; display:flex; align-items:center; gap:8px; }
+    .template-label::after { content:''; flex:1; height:1px; background:rgba(61,245,224,.2); }
+    .template-text { font-size:14px; color:var(--text); line-height:1.6; }
+    .template-text .bracket { color:var(--violet); }
+
+    /* ── BEST PRACTICE ROWS ─────────────── */
+    .bp-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:0; margin-bottom:1.5rem; overflow:hidden; }
+    .bp-row { display:flex; gap:14px; align-items:flex-start; padding:12px 1.2rem; border-bottom:1px solid var(--border); }
+    .bp-row:last-child{border-bottom:none}
+    .bp-icon { font-size:14px; flex-shrink:0; margin-top:2px; }
+    .bp-title { font-size:13px; font-weight:600; color:var(--text); margin-bottom:3px; }
+    .bp-desc  { font-size:12px; color:var(--text-mid); line-height:1.55; }
+
+    /* ── QUIZ ────────────────────────────── */
+    .quiz-q { font-size:13px; font-weight:600; color:var(--text); margin-bottom:10px; }
+    .quiz-opt { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 14px; margin-bottom:8px; cursor:pointer; font-size:13px; color:var(--text); transition:all .15s; display:flex; align-items:center; gap:12px; }
+    .quiz-opt:hover { border-color:var(--border-mid); background:var(--bg-hover); }
+    .quiz-opt.correct { border-color:var(--green); background:var(--green-dim); color:var(--green); }
+    .quiz-opt.wrong   { border-color:var(--rose);  background:var(--rose-dim);  color:var(--rose); }
+    .opt-key { width:24px; height:24px; border-radius:50%; border:1px solid var(--border-mid); display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:10px; font-weight:700; flex-shrink:0; }
+    .quiz-fb { font-size:12px; padding:9px 14px; border-radius:var(--radius-sm); margin-top:8px; display:none; line-height:1.55; }
+    .quiz-fb.show   { display:block; }
+    .quiz-fb.ok  { background:var(--green-dim); color:var(--green); border:1px solid rgba(74,222,128,.2); }
+    .quiz-fb.bad { background:var(--rose-dim);  color:var(--rose);  border:1px solid rgba(251,113,133,.2); }
+
+    /* ── HANDS-ON CHECKLIST ─────────────── */
+    .checklist { margin-bottom:2rem; }
+    .chk-item { display:flex; align-items:flex-start; gap:12px; padding:10px 0; border-bottom:1px solid var(--border); cursor:pointer; }
+    .chk-item:last-child{border-bottom:none}
+    .chk-box { width:18px; height:18px; border-radius:4px; border:1px solid var(--border-mid); flex-shrink:0; margin-top:2px; display:flex; align-items:center; justify-content:center; transition:all .2s; }
+    .chk-box.on { background:var(--cyan); border-color:var(--cyan); box-shadow:0 0 10px var(--cyan-glow); }
+    .chk-box.on::after { content:''; display:block; width:9px; height:5px; border-left:1.5px solid var(--bg); border-bottom:1.5px solid var(--bg); transform:rotate(-45deg) translateY(-1px); }
+    .chk-label { font-size:13px; color:var(--text); line-height:1.5; }
+    .chk-label.on { color:var(--text-dim); text-decoration:line-through; }
+
+    /* ── CTA BOX ─────────────────────────── */
+    .cta-box { background:var(--cyan-dim); border:1px solid rgba(61,245,224,.2); border-radius:var(--radius); padding:1.25rem; margin-top:2rem; }
+    .cta-title { font-size:14px; font-weight:600; color:var(--cyan); margin-bottom:6px; }
+    .cta-body  { font-size:13px; color:var(--text-mid); line-height:1.65; }
+
+    /* ── DIVIDER ─────────────────────────── */
+    .div { height:1px; background:var(--border); margin:1.75rem 0; }
+
+    /* ── BUTTONS ─────────────────────────── */
+    .btn { font-family:var(--font); font-size:13px; padding:8px 18px; border-radius:var(--radius-sm); border:1px solid var(--border-mid); cursor:pointer; color:var(--text); background:transparent; transition:all .2s; }
+    .btn:hover { background:var(--bg-hover); border-color:var(--border-hi); }
+    .btn:active { transform:scale(.98); }
+    .btn:disabled { opacity:.3; cursor:default; transform:none; }
+    .btn-cyan { background:var(--cyan-dim); border-color:var(--cyan); color:var(--cyan); }
+    .btn-cyan:hover { box-shadow:0 0 20px var(--cyan-glow); background:rgba(61,245,224,.14); }
+
+    /* ── NAV ─────────────────────────────── */
+    .nav-row { display:flex; align-items:center; justify-content:space-between; margin-top:2.5rem; padding-top:1.5rem; border-top:1px solid var(--border); }
+    .slide-ctr { font-family:var(--mono); font-size:11px; color:var(--text-dim); }
+
+    /* scrollbar */
+    ::-webkit-scrollbar{width:4px;height:4px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:var(--border-mid);border-radius:2px}
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div class="course-id">Workflow Builder — 15-min practical course</div>
+    <div class="timer-wrap">
+      <div class="timer-dot"></div>
+      <div class="timer-val" id="timer">00:00</div>
+    </div>
+  </div>
+
+  <div class="progress-track">
+    <div class="progress-fill" id="pfill" style="width:5%"></div>
+  </div>
+
+  <div class="module-tabs">
+    <button class="module-tab active" onclick="goTo(0)">01 / What it builds</button>
+    <button class="module-tab" onclick="goTo(1)">02 / The 5-step process</button>
+    <button class="module-tab" onclick="goTo(2)">03 / The 5 agents</button>
+    <button class="module-tab" onclick="goTo(3)">04 / Prompt patterns</button>
+    <button class="module-tab" onclick="goTo(4)">05 / Test &amp; refine</button>
+  </div>
+
+  <!-- ══════════════════════════════════════ SLIDE 0 ══ -->
+  <div class="slide active" id="slide-0">
+    <div class="eyebrow"><span class="eyebrow-line"></span>Module 1 — What does the Workflow Builder create? · 3 min</div>
+    <div class="slide-title">A meta-system that builds other agent systems</div>
+    <div class="slide-sub">The Workflow Builder is not a trading agent or a support bot — it is the factory. You describe any professional workflow, and it outputs a complete, ready-to-run multi-agent system with research, a plan, agent files, and documentation.</div>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-tag">The problem it solves</div>
+        <div class="card-title">Building agents from scratch is slow</div>
+        <div class="card-body">Researching a domain, designing subagents, writing YAML files, and creating docs typically takes 4–8 hours manually. The builder compresses this to a single orchestrator invocation.</div>
+      </div>
+      <div class="card">
+        <div class="card-tag">The output it produces</div>
+        <div class="card-title">A complete multi-agent system</div>
+        <div class="card-body">Research markdown → plan markdown → <code style="font-family:var(--mono);font-size:11px">.cursor/agents/*.md</code> files → README.md. Everything another team needs to run, extend, and understand the system.</div>
+      </div>
+      <div class="card">
+        <div class="card-tag">Works for any domain</div>
+        <div class="card-title">Domain-agnostic by design</div>
+        <div class="card-body">SSRN research, desktop support, pullback trading, RAG pipelines, HR onboarding — any structured professional workflow can be turned into agents using the same four-phase pattern.</div>
+      </div>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-icon">◈</div>
+      <div class="callout-body"><strong>Key mental model:</strong> Think of the Workflow Builder as a compiler. You write a one-line description of a domain workflow (the "source code"), and it compiles that description into a running multi-agent system (the "executable").</div>
+    </div>
+
+    <div class="div"></div>
+    <div class="quiz-q">Quick check — what is the output of a full Workflow Builder run?</div>
+    <div id="q0">
+      <div class="quiz-opt" onclick="qz('q0',this,false)"><span class="opt-key">A</span>A single prompt template you can reuse in Claude</div>
+      <div class="quiz-opt" onclick="qz('q0',this,false)"><span class="opt-key">B</span>A spreadsheet of workflow steps and owners</div>
+      <div class="quiz-opt" onclick="qz('q0',this,true)"><span class="opt-key">C</span>Research doc + plan + agent .md files + README, ready to run in Cursor</div>
+      <div class="quiz-fb" id="q0-fb"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════ SLIDE 1 ══ -->
+  <div class="slide" id="slide-1">
+    <div class="eyebrow"><span class="eyebrow-line"></span>Module 2 — The 5-step human workflow · 3 min</div>
+    <div class="slide-title">How you drive the builder step-by-step</div>
+    <div class="slide-sub">Each step has a specific AI mode (ASK / PLAN / AGENT) and a prompt template. Click any step to expand its prompt template, what the AI does, and the file it saves.</div>
+
+    <div class="timeline" id="timeline">
+
+      <div class="tl-step" onclick="toggleStep(0)">
+        <div class="tl-left"><div class="tl-num" id="tln-0">1</div><div class="tl-line"></div></div>
+        <div class="tl-body">
+          <div><span class="tl-mode mode-ask">ASK / High-Think Model</span></div>
+          <div class="tl-title">Research the target domain workflow</div>
+          <div class="tl-desc">Ask the AI to perform deep research on how professionals in a specific domain actually work — tools, steps, best practices, APIs.</div>
+          <div class="tl-detail">
+            <div class="template-box">
+              <div class="template-label">Prompt template</div>
+              <div class="template-text">Research a workflow that <span class="bracket">[who are the users]</span> use <span class="bracket">[for what purpose]</span></div>
+            </div>
+            <div class="code-wrap">
+              <div class="code-label">Example 1 — SSRN research</div>
+              <div class="code-block" style="position:relative">
+<button class="copy-btn" onclick="copyCode(this)">COPY</button>Research a workflow that <span class="kw">quant researchers</span> use to <span class="str">search on SSRN for related papers</span></div>
+            </div>
+            <div class="code-wrap">
+              <div class="code-label">Example 2 — IT support</div>
+              <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>Research a workflow that <span class="kw">desktop support engineers</span> use to <span class="str">provide support for Windows applications</span></div>
+            </div>
+            <div class="callout tip" style="margin-top:10px">
+              <div class="callout-icon">💾</div>
+              <div class="callout-body"><strong>Best practice:</strong> Save the research output to <code style="font-family:var(--mono);font-size:11px">workflows/[project]/[name].md</code> so you can review and manually edit before moving to Step 2.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-step" onclick="toggleStep(1)">
+        <div class="tl-left"><div class="tl-num" id="tln-1">2</div><div class="tl-line"></div></div>
+        <div class="tl-body">
+          <div><span class="tl-mode mode-plan">PLAN / High-Think Model</span></div>
+          <div class="tl-title">Plan the subagents from the research</div>
+          <div class="tl-desc">Give the AI the research markdown and ask it to map each workflow step to a specialized agent — including model choice, tools, I/O, and an orchestrator spec.</div>
+          <div class="tl-detail">
+            <div class="template-box">
+              <div class="template-label">Prompt template</div>
+              <div class="template-text">Plan for creating subagents for the workflow described in <span class="bracket">[path to research .md]</span></div>
+            </div>
+            <div class="code-wrap">
+              <div class="code-label">Example</div>
+              <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>Plan for creating subagents for the workflow described in <span class="str">workflows/lei/ssrn.md</span></div>
+            </div>
+            <div class="callout info" style="margin-top:10px">
+              <div class="callout-icon">◉</div>
+              <div class="callout-body"><strong>What the AI produces:</strong> Workflow-to-agent mapping table, pipeline ASCII diagram, per-agent specs (model, readonly, tools, I/O), and key design decisions.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-step" onclick="toggleStep(2)">
+        <div class="tl-left"><div class="tl-num" id="tln-2">3</div><div class="tl-line"></div></div>
+        <div class="tl-body">
+          <div><span class="tl-mode mode-agent">AGENT / High-Think Model</span></div>
+          <div class="tl-title">Write the plan and build the agent files</div>
+          <div class="tl-desc">In AGENT mode, the AI first saves the plan to a .md file, then creates each <code style="font-family:var(--mono);font-size:11px">.cursor/agents/[name].md</code> file with YAML frontmatter and full instructions.</div>
+          <div class="tl-detail">
+            <div class="template-box">
+              <div class="template-label">Prompt template</div>
+              <div class="template-text">First write the plan to <span class="bracket">[plan output path]</span>, and then build the agents</div>
+            </div>
+            <div class="code-wrap">
+              <div class="code-label">Example</div>
+              <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>First write the plan to <span class="str">workflows/ssrn/PLAN.md</span>, and then build the agents</div>
+            </div>
+            <div class="code-wrap">
+              <div class="code-label">Agent file pattern (YAML frontmatter)</div>
+              <div class="code-block"><span class="kw">---</span>
+<span class="ph">name</span>: <span class="str">agent-name</span>
+<span class="ph">description</span>: <span class="str">"one-sentence description for agent discovery"</span>
+<span class="ph">model</span>: <span class="str">sonnet</span>   <span class="cmt"># or: fast</span>
+<span class="ph">readonly</span>: <span class="str">false</span>  <span class="cmt"># true = read-only tool access</span>
+<span class="kw">---</span>
+
+<span class="cmt">## Role
+Full instruction body with H2 sections for each major task...</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-step" onclick="toggleStep(3)">
+        <div class="tl-left"><div class="tl-num" id="tln-3">4</div><div class="tl-line"></div></div>
+        <div class="tl-body">
+          <div><span class="tl-mode mode-agent">AGENT / High-Think Model</span></div>
+          <div class="tl-title">Create the README.md documentation</div>
+          <div class="tl-desc">Ask the AI to produce a concise, user-friendly README covering what the system does, the agent list, and practical invocation examples.</div>
+          <div class="tl-detail">
+            <div class="template-box">
+              <div class="template-label">Prompt template</div>
+              <div class="template-text">Add a README.md for the project, include what it is for and how to use it with some simple examples. Keep it simple and concise.</div>
+            </div>
+            <div class="code-wrap">
+              <div class="code-label">Exact prompt (use as-is)</div>
+              <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button>Add a README.md for the project, include that it is for and how to use it with some simple examples. Keep it simple and concise.</div>
+            </div>
+            <div class="callout good" style="margin-top:10px">
+              <div class="callout-icon">◳</div>
+              <div class="callout-body"><strong>Why concise matters:</strong> The README is how future users discover what the agents do. A 2-page README gets read; a 20-page README gets skipped.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-step" onclick="toggleStep(4)">
+        <div class="tl-left"><div class="tl-num" id="tln-4">5</div></div>
+        <div class="tl-body">
+          <div><span class="tl-mode mode-test">TEST / ITERATE</span></div>
+          <div class="tl-title">Test, test, and test the workflow</div>
+          <div class="tl-desc">Run the orchestrator against a real use case. Identify where agents fail, where outputs are wrong, and refine prompts and agent instructions until objectives are satisfied.</div>
+          <div class="tl-detail">
+            <div class="callout warn" style="margin-top:6px">
+              <div class="callout-icon">⚡</div>
+              <div class="callout-body"><strong>Rule of thumb:</strong> Expect 3–5 refinement cycles before a new agent system performs reliably. Track failures in a simple list and fix the highest-frequency issue first.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════ SLIDE 2 ══ -->
+  <div class="slide" id="slide-2">
+    <div class="eyebrow"><span class="eyebrow-line"></span>Module 3 — The 5 automated agents · 3 min</div>
+    <div class="slide-title">When you run the orchestrator, these are the agents it uses</div>
+    <div class="slide-sub">The Workflow Builder itself is a multi-agent system. The orchestrator coordinates four specialists that map directly onto the four manual steps you just learned — one agent per phase.</div>
+
+    <table class="spec-table">
+      <thead><tr><th>Agent</th><th>Model</th><th>Phase</th><th>Role</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>workflow.orchestrator</td>
+          <td><span class="model-pill pill-sonnet">sonnet</span></td>
+          <td>All</td>
+          <td>Single entry point. Accepts topic + project name + folder. Sequences all 4 phases, passes file paths between agents.</td>
+        </tr>
+        <tr>
+          <td>workflow.researcher</td>
+          <td><span class="model-pill pill-sonnet">sonnet</span></td>
+          <td>Step 1</td>
+          <td>WebSearch + WebFetch to research the domain. Saves structured deep-dive markdown with steps, tools, APIs, and best practices.</td>
+        </tr>
+        <tr>
+          <td>workflow.planner</td>
+          <td><span class="model-pill pill-sonnet">sonnet</span></td>
+          <td>Step 2</td>
+          <td>Reads research markdown. Maps workflow steps to agents. Designs orchestrator + subagent specs. Saves plan markdown.</td>
+        </tr>
+        <tr>
+          <td>workflow.builder</td>
+          <td><span class="model-pill pill-sonnet">sonnet</span></td>
+          <td>Step 3</td>
+          <td>Reads plan markdown. Creates each <code style="font-family:var(--mono);font-size:10px">.cursor/agents/[name].md</code> file following the established YAML + instruction pattern.</td>
+        </tr>
+        <tr>
+          <td>workflow.documenter</td>
+          <td><span class="model-pill pill-fast">fast</span></td>
+          <td>Step 4</td>
+          <td>Reads plan + agent list. Creates concise README.md: summary, agent list, invocation examples. Uses fast model — writing only, no reasoning required.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout info">
+      <div class="callout-icon">◈</div>
+      <div class="callout-body"><strong>File-based handoff is the key design decision.</strong> Agents share no conversation history. Each agent saves its output to a <code style="font-family:var(--mono);font-size:11px">.md</code> file; the next agent reads from that path. This is what makes the pipeline reliable and restartable at any phase.</div>
+    </div>
+
+    <div class="pipeline-wrap">
+      <div class="pipeline" id="pipeline">
+        <div class="pipe-node" id="pn0" onclick="selectPipe(0)"><div class="pipe-phase">Agent 1</div><div class="pipe-name">researcher</div><div class="pipe-sub">saves research.md</div></div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node" id="pn1" onclick="selectPipe(1)"><div class="pipe-phase">Agent 2</div><div class="pipe-name">planner</div><div class="pipe-sub">reads → saves plan.md</div></div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node" id="pn2" onclick="selectPipe(2)"><div class="pipe-phase">Agent 3</div><div class="pipe-name">builder</div><div class="pipe-sub">reads → creates agents</div></div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node" id="pn3" onclick="selectPipe(3)"><div class="pipe-phase">Agent 4</div><div class="pipe-name">documenter</div><div class="pipe-sub">reads → creates README</div></div>
+      </div>
+      <div class="pipe-panel" id="pipe-panel">
+        <div class="pipe-panel-title" id="pp-title"></div>
+        <div id="pp-body"></div>
+      </div>
+    </div>
+
+    <div class="quiz-q">Why does the workflow.documenter use the "fast" model while others use "sonnet"?</div>
+    <div id="q1">
+      <div class="quiz-opt" onclick="qz('q1',this,false)"><span class="opt-key">A</span>Cost savings — the documenter is optional so quality doesn't matter</div>
+      <div class="quiz-opt" onclick="qz('q1',this,true)"><span class="opt-key">B</span>Its task is writing only — no domain reasoning required, so the fast model is sufficient and more efficient</div>
+      <div class="quiz-opt" onclick="qz('q1',this,false)"><span class="opt-key">C</span>Sonnet can't write markdown files</div>
+      <div class="quiz-fb" id="q1-fb"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════ SLIDE 3 ══ -->
+  <div class="slide" id="slide-3">
+    <div class="eyebrow"><span class="eyebrow-line"></span>Module 4 — Prompt patterns &amp; invocations · 3 min</div>
+    <div class="slide-title">Five ways to invoke the Workflow Builder</div>
+    <div class="slide-sub">You can run the full pipeline with one command, or call individual agents for specific phases. These are the exact patterns from the spec — copy and adapt them for your domain.</div>
+
+    <div class="code-wrap">
+      <div class="code-label">Full pipeline — one command to build everything</div>
+      <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><span class="kw">Use</span> <span class="ag">workflow.orchestrator</span> <span class="str">to create agents for the workflow that</span>
+<span class="str">quant researchers use to monitor equity factor performance</span></div>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-label">Research only — skip the rest</div>
+      <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><span class="kw">Use</span> <span class="ag">workflow.researcher</span> <span class="str">to research the workflow that</span>
+<span class="str">data engineers use to build RAG pipelines</span></div>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-label">Plan from existing research (pick up mid-pipeline)</div>
+      <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><span class="kw">Use</span> <span class="ag">workflow.planner</span> <span class="str">to plan agents from the research at</span>
+<span class="str">workflows/my-project/my-research.md</span></div>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-label">Build from an existing plan</div>
+      <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><span class="kw">Use</span> <span class="ag">workflow.builder</span> <span class="str">to build agents from the plan at</span>
+<span class="str">workflows/my-project/my-plan.md</span></div>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-label">Document existing agents</div>
+      <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">COPY</button><span class="kw">Use</span> <span class="ag">workflow.documenter</span> <span class="str">to create a README for the agents</span>
+<span class="str">described in workflows/my-project/my-plan.md</span></div>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-icon">▶</div>
+      <div class="callout-body"><strong>Mid-pipeline restart trick:</strong> If the builder fails or produces a bad agent file, you don't need to re-run the researcher and planner. Just fix the plan markdown and re-invoke <code style="font-family:var(--mono);font-size:11px">workflow.builder</code> directly with the corrected plan path.</div>
+    </div>
+
+    <div class="div"></div>
+    <div class="quiz-q">You ran the researcher and planner successfully, but the builder created incorrect agent files. What should you do?</div>
+    <div id="q2">
+      <div class="quiz-opt" onclick="qz('q2',this,false)"><span class="opt-key">A</span>Start over from the researcher — re-run the full pipeline</div>
+      <div class="quiz-opt" onclick="qz('q2',this,true)"><span class="opt-key">B</span>Edit the plan markdown, then invoke workflow.builder directly with the corrected plan path</div>
+      <div class="quiz-opt" onclick="qz('q2',this,false)"><span class="opt-key">C</span>Manually rewrite the agent files from scratch</div>
+      <div class="quiz-fb" id="q2-fb"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════ SLIDE 4 ══ -->
+  <div class="slide" id="slide-4">
+    <div class="eyebrow"><span class="eyebrow-line"></span>Module 5 — Test &amp; refine your system · 3 min</div>
+    <div class="slide-title">Building is 20% of the work. Testing is 80%.</div>
+    <div class="slide-sub">Agent systems rarely work perfectly on the first run. The spec calls this out explicitly: <em>"TEST TEST and TEST the workflow — refine until objectives are satisfied."</em> Here is a practical testing protocol.</div>
+
+    <div class="bp-card">
+      <div class="bp-row">
+        <div class="bp-icon" style="color:var(--cyan)">①</div>
+        <div>
+          <div class="bp-title">Run the simplest possible case first</div>
+          <div class="bp-desc">Before testing edge cases, give the orchestrator a well-known, simple domain. Confirm each agent produces a valid file before trying a complex or novel workflow.</div>
+        </div>
+      </div>
+      <div class="bp-row">
+        <div class="bp-icon" style="color:var(--cyan)">②</div>
+        <div>
+          <div class="bp-title">Review each phase output before proceeding</div>
+          <div class="bp-desc">After the researcher saves its markdown, read it. Does it capture the actual workflow steps? Missing tools or steps here cascade into a poor plan and bad agents.</div>
+        </div>
+      </div>
+      <div class="bp-row">
+        <div class="bp-icon" style="color:var(--cyan)">③</div>
+        <div>
+          <div class="bp-title">Check the YAML frontmatter in every agent file</div>
+          <div class="bp-desc">The builder must match the exact YAML pattern of existing agents. Validate: <code style="font-family:var(--mono);font-size:11px">name</code>, <code style="font-family:var(--mono);font-size:11px">description</code>, <code style="font-family:var(--mono);font-size:11px">model</code>, <code style="font-family:var(--mono);font-size:11px">readonly</code>. Wrong or missing fields cause silent failures at runtime.</div>
+        </div>
+      </div>
+      <div class="bp-row">
+        <div class="bp-icon" style="color:var(--cyan)">④</div>
+        <div>
+          <div class="bp-title">Test each subagent in isolation before running the orchestrator</div>
+          <div class="bp-desc">Call each agent individually with controlled input. Confirm the output format before wiring them into the full pipeline. Isolation narrows the failure surface.</div>
+        </div>
+      </div>
+      <div class="bp-row">
+        <div class="bp-icon" style="color:var(--cyan)">⑤</div>
+        <div>
+          <div class="bp-title">Log what fails and fix the highest-frequency issue first</div>
+          <div class="bp-desc">Keep a running list of failures across test runs. One systemic issue (e.g. wrong file path format) often explains 60% of failures. Fix root causes, not symptoms.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="div"></div>
+    <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:10px;">Session hands-on checklist — build your first system</div>
+    <div class="checklist">
+      <div class="chk-item" onclick="ck(this)"><div class="chk-box"></div><div class="chk-label">Choose a domain: write a one-sentence description of a workflow you know well</div></div>
+      <div class="chk-item" onclick="ck(this)"><div class="chk-box"></div><div class="chk-label">Run the researcher prompt using the template from Step 1</div></div>
+      <div class="chk-item" onclick="ck(this)"><div class="chk-box"></div><div class="chk-label">Review the research .md — edit any missing steps or tools before continuing</div></div>
+      <div class="chk-item" onclick="ck(this)"><div class="chk-box"></div><div class="chk-label">Run the planner and confirm the agent mapping makes sense</div></div>
+      <div class="chk-item" onclick="ck(this)"><div class="chk-box"></div><div class="chk-label">Build agents and validate YAML frontmatter in each file</div></div>
+      <div class="chk-item" onclick="ck(this)"><div class="chk-box"></div><div class="chk-label">Generate README and verify it is concise and accurate</div></div>
+      <div class="chk-item" onclick="ck(this)"><div class="chk-box"></div><div class="chk-label">Test one subagent in isolation — call it directly with sample input</div></div>
+      <div class="chk-item" onclick="ck(this)"><div class="chk-box"></div><div class="chk-label">Run the full orchestrator and log any failures for refinement</div></div>
+    </div>
+
+    <div class="cta-box">
+      <div class="cta-title">You now have the complete meta-workflow</div>
+      <div class="cta-body">Research → Plan → Build → Document → Test. Use the prompt templates from Module 4, validate each phase output before proceeding, and expect 3–5 refinement cycles. Every domain workflow can become an agent system — start with one you know deeply.</div>
+    </div>
+  </div>
+
+  <!-- NAV -->
+  <div class="nav-row">
+    <button class="btn" id="btn-prev" onclick="nav(-1)" disabled>← Previous</button>
+    <span class="slide-ctr" id="slide-ctr">Slide 1 of 5</span>
+    <button class="btn btn-cyan" id="btn-next" onclick="nav(1)">Next →</button>
+  </div>
+
+</div>
+<script>
+  /* ── state ── */
+  let cur = 0; const TOTAL = 5;
+  let timerSec = 0;
+  const done = new Set();
+
+  /* ── timer ── */
+  setInterval(() => {
+    timerSec++;
+    const m = Math.floor(timerSec/60), s = timerSec%60;
+    document.getElementById('timer').textContent = p(m)+':'+p(s);
+  }, 1000);
+  function p(n){ return n<10?'0'+n:n; }
+
+  /* ── navigation ── */
+  function goTo(idx){ done.add(cur); cur=idx; render(); }
+  function nav(d){ done.add(cur); cur=Math.max(0,Math.min(TOTAL-1,cur+d)); render(); }
+
+  function render(){
+    document.querySelectorAll('.slide').forEach((s,i)=>s.classList.toggle('active',i===cur));
+    document.querySelectorAll('.module-tab').forEach((t,i)=>{
+      t.classList.remove('active','done');
+      if(i===cur) t.classList.add('active');
+      else if(done.has(i)) t.classList.add('done');
+    });
+    document.getElementById('pfill').style.width = Math.round(((cur+1)/TOTAL)*100)+'%';
+    document.getElementById('slide-ctr').textContent = 'Slide '+(cur+1)+' of '+TOTAL;
+    document.getElementById('btn-prev').disabled = cur===0;
+    const nb = document.getElementById('btn-next');
+    nb.disabled = cur===TOTAL-1;
+    nb.textContent = cur===TOTAL-1 ? 'Complete' : 'Next →';
+  }
+
+  /* ── timeline steps ── */
+  let openStep = -1;
+  function toggleStep(idx){
+    const steps = document.querySelectorAll('.tl-step');
+    if(openStep===idx){
+      steps[idx].classList.remove('active-step');
+      openStep=-1; return;
+    }
+    if(openStep>=0) steps[openStep].classList.remove('active-step');
+    steps[idx].classList.add('active-step');
+    openStep=idx;
+  }
+
+  /* ── pipeline nodes ── */
+  const pipeData = [
+    { title:'workflow.researcher',
+      rows:[['Input','User topic description'],['Tools','WebSearch, WebFetch'],['Output','Structured research markdown'],['Saves to','workflows/[project]/[name].md'],['Covers','Steps, tools table, API access, best practices']] },
+    { title:'workflow.planner',
+      rows:[['Input','Research markdown path'],['Output','Plan markdown'],['Saves to','workflows/[project]/[name]-plan.md'],['Covers','Agent mapping, pipeline diagram, per-agent specs'],['Key decision','Model + readonly + tools per agent']] },
+    { title:'workflow.builder',
+      rows:[['Input','Plan markdown path'],['Output','Agent .md files'],['Creates','One file per agent in .cursor/agents/'],['Pattern','YAML frontmatter + H2 instruction sections'],['Constraint','Must match existing agent file style']] },
+    { title:'workflow.documenter',
+      rows:[['Input','Plan + agent list'],['Output','README.md'],['Saves to','workflows/[project]/README.md'],['Model','fast (writing only, no reasoning)'],['Covers','Summary, agent list, invocation examples']] },
+  ];
+  let openPipe = -1;
+  function selectPipe(idx){
+    const nodes = document.querySelectorAll('.pipe-node');
+    const panel = document.getElementById('pipe-panel');
+    if(openPipe===idx){ nodes[idx].classList.remove('lit'); panel.classList.remove('vis'); openPipe=-1; return; }
+    nodes.forEach(n=>n.classList.remove('lit'));
+    nodes[idx].classList.add('lit');
+    openPipe=idx;
+    const d = pipeData[idx];
+    document.getElementById('pp-title').textContent = d.title;
+    document.getElementById('pp-body').innerHTML = d.rows.map(r=>
+      `<div class="pipe-row"><span class="pr-label">${r[0]}</span><span class="pr-val">${r[1]}</span></div>`
+    ).join('');
+    panel.classList.add('vis');
+  }
+
+  /* ── quiz ── */
+  const qMsg = {
+    q0:{ t:'Correct! The Workflow Builder produces a complete, runnable agent system: research doc, plan doc, .cursor/agents/*.md files, and README — all ready to use in Cursor.', f:'Not quite. The output is a full multi-agent system: structured markdown files, YAML agent files, and documentation — not just a prompt or spreadsheet.' },
+    q1:{ t:'Exactly right. The documenter\'s job is purely writing — it reads a plan and formats a README. No domain reasoning or judgment needed, so the fast model is the correct and more efficient choice.', f:'Incorrect. Model selection is about matching capability to task. The documenter just writes structured text from existing content — that\'s squarely in the fast model\'s capability.' },
+    q2:{ t:'Correct. The file-based handoff means you can restart at any phase. Fix the plan markdown and re-invoke the builder directly — no need to re-run phases that already succeeded.', f:'Think about the file-based handoff design. Each agent reads from a file and saves to a file. You can restart at any phase by providing the correct input file — no need to re-run phases that already worked.' },
+  };
+  function qz(id, el, ok){
+    document.getElementById(id).querySelectorAll('.quiz-opt').forEach(o=>{ o.onclick=null; o.style.cursor='default'; });
+    el.classList.add(ok?'correct':'wrong');
+    const fb = document.getElementById(id+'-fb');
+    fb.classList.add('show', ok?'ok':'bad');
+    fb.textContent = ok ? qMsg[id].t : qMsg[id].f;
+  }
+
+  /* ── checklist ── */
+  function ck(el){ el.querySelector('.chk-box').classList.toggle('on'); el.querySelector('.chk-label').classList.toggle('on'); }
+
+  /* ── copy buttons ── */
+  function copyCode(btn){
+    const block = btn.parentElement;
+    const txt = block.innerText.replace('COPY','').replace('COPIED','').trim();
+    navigator.clipboard.writeText(txt).catch(()=>{});
+    btn.textContent='COPIED'; btn.classList.add('copied');
+    setTimeout(()=>{ btn.textContent='COPY'; btn.classList.remove('copied'); }, 1500);
+  }
+
+  render();
+</script>
+</body>
+</html>
