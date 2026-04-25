@@ -1,18 +1,36 @@
 [
   {
     "id": "ai-agents-workflow",
-    "path": "data/ai-workflows/1-claude-agent-workflow.html",
+    "path": "data/ai-workflows/1-claude-agent-workflows.html",
     "type": "html",
-    "title": "Claude Agent Workflow",
+    "title": "Claude Agent Workflows",
     "category": "ai-workflows",
     "icon": "⚙️",
     "accent": "#00d4ff",
-    "description": "Claude Agent Workflow is a comprehensive platform for building, deploying, and managing AI agents.",
+    "description": "Claude Agent Workflows orchestrate reasoning, tool use, and execution across multiple steps so Claude can complete complex or long‑running tasks autonomously or semi‑autonomously.",
     "tags": [
       "ai",
-      "ai-agents",
+      "ai-workflows",
       "claude",
-      "workflow"
+      "workflows"
+    ],
+    "show-sheet-header": false
+  },
+  {
+    "id": "ai-agents-workflow",
+    "path": "data/ai-workflows/2-pullback-agent-workflow.html",
+    "type": "html",
+    "title": "Pullback Trading Agent Workflow",
+    "category": "ai-workflows",
+    "icon": "⚙️",
+    "accent": "#00d4ff",
+    "description": "Pullback Trading Agent Workflow orchestrates reasoning, tool use, and execution across multiple steps so the agent can complete complex or long‑running trading tasks autonomously or semi‑autonomously.",
+    "tags": [
+      "ai",
+      "ai-workflows",
+      "pullback",
+      "trading",
+      "workflows"
     ],
     "show-sheet-header": false
   },
