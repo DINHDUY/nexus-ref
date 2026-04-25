@@ -1,5 +1,22 @@
 [
   {
+    "id": "ai-agents-workflow",
+    "path": "data/ai-workflows/1-claude-agent-workflow.html",
+    "type": "html",
+    "title": "Claude Agent Workflow",
+    "category": "ai-workflows",
+    "icon": "⚙️",
+    "accent": "#00d4ff",
+    "description": "Claude Agent Workflow is a comprehensive platform for building, deploying, and managing AI agents.",
+    "tags": [
+      "ai",
+      "ai-agents",
+      "claude",
+      "workflow"
+    ],
+    "show-sheet-header": false
+  },
+  {
     "id": "ai-agents-maf",
     "path": "data/ai-agents/1-maf.html",
     "type": "html",

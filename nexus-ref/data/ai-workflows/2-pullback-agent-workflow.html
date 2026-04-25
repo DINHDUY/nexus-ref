@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pullback Trading Agent — Quick Practical</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #090b10;
+      --bg-surface: #0e1118;
+      --bg-card: #131720;
+      --bg-card-hover: #181d28;
+      --border: rgba(255,255,255,0.06);
+      --border-mid: rgba(255,255,255,0.11);
+      --border-accent: rgba(255,255,255,0.18);
+      --text: #e8eaf2;
+      --text-mid: #8a8fa8;
+      --text-dim: #454a60;
+      --green: #4fffb0;
+      --green-dim: rgba(79,255,176,0.09);
+      --green-glow: rgba(79,255,176,0.22);
+      --amber: #ffc947;
+      --amber-dim: rgba(255,201,71,0.09);
+      --amber-glow: rgba(255,201,71,0.2);
+      --red: #ff5f6d;
+      --red-dim: rgba(255,95,109,0.09);
+      --blue: #5eb4ff;
+      --blue-dim: rgba(94,180,255,0.09);
+      --purple: #b06bff;
+      --purple-dim: rgba(176,107,255,0.09);
+      --radius: 10px;
+      --radius-sm: 6px;
+      --font-head: 'Bricolage Grotesque', sans-serif;
+      --font-mono: 'Space Mono', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-head);
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+      line-height: 1.6;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px);
+      pointer-events: none;
+      z-index: 999;
+    }
+    .wrap { max-width: 800px; margin: 0 auto; }
+
+    /* TOP BAR */
+    .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.75rem; }
+    .course-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
+    .timer-wrap { display: flex; align-items: center; gap: 8px; }
+    .timer-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green-glow); animation: blink 1.4s ease-in-out infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.25} }
+    .timer-val { font-family: var(--font-mono); font-size: 13px; color: var(--green); letter-spacing: 0.06em; }
+
+    /* PROGRESS */
+    .progress-track { height: 2px; background: var(--border); border-radius: 2px; margin-bottom: 1.75rem; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--green), var(--amber)); border-radius: 2px; transition: width 0.5s cubic-bezier(.4,0,.2,1); box-shadow: 0 0 10px var(--green-glow); }
+
+    /* MODULE TABS */
+    .module-tabs { display: flex; gap: 6px; margin-bottom: 2.5rem; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+    .module-tabs::-webkit-scrollbar { display: none; }
+    .module-tab { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.05em; padding: 5px 12px; border-radius: 999px; border: 1px solid var(--border); cursor: pointer; white-space: nowrap; color: var(--text-dim); background: transparent; transition: all 0.2s; }
+    .module-tab:hover { border-color: var(--border-mid); color: var(--text-mid); }
+    .module-tab.active { background: var(--green-dim); border-color: var(--green); color: var(--green); box-shadow: 0 0 14px var(--green-glow); }
+    .module-tab.done { border-color: var(--border-mid); color: var(--text-mid); }
+
+    /* SLIDES */
+    .slide { display: none; animation: fadeIn 0.3s ease; }
+    .slide.active { display: block; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+
+    /* SLIDE HEADER */
+    .slide-header { margin-bottom: 2rem; }
+    .module-eyebrow { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--green); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+    .eyebrow-line { width: 24px; height: 1px; background: var(--green); box-shadow: 0 0 6px var(--green-glow); }
+    .slide-title { font-size: 26px; font-weight: 600; color: var(--text); line-height: 1.25; margin-bottom: 10px; letter-spacing: -0.01em; }
+    .slide-subtitle { font-size: 14px; color: var(--text-mid); line-height: 1.7; max-width: 640px; }
+
+    /* CARDS */
+    .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.1rem 1.25rem; transition: border-color 0.2s; }
+    .card:hover { border-color: var(--border-mid); }
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 2rem; }
+    .card-tag { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--green); margin-bottom: 8px; }
+    .card-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+    .card-body { font-size: 12px; color: var(--text-mid); line-height: 1.55; }
+
+    /* AGENT TABLE */
+    .agent-table { width: 100%; border-collapse: collapse; margin-bottom: 2rem; font-size: 12px; }
+    .agent-table thead tr { border-bottom: 1px solid var(--border-mid); }
+    .agent-table th { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dim); padding: 0 12px 10px 0; text-align: left; font-weight: 400; }
+    .agent-table td { padding: 9px 12px 9px 0; border-bottom: 1px solid var(--border); color: var(--text-mid); vertical-align: top; }
+    .agent-table tr:last-child td { border-bottom: none; }
+    .agent-table td:first-child { font-family: var(--font-mono); font-size: 11px; color: var(--green); white-space: nowrap; }
+    .model-pill { display: inline-block; font-family: var(--font-mono); font-size: 9px; padding: 2px 7px; border-radius: 999px; }
+    .model-sonnet { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(94,180,255,0.2); }
+    .model-o3 { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(255,201,71,0.2); }
+
+    /* PIPELINE VISUAL */
+    .pipeline { margin-bottom: 2rem; }
+    .pipe-row { display: flex; align-items: stretch; gap: 0; margin-bottom: 0; }
+    .pipe-node {
+      flex: 1; min-width: 80px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .pipe-node:hover { border-color: var(--border-mid); background: var(--bg-card-hover); }
+    .pipe-node.active-node { border-color: var(--green); box-shadow: 0 0 18px rgba(79,255,176,0.12); background: var(--green-dim); }
+    .pipe-phase { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.06em; color: var(--text-dim); margin-bottom: 4px; }
+    .pipe-name { font-size: 11px; font-weight: 600; color: var(--text); }
+    .pipe-sub { font-size: 10px; color: var(--text-mid); margin-top: 3px; line-height: 1.3; }
+    .pipe-arrow { display: flex; align-items: center; padding: 0 3px; color: var(--text-dim); font-size: 14px; flex-shrink: 0; }
+    .pipe-detail { background: var(--bg-surface); border: 1px solid var(--border-mid); border-radius: var(--radius); padding: 1rem 1.25rem; margin-top: 12px; display: none; }
+    .pipe-detail.visible { display: block; animation: fadeIn 0.2s ease; }
+    .pipe-detail-title { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--green); margin-bottom: 10px; }
+    .pipe-detail-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 8px; font-size: 12px; }
+    .pipe-detail-row:last-child { margin-bottom: 0; }
+    .pdr-label { color: var(--text-dim); white-space: nowrap; }
+    .pdr-val { color: var(--text); text-align: right; font-family: var(--font-mono); font-size: 11px; }
+
+    /* CODE BLOCK */
+    .code-block {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      margin-bottom: 14px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.7;
+      color: var(--text-mid);
+      overflow-x: auto;
+    }
+    .code-block .kw { color: var(--green); }
+    .code-block .str { color: var(--amber); }
+    .code-block .cmt { color: var(--text-dim); }
+    .code-block .ag { color: var(--blue); }
+    .code-block .num { color: var(--purple); }
+    .code-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+    .code-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* SCENARIO WALKTHROUGH */
+    .walkthrough { margin-bottom: 2rem; }
+    .wt-step { display: flex; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--border); align-items: flex-start; }
+    .wt-step:last-child { border-bottom: none; }
+    .wt-num { font-family: var(--font-mono); font-size: 10px; color: var(--green); min-width: 28px; margin-top: 2px; font-weight: 700; }
+    .wt-body {}
+    .wt-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+    .wt-desc { font-size: 12px; color: var(--text-mid); line-height: 1.55; }
+    .wt-output { font-family: var(--font-mono); font-size: 11px; color: var(--amber); margin-top: 5px; padding: 5px 10px; background: var(--amber-dim); border-radius: var(--radius-sm); border: 1px solid rgba(255,201,71,0.15); }
+
+    /* CRITERIA BOX */
+    .criteria-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 2rem; }
+    @media (max-width:560px) { .criteria-grid { grid-template-columns: 1fr 1fr; } }
+    .criteria-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; }
+    .criteria-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 5px; }
+    .criteria-val { font-size: 14px; font-weight: 600; color: var(--text); }
+    .criteria-sub { font-size: 11px; color: var(--text-mid); margin-top: 2px; }
+    .criteria-box.green { border-color: rgba(79,255,176,0.2); background: var(--green-dim); }
+    .criteria-box.green .criteria-val { color: var(--green); }
+    .criteria-box.amber { border-color: rgba(255,201,71,0.2); background: var(--amber-dim); }
+    .criteria-box.amber .criteria-val { color: var(--amber); }
+    .criteria-box.red { border-color: rgba(255,95,109,0.2); background: var(--red-dim); }
+    .criteria-box.red .criteria-val { color: var(--red); }
+
+    /* QUIZ */
+    .quiz-label { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
+    .quiz-option { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 8px; cursor: pointer; font-size: 13px; color: var(--text); transition: all 0.15s; display: flex; align-items: center; gap: 12px; }
+    .quiz-option:hover { border-color: var(--border-mid); background: var(--bg-card-hover); }
+    .quiz-option.correct { border-color: var(--green); background: var(--green-dim); color: var(--green); }
+    .quiz-option.wrong { border-color: var(--red); background: var(--red-dim); color: var(--red); }
+    .opt-key { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--border-mid); display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 10px; font-weight: 700; flex-shrink: 0; }
+    .quiz-feedback { font-size: 12px; padding: 9px 14px; border-radius: var(--radius-sm); margin-top: 8px; display: none; line-height: 1.55; }
+    .quiz-feedback.show { display: block; }
+    .quiz-feedback.success { background: var(--green-dim); color: var(--green); border: 1px solid rgba(79,255,176,0.2); }
+    .quiz-feedback.error { background: var(--red-dim); color: var(--red); border: 1px solid rgba(255,95,109,0.2); }
+
+    /* SIZING CALCULATOR */
+    .calc-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 2rem; }
+    .calc-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--green); margin-bottom: 14px; }
+    .calc-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .calc-row label { font-size: 12px; color: var(--text-mid); min-width: 120px; }
+    .calc-row input { flex: 1; background: var(--bg-surface); border: 1px solid var(--border-mid); border-radius: var(--radius-sm); padding: 6px 10px; color: var(--text); font-family: var(--font-mono); font-size: 12px; outline: none; transition: border-color 0.15s; }
+    .calc-row input:focus { border-color: var(--green); box-shadow: 0 0 10px rgba(79,255,176,0.1); }
+    .calc-divider { height: 1px; background: var(--border); margin: 14px 0; }
+    .calc-results { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    @media (max-width:480px) { .calc-results { grid-template-columns: 1fr 1fr; } }
+    .calc-result { text-align: center; padding: 10px; background: var(--bg-surface); border-radius: var(--radius-sm); border: 1px solid var(--border); }
+    .calc-result-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 5px; }
+    .calc-result-val { font-family: var(--font-mono); font-size: 16px; font-weight: 700; color: var(--green); }
+    .calc-result-val.amber { color: var(--amber); }
+    .calc-result-val.blue { color: var(--blue); }
+
+    /* TIPS */
+    .tips-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 0; margin-bottom: 1.5rem; overflow: hidden; }
+    .tip-row { display: flex; gap: 14px; align-items: flex-start; padding: 12px 1.25rem; border-bottom: 1px solid var(--border); }
+    .tip-row:last-child { border-bottom: none; }
+    .tip-num { font-family: var(--font-mono); font-size: 10px; color: var(--green); min-width: 22px; margin-top: 3px; }
+    .tip-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+    .tip-body { font-size: 12px; color: var(--text-mid); line-height: 1.55; }
+
+    /* CTA */
+    .cta-box { background: var(--green-dim); border: 1px solid rgba(79,255,176,0.2); border-radius: var(--radius); padding: 1.25rem; margin-top: 2rem; }
+    .cta-title { font-size: 14px; font-weight: 600; color: var(--green); margin-bottom: 6px; }
+    .cta-body { font-size: 13px; color: var(--text-mid); line-height: 1.65; margin-bottom: 14px; }
+
+    /* BUTTONS */
+    .btn { font-family: var(--font-head); font-size: 13px; padding: 8px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-mid); cursor: pointer; color: var(--text); background: transparent; transition: all 0.2s; }
+    .btn:hover { background: var(--bg-card-hover); border-color: var(--border-accent); }
+    .btn:active { transform: scale(0.98); }
+    .btn:disabled { opacity: 0.3; cursor: default; transform: none; }
+    .btn-green { background: var(--green-dim); border-color: var(--green); color: var(--green); }
+    .btn-green:hover { box-shadow: 0 0 20px rgba(79,255,176,0.15); }
+
+    /* NAV */
+    .nav-row { display: flex; align-items: center; justify-content: space-between; margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+    .slide-counter { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); }
+    .section-div { height: 1px; background: var(--border); margin: 1.75rem 0; }
+
+    /* DISCLAIMER */
+    .disclaimer { font-size: 11px; color: var(--text-dim); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px; margin-top: 2rem; font-family: var(--font-mono); line-height: 1.6; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top-bar">
+    <div class="course-label">Pullback Trading Agent — 15-min practical course</div>
+    <div class="timer-wrap">
+      <div class="timer-dot"></div>
+      <div class="timer-val" id="timer">00:00</div>
+    </div>
+  </div>
+
+  <div class="progress-track">
+    <div class="progress-fill" id="progress-fill" style="width:5%"></div>
+  </div>
+
+  <div class="module-tabs">
+    <button class="module-tab active" onclick="goModule(0)">01 / Overview</button>
+    <button class="module-tab" onclick="goModule(1)">02 / The 7 agents</button>
+    <button class="module-tab" onclick="goModule(2)">03 / Pipeline walkthrough</button>
+    <button class="module-tab" onclick="goModule(3)">04 / Live invocations</button>
+    <button class="module-tab" onclick="goModule(4)">05 / Risk & sizing</button>
+  </div>
+
+  <!-- ───── SLIDE 0: OVERVIEW ───── -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-header">
+      <div class="module-eyebrow"><span class="eyebrow-line"></span>Module 1 — What this system does · 3 min</div>
+      <div class="slide-title">The Pullback Trading Agent: a 6-phase AI pipeline</div>
+      <div class="slide-subtitle">This system automates the full day-trading workflow for pullback/continuation setups — from pre-market scanning at 8 AM to post-trade journaling after market close, using seven coordinated Claude subagents.</div>
+    </div>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-tag">The problem it solves</div>
+        <div class="card-title">Manual scanning is slow and emotional</div>
+        <div class="card-body">A trader typically spends 60–90 minutes pre-market scanning 50+ tickers. The agent compresses this to seconds, using consistent, rules-based criteria every time.</div>
+      </div>
+      <div class="card">
+        <div class="card-tag">The workflow covered</div>
+        <div class="card-title">Pre-market to journal — end-to-end</div>
+        <div class="card-body">Scan → Analyze setup → Confirm entry → Size position → Manage trade → Journal outcome. Each phase is handled by a dedicated subagent with a focused role.</div>
+      </div>
+      <div class="card">
+        <div class="card-tag">The trading style</div>
+        <div class="card-title">VWAP / EMA pullback on high-RVOL stocks</div>
+        <div class="card-body">Targets stocks gapping up with a clear catalyst, pulling back to VWAP or 9/20 EMA support, then forming a bullish reversal candle to enter long.</div>
+      </div>
+    </div>
+
+    <div class="section-div"></div>
+    <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:10px;">Entry criteria the scanner enforces:</div>
+    <div class="criteria-grid">
+      <div class="criteria-box green"><div class="criteria-label">Gap threshold</div><div class="criteria-val">≥ 3%</div><div class="criteria-sub">Pre-market gap up</div></div>
+      <div class="criteria-box green"><div class="criteria-label">RVOL</div><div class="criteria-val">≥ 2×</div><div class="criteria-sub">Relative volume vs avg</div></div>
+      <div class="criteria-box green"><div class="criteria-label">Catalyst</div><div class="criteria-val">Required</div><div class="criteria-sub">News / earnings driver</div></div>
+      <div class="criteria-box amber"><div class="criteria-label">Pullback depth</div><div class="criteria-val">38–62%</div><div class="criteria-sub">Fibonacci of flagpole</div></div>
+      <div class="criteria-box amber"><div class="criteria-label">Support level</div><div class="criteria-val">VWAP / EMA</div><div class="criteria-sub">9 EMA or 20 EMA</div></div>
+      <div class="criteria-box red"><div class="criteria-label">Max risk</div><div class="criteria-val">1% / trade</div><div class="criteria-sub">Account equity rule</div></div>
+    </div>
+
+    <div class="quiz-label" style="margin-top:1rem;">Quick check — what is the minimum gap required for a stock to qualify for the watchlist?</div>
+    <div id="q0">
+      <div class="quiz-option" onclick="answerQuiz('q0',this,false)"><span class="opt-key">A</span>Gap of at least 1% with any volume</div>
+      <div class="quiz-option" onclick="answerQuiz('q0',this,true)"><span class="opt-key">B</span>Gap of at least 3% with RVOL ≥ 2× and a confirmed catalyst</div>
+      <div class="quiz-option" onclick="answerQuiz('q0',this,false)"><span class="opt-key">C</span>Gap of at least 5% regardless of volume</div>
+      <div class="quiz-feedback" id="q0-feedback"></div>
+    </div>
+  </div>
+
+  <!-- ───── SLIDE 1: AGENTS ───── -->
+  <div class="slide" id="slide-1">
+    <div class="slide-header">
+      <div class="module-eyebrow"><span class="eyebrow-line"></span>Module 2 — Meet the 7 agents · 3 min</div>
+      <div class="slide-title">One orchestrator, six specialists</div>
+      <div class="slide-subtitle">Each agent has a single responsibility. The orchestrator coordinates all six specialists in sequence. Two agents use o3-mini for pure math/logic tasks; the rest use Claude Sonnet for reasoning and language.</div>
+    </div>
+
+    <table class="agent-table">
+      <thead>
+        <tr>
+          <th>Agent</th>
+          <th>Model</th>
+          <th>What it does</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>pullback.orchestrator</td>
+          <td><span class="model-pill model-sonnet">sonnet-4-5</span></td>
+          <td>Entry point — coordinates all 6 phases end-to-end</td>
+        </tr>
+        <tr>
+          <td>pullback.scanner</td>
+          <td><span class="model-pill model-sonnet">sonnet-4-5</span></td>
+          <td>Pre-market screener — builds daily watchlist from gap, RVOL, and catalyst data</td>
+        </tr>
+        <tr>
+          <td>pullback.setup-analyzer</td>
+          <td><span class="model-pill model-sonnet">sonnet-4-5</span></td>
+          <td>Grades trend quality, flagpole strength, and pullback depth against Fibonacci levels</td>
+        </tr>
+        <tr>
+          <td>pullback.entry-advisor</td>
+          <td><span class="model-pill model-sonnet">sonnet-4-5</span></td>
+          <td>Confirms bullish reversal candle pattern and volume expansion at VWAP/EMA support</td>
+        </tr>
+        <tr>
+          <td>pullback.risk-manager</td>
+          <td><span class="model-pill model-o3">o3-mini</span></td>
+          <td>Calculates exact position size, ATR-adjusted stop, and 2R–4R profit targets</td>
+        </tr>
+        <tr>
+          <td>pullback.trade-manager</td>
+          <td><span class="model-pill model-sonnet">sonnet-4-5</span></td>
+          <td>Manages open trades — breakeven at +1R, Chandelier Exit trailing, scale-outs at 2R</td>
+        </tr>
+        <tr>
+          <td>pullback.journal</td>
+          <td><span class="model-pill model-o3">o3-mini</span></td>
+          <td>Post-trade log — A–F quality grade, R-multiples, win rate, and session avg R:R</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="card" style="border-color:rgba(94,180,255,0.2);background:var(--blue-dim);">
+      <div class="card-tag" style="color:var(--blue);">Model selection rationale</div>
+      <div class="card-body" style="color:var(--text-mid);">
+        <strong style="color:var(--text);">Claude Sonnet</strong> handles tasks needing language comprehension, market reasoning, and nuanced judgment — like interpreting chart structure or reading candle patterns.<br><br>
+        <strong style="color:var(--text);">o3-mini</strong> handles deterministic math — position sizing and R-multiple calculations don't need prose, they need accuracy. Using a reasoning-focused model reduces arithmetic errors on the most consequential outputs.
+      </div>
+    </div>
+  </div>
+
+  <!-- ───── SLIDE 2: PIPELINE ───── -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <div class="module-eyebrow"><span class="eyebrow-line"></span>Module 3 — Pipeline walkthrough · 3 min</div>
+      <div class="slide-title">Six phases from scan to journal</div>
+      <div class="slide-subtitle">Click any phase to see exactly what that agent receives, what it decides, and what it passes forward. Each phase is a checkpoint — a bad setup gets filtered before it reaches the next agent.</div>
+    </div>
+
+    <div class="pipeline">
+      <div class="pipe-row">
+        <div class="pipe-node" id="node-0" onclick="selectNode(0)">
+          <div class="pipe-phase">Phase 1</div>
+          <div class="pipe-name">Scan</div>
+          <div class="pipe-sub">3–8 candidates</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node" id="node-1" onclick="selectNode(1)">
+          <div class="pipe-phase">Phase 2</div>
+          <div class="pipe-name">Analyze</div>
+          <div class="pipe-sub">Setup grade</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node" id="node-2" onclick="selectNode(2)">
+          <div class="pipe-phase">Phase 3</div>
+          <div class="pipe-name">Confirm</div>
+          <div class="pipe-sub">Entry signal</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node" id="node-3" onclick="selectNode(3)">
+          <div class="pipe-phase">Phase 4</div>
+          <div class="pipe-name">Size</div>
+          <div class="pipe-sub">Shares + stop</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node" id="node-4" onclick="selectNode(4)">
+          <div class="pipe-phase">Phase 5</div>
+          <div class="pipe-name">Manage</div>
+          <div class="pipe-sub">Trail + scale</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node" id="node-5" onclick="selectNode(5)">
+          <div class="pipe-phase">Phase 6</div>
+          <div class="pipe-name">Journal</div>
+          <div class="pipe-sub">A–F grade</div>
+        </div>
+      </div>
+
+      <div class="pipe-detail" id="pipe-detail">
+        <div class="pipe-detail-title" id="detail-title"></div>
+        <div id="detail-body"></div>
+      </div>
+    </div>
+
+    <div class="walkthrough">
+      <div class="wt-step">
+        <div class="wt-num">EX.</div>
+        <div class="wt-body">
+          <div class="wt-title">Today's session — NVDA gaps up 4.2% on earnings beat</div>
+          <div class="wt-desc">Pre-market: NVDA up from $860 close → $896 pre-market high. RVOL at 3.8×. Catalyst confirmed (EPS beat + raised guidance). Scanner selects NVDA as #1 watchlist candidate.</div>
+          <div class="wt-output">scanner output → NVDA: gap +4.2%, RVOL 3.8×, catalyst CONFIRMED, watchlist rank #1</div>
+        </div>
+      </div>
+      <div class="wt-step">
+        <div class="wt-num">→</div>
+        <div class="wt-body">
+          <div class="wt-title">By 9:40 AM, NVDA pulls back to VWAP at $875</div>
+          <div class="wt-desc">Setup-analyzer grades the flagpole (860→896 = $36 move), confirms pullback depth is 58% Fibonacci, and validates VWAP at $875 as the key support level. Setup grade: A.</div>
+          <div class="wt-output">setup-analyzer output → Grade: A | Flagpole: $36 | Pullback: 58% Fib | Support: VWAP $875</div>
+        </div>
+      </div>
+      <div class="wt-step">
+        <div class="wt-num">→</div>
+        <div class="wt-body">
+          <div class="wt-title">9:43 AM — bullish engulfing candle off VWAP with 2× volume</div>
+          <div class="wt-desc">Entry-advisor detects a Tier 1 bullish engulfing candle at $875.50 with volume 2.4× the 20-period average. All three confirmation boxes checked. Entry signal: CONFIRMED.</div>
+          <div class="wt-output">entry-advisor output → Signal: CONFIRMED | Pattern: Bullish engulfing | Entry: $875.50 | Vol: 2.4×</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───── SLIDE 3: INVOCATIONS ───── -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <div class="module-eyebrow"><span class="eyebrow-line"></span>Module 4 — Calling agents in practice · 3 min</div>
+      <div class="slide-title">How you actually invoke the system</div>
+      <div class="slide-subtitle">You can run the full pipeline via the orchestrator, or call individual subagents for focused tasks. Here are the four most common invocation patterns with real examples.</div>
+    </div>
+
+    <div class="code-label">Full pipeline — orchestrator</div>
+    <div class="code-block"><span class="kw">Run agent</span> <span class="ag">/pullback.orchestrator</span> <span class="str">pipeline for today.</span>
+<span class="str">Account size: $120,000. Prioritize NVDA and TSLA if they gap up.</span></div>
+
+    <div class="code-label">Pre-market scan only</div>
+    <div class="code-block"><span class="ag">@pullback.scanner</span> <span class="str">Scan for pullback candidates for today.</span>
+<span class="str">Show top 5 by catalyst strength and RVOL.</span></div>
+
+    <div class="code-label">Setup analysis for a specific ticker</div>
+    <div class="code-block"><span class="ag">@pullback.setup-analyzer</span> <span class="str">Analyze NVDA for a pullback setup.</span>
+<span class="str">Current price: $875. VWAP: $862. 9 EMA: $858. ATR: $14.20.</span>
+<span class="str">Pre-market high was $882.</span></div>
+
+    <div class="code-label">Trade management — get chandelier exit update</div>
+    <div class="code-block"><span class="ag">@pullback.trade-manager</span> <span class="str">I'm long TSLA from $248.00, stop at $244.50.</span>
+<span class="str">Current price: $256.80. Highest high since entry: $257.40. ATR: $3.60.</span>
+<span class="str">Update my Chandelier Exit and advise on stop placement.</span></div>
+
+    <div class="code-label">Post-trade journal entry</div>
+    <div class="code-block"><span class="ag">@pullback.journal</span> <span class="str">Log this trade: NVDA long, entry $870, stop $858,</span>
+<span class="str">exit $895 (full) at 10:45 AM. ATR was $14. RVOL was 3.2×.</span>
+<span class="str">Setup had bullish engulfing off VWAP. Account $50,000.</span></div>
+
+    <div class="section-div"></div>
+    <div class="quiz-label">Which agent would you call to get a Chandelier Exit update on an open TSLA long?</div>
+    <div id="q1">
+      <div class="quiz-option" onclick="answerQuiz('q1',this,false)"><span class="opt-key">A</span>@pullback.risk-manager — it handles all position math</div>
+      <div class="quiz-option" onclick="answerQuiz('q1',this,false)"><span class="opt-key">B</span>@pullback.entry-advisor — it tracks entry candles</div>
+      <div class="quiz-option" onclick="answerQuiz('q1',this,true)"><span class="opt-key">C</span>@pullback.trade-manager — it manages open positions including trailing stops</div>
+      <div class="quiz-feedback" id="q1-feedback"></div>
+    </div>
+  </div>
+
+  <!-- ───── SLIDE 4: RISK & SIZING ───── -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <div class="module-eyebrow"><span class="eyebrow-line"></span>Module 5 — Risk management deep-dive · 3 min</div>
+      <div class="slide-title">The 1% rule: how the risk-manager thinks</div>
+      <div class="slide-subtitle">The risk-manager (o3-mini) applies a deterministic 1% account risk formula. Try the interactive calculator below — it mirrors exactly what the agent computes when you send it a trade.</div>
+    </div>
+
+    <div class="calc-box">
+      <div class="calc-label">Interactive position sizer — mirrors pullback.risk-manager output</div>
+      <div class="calc-row">
+        <label>Account size ($)</label>
+        <input type="number" id="account" value="120000" oninput="calcSize()" />
+      </div>
+      <div class="calc-row">
+        <label>Entry price ($)</label>
+        <input type="number" id="entry" value="875.50" step="0.01" oninput="calcSize()" />
+      </div>
+      <div class="calc-row">
+        <label>Stop price ($)</label>
+        <input type="number" id="stop" value="861.00" step="0.01" oninput="calcSize()" />
+      </div>
+      <div class="calc-row">
+        <label>ATR ($)</label>
+        <input type="number" id="atr" value="14.20" step="0.01" oninput="calcSize()" />
+      </div>
+      <div class="calc-divider"></div>
+      <div class="calc-results">
+        <div class="calc-result">
+          <div class="calc-result-label">Max risk $</div>
+          <div class="calc-result-val" id="res-risk">—</div>
+        </div>
+        <div class="calc-result">
+          <div class="calc-result-label">Shares</div>
+          <div class="calc-result-val" id="res-shares">—</div>
+        </div>
+        <div class="calc-result">
+          <div class="calc-result-label">Position $</div>
+          <div class="calc-result-val amber" id="res-pos">—</div>
+        </div>
+        <div class="calc-result">
+          <div class="calc-result-label">2R target</div>
+          <div class="calc-result-val blue" id="res-2r">—</div>
+        </div>
+        <div class="calc-result">
+          <div class="calc-result-label">3R target</div>
+          <div class="calc-result-val blue" id="res-3r">—</div>
+        </div>
+        <div class="calc-result">
+          <div class="calc-result-label">R / share</div>
+          <div class="calc-result-val" id="res-r">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tips-card">
+      <div class="tip-row">
+        <div class="tip-num">R1</div>
+        <div>
+          <div class="tip-title">Move stop to breakeven at +1R</div>
+          <div class="tip-body">Once the position is up by 1 full R, the trade-manager moves the stop to your entry price. You can never lose on this trade again.</div>
+        </div>
+      </div>
+      <div class="tip-row">
+        <div class="tip-num">R2</div>
+        <div>
+          <div class="tip-title">Scale out 50% at +2R</div>
+          <div class="tip-body">At 2R gain, the agent recommends selling half the position. This locks in profit and reduces pressure to hold the remainder.</div>
+        </div>
+      </div>
+      <div class="tip-row">
+        <div class="tip-num">CX</div>
+        <div>
+          <div class="tip-title">Chandelier Exit for the runner</div>
+          <div class="tip-body">The remaining 50% is trailed using highest-high − (ATR × 3). This lets big moves run without giving up too much on the way back down.</div>
+        </div>
+      </div>
+      <div class="tip-row">
+        <div class="tip-num">JR</div>
+        <div>
+          <div class="tip-title">Journal grades the whole process, not just the outcome</div>
+          <div class="tip-body">A trade that hit 3R but had a D-grade setup is still graded D. The journal forces you to separate execution quality from lucky outcomes.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cta-box">
+      <div class="cta-title">Start your first session with the pipeline</div>
+      <div class="cta-body">Use the invocation examples from Module 4 in Cursor with the agent files configured. Begin with the scanner only — run it pre-market for two weeks before running the full orchestrator pipeline live.</div>
+    </div>
+
+    <div class="disclaimer">⚠  Risk disclaimer: Day trading is high-risk. This system is a decision-support tool, not financial advice. Always verify signals manually and use a paper trading account before live execution.</div>
+  </div>
+
+  <!-- NAV -->
+  <div class="nav-row">
+    <button class="btn" id="btn-prev" onclick="navigate(-1)" disabled>← Previous</button>
+    <span class="slide-counter" id="slide-counter">Slide 1 of 5</span>
+    <button class="btn btn-green" id="btn-next" onclick="navigate(1)">Next →</button>
+  </div>
+
+</div>
+
+<script>
+  let current = 0;
+  const total = 5;
+  let timerSec = 0;
+  const completedModules = new Set();
+
+  setInterval(() => {
+    timerSec++;
+    const m = Math.floor(timerSec / 60);
+    const s = timerSec % 60;
+    document.getElementById('timer').textContent =
+      String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  }, 1000);
+
+  function goModule(idx) { completedModules.add(current); current = idx; updateUI(); }
+  function navigate(dir) { completedModules.add(current); current = Math.max(0, Math.min(total-1, current+dir)); updateUI(); }
+
+  function updateUI() {
+    document.querySelectorAll('.slide').forEach((s,i) => s.classList.toggle('active', i===current));
+    document.querySelectorAll('.module-tab').forEach((t,i) => {
+      t.classList.remove('active','done');
+      if (i===current) t.classList.add('active');
+      else if (completedModules.has(i)) t.classList.add('done');
+    });
+    const prog = Math.round(((current+1)/total)*100);
+    document.getElementById('progress-fill').style.width = prog+'%';
+    document.getElementById('slide-counter').textContent = 'Slide '+(current+1)+' of '+total;
+    document.getElementById('btn-prev').disabled = current===0;
+    const nb = document.getElementById('btn-next');
+    nb.disabled = current===total-1;
+    nb.textContent = current===total-1 ? 'Complete' : 'Next →';
+    if (current===4) calcSize();
+  }
+
+  function answerQuiz(qid, el, isCorrect) {
+    document.getElementById(qid).querySelectorAll('.quiz-option').forEach(o => { o.onclick=null; o.style.cursor='default'; });
+    el.classList.add(isCorrect?'correct':'wrong');
+    const fb = document.getElementById(qid+'-feedback');
+    fb.classList.add('show', isCorrect?'success':'error');
+    const msgs = {
+      q0: {
+        t: 'Correct. All three criteria must be met simultaneously: gap ≥ 3%, RVOL ≥ 2×, and a verified catalyst. Missing any one of them disqualifies the candidate.',
+        f: 'Not quite. The scanner requires all three criteria: gap ≥ 3%, RVOL ≥ 2×, AND a confirmed catalyst. Volume alone or gap alone is not enough.'
+      },
+      q1: {
+        t: 'Exactly right. pullback.trade-manager owns all in-trade management — breakeven stops, Chandelier Exit trailing, and scale-out decisions.',
+        f: 'Incorrect. The risk-manager only runs at entry to calculate the initial size and targets. For active trade management after entry, you use pullback.trade-manager.'
+      }
+    };
+    fb.textContent = isCorrect ? msgs[qid].t : msgs[qid].f;
+  }
+
+  // Pipeline detail data
+  const pipeDetails = [
+    {
+      title: 'Phase 1 — pullback.scanner',
+      rows: [
+        ['Agent','pullback.scanner (sonnet-4-5)'],
+        ['Runs','Pre-market, before 9:30 AM ET'],
+        ['Data sources','Yahoo Finance, Finviz, Seeking Alpha via WebFetch'],
+        ['Criteria','Gap ≥ 3%, RVOL ≥ 2×, confirmed catalyst'],
+        ['Output','Ranked watchlist of 3–8 candidates'],
+        ['Filter effect','~50 gapping tickers → 3–8 quality setups'],
+      ]
+    },
+    {
+      title: 'Phase 2 — pullback.setup-analyzer',
+      rows: [
+        ['Agent','pullback.setup-analyzer (sonnet-4-5)'],
+        ['Input','Watchlist from scanner + live price data'],
+        ['Grades','Flagpole strength, pullback depth, VWAP/EMA alignment'],
+        ['Key check','Pullback must be 38–62% Fibonacci of the flagpole'],
+        ['Output','Setup grade A–F per candidate'],
+        ['Filter effect','3–8 candidates → 1–3 qualifying setups'],
+      ]
+    },
+    {
+      title: 'Phase 3 — pullback.entry-advisor',
+      rows: [
+        ['Agent','pullback.entry-advisor (sonnet-4-5)'],
+        ['Runs','Intraday — watching for reversal candle formation'],
+        ['Looks for','Tier 1/2 bullish reversal candle at VWAP/EMA'],
+        ['Volume check','Entry candle volume must exceed 20-period average'],
+        ['Output','Entry confirmed / not confirmed + exact entry price'],
+        ['Timing','9:30–11:00 AM ET peak session window'],
+      ]
+    },
+    {
+      title: 'Phase 4 — pullback.risk-manager',
+      rows: [
+        ['Agent','pullback.risk-manager (o3-mini)'],
+        ['Formula','Risk $ = Account × 1% | Shares = Risk $ ÷ (Entry − Stop)'],
+        ['Stop placement','ATR-adjusted — typically 1× ATR below entry'],
+        ['Profit targets','2R, 3R, and 4R above entry'],
+        ['Output','Shares, stop price, target prices, position value'],
+        ['Why o3-mini','Deterministic math — no ambiguity, high accuracy'],
+      ]
+    },
+    {
+      title: 'Phase 5 — pullback.trade-manager',
+      rows: [
+        ['Agent','pullback.trade-manager (sonnet-4-5)'],
+        ['At +1R','Moves stop to breakeven (entry price)'],
+        ['At +2R','Recommends scaling out 50% of position'],
+        ['Trailing stop','Chandelier Exit = Highest high − (ATR × 3)'],
+        ['Output','Updated stop level, scale-out advice, position status'],
+        ['Call it when','Any time price moves significantly after entry'],
+      ]
+    },
+    {
+      title: 'Phase 6 — pullback.journal',
+      rows: [
+        ['Agent','pullback.journal (o3-mini)'],
+        ['Grades','Process quality A–F (independent of P&L outcome)'],
+        ['Calculates','R-multiple achieved, win rate, session avg R:R'],
+        ['Logs','Entry/exit time, setup type, RVOL, ATR, candle pattern'],
+        ['Output','Structured trade log entry + session summary'],
+        ['Why it matters','Separates skill from luck over time'],
+      ]
+    }
+  ];
+
+  let selectedNode = -1;
+  function selectNode(idx) {
+    const detail = document.getElementById('pipe-detail');
+    if (selectedNode === idx) {
+      detail.classList.remove('visible');
+      document.getElementById('node-'+idx).classList.remove('active-node');
+      selectedNode = -1;
+      return;
+    }
+    document.querySelectorAll('.pipe-node').forEach(n => n.classList.remove('active-node'));
+    document.getElementById('node-'+idx).classList.add('active-node');
+    selectedNode = idx;
+    const d = pipeDetails[idx];
+    document.getElementById('detail-title').textContent = d.title;
+    document.getElementById('detail-body').innerHTML = d.rows.map(r =>
+      `<div class="pipe-detail-row"><span class="pdr-label">${r[0]}</span><span class="pdr-val">${r[1]}</span></div>`
+    ).join('');
+    detail.classList.add('visible');
+  }
+
+  // Position sizing calculator
+  function calcSize() {
+    const acct = parseFloat(document.getElementById('account').value) || 0;
+    const entry = parseFloat(document.getElementById('entry').value) || 0;
+    const stop = parseFloat(document.getElementById('stop').value) || 0;
+    const atr = parseFloat(document.getElementById('atr').value) || 0;
+    if (!acct || !entry || !stop || entry <= stop) {
+      ['res-risk','res-shares','res-pos','res-2r','res-3r','res-r'].forEach(id => document.getElementById(id).textContent = '—');
+      return;
+    }
+    const riskDollars = acct * 0.01;
+    const rPerShare = entry - stop;
+    const shares = Math.floor(riskDollars / rPerShare);
+    const posValue = shares * entry;
+    const target2r = entry + (rPerShare * 2);
+    const target3r = entry + (rPerShare * 3);
+    document.getElementById('res-risk').textContent = '$'+Math.round(riskDollars).toLocaleString();
+    document.getElementById('res-shares').textContent = shares.toLocaleString();
+    document.getElementById('res-pos').textContent = '$'+Math.round(posValue).toLocaleString();
+    document.getElementById('res-2r').textContent = '$'+target2r.toFixed(2);
+    document.getElementById('res-3r').textContent = '$'+target3r.toFixed(2);
+    document.getElementById('res-r').textContent = '$'+rPerShare.toFixed(2);
+  }
+
+  updateUI();
+  calcSize();
+</script>
+</body>
+</html>

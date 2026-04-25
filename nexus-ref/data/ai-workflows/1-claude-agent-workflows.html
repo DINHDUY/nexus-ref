@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Claude Agent Workflows — Quick Intro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0c0c0f;
+      --bg-surface: #13131a;
+      --bg-card: #1a1a24;
+      --bg-card-hover: #1f1f2e;
+      --border: rgba(255,255,255,0.07);
+      --border-mid: rgba(255,255,255,0.12);
+      --border-accent: rgba(255,255,255,0.2);
+      --text: #f0eef8;
+      --text-mid: #9b98b4;
+      --text-dim: #5a5870;
+      --neon: #c8b8ff;
+      --neon-dim: rgba(200,184,255,0.12);
+      --neon-glow: rgba(200,184,255,0.25);
+      --teal: #7ef0d4;
+      --teal-dim: rgba(126,240,212,0.1);
+      --amber: #ffcf6e;
+      --amber-dim: rgba(255,207,110,0.1);
+      --danger: #ff7070;
+      --danger-dim: rgba(255,112,112,0.1);
+      --success: #7ef0a4;
+      --success-dim: rgba(126,240,164,0.1);
+      --radius: 10px;
+      --radius-sm: 6px;
+      --font-head: 'Bricolage Grotesque', sans-serif;
+      --font-mono: 'Space Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-head);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+      line-height: 1.6;
+    }
+
+    /* scanline overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.03) 2px,
+        rgba(0,0,0,0.03) 4px
+      );
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    .wrap {
+      max-width: 780px;
+      margin: 0 auto;
+    }
+
+    /* Top bar */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+    }
+    .course-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .timer-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .timer-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--neon);
+      box-shadow: 0 0 8px var(--neon-glow);
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    .timer-val {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--neon);
+      letter-spacing: 0.05em;
+    }
+
+    /* Progress */
+    .progress-track {
+      height: 2px;
+      background: var(--border);
+      border-radius: 2px;
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--neon), var(--teal));
+      border-radius: 2px;
+      transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+      box-shadow: 0 0 12px var(--neon-glow);
+    }
+
+    /* Module tabs */
+    .module-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 2.5rem;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+    .module-tabs::-webkit-scrollbar { display: none; }
+    .module-tab {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      padding: 5px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      white-space: nowrap;
+      color: var(--text-dim);
+      background: transparent;
+      transition: all 0.2s;
+    }
+    .module-tab:hover { border-color: var(--border-mid); color: var(--text-mid); }
+    .module-tab.active {
+      background: var(--neon-dim);
+      border-color: var(--neon);
+      color: var(--neon);
+      box-shadow: 0 0 16px var(--neon-glow);
+    }
+    .module-tab.done {
+      border-color: var(--border-mid);
+      color: var(--text-mid);
+    }
+
+    /* Slides */
+    .slide { display: none; animation: fadeIn 0.3s ease; }
+    .slide.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+    /* Slide header */
+    .slide-header { margin-bottom: 2rem; }
+    .module-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--neon);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .eyebrow-line {
+      width: 24px;
+      height: 1px;
+      background: var(--neon);
+      box-shadow: 0 0 6px var(--neon-glow);
+    }
+    .slide-title {
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.25;
+      margin-bottom: 10px;
+      letter-spacing: -0.01em;
+    }
+    .slide-subtitle {
+      font-size: 15px;
+      color: var(--text-mid);
+      line-height: 1.65;
+      max-width: 620px;
+    }
+
+    /* Compare grid */
+    .compare-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 2rem;
+    }
+    @media (max-width: 540px) { .compare-row { grid-template-columns: 1fr; } }
+    .compare-col {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.1rem 1.25rem;
+    }
+    .compare-col.highlight {
+      border-color: var(--neon);
+      box-shadow: 0 0 24px rgba(200,184,255,0.08), inset 0 0 40px rgba(200,184,255,0.03);
+    }
+    .compare-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 12px;
+    }
+    .compare-label.accent { color: var(--neon); }
+    .compare-item {
+      font-size: 13px;
+      color: var(--text-mid);
+      padding: 5px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .compare-item:last-child { border-bottom: none; }
+    .compare-item::before {
+      content: '›';
+      color: var(--text-dim);
+      margin-top: 0;
+      flex-shrink: 0;
+    }
+
+    /* Quote */
+    .quote-block {
+      border-left: 2px solid var(--neon);
+      padding: 10px 18px;
+      margin-bottom: 2rem;
+      box-shadow: -4px 0 20px rgba(200,184,255,0.08);
+    }
+    .quote-text {
+      font-size: 15px;
+      color: var(--text-mid);
+      font-style: italic;
+      line-height: 1.7;
+    }
+
+    /* Cards */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 2rem;
+    }
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.1rem 1.25rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .card:hover {
+      border-color: var(--border-mid);
+      box-shadow: 0 0 20px rgba(200,184,255,0.06);
+    }
+    .card-icon { font-size: 18px; margin-bottom: 10px; color: var(--neon); }
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .card-body {
+      font-size: 12px;
+      color: var(--text-mid);
+      line-height: 1.6;
+    }
+
+    /* Flow steps */
+    .flow-steps {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      margin-bottom: 2rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .flow-steps::-webkit-scrollbar { display: none; }
+    .flow-step { flex: 1; min-width: 90px; }
+    .flow-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 10px;
+      text-align: center;
+      height: 100%;
+    }
+    .step-num {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.06em;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+    }
+    .step-name { font-size: 12px; font-weight: 600; color: var(--text); }
+    .step-desc { font-size: 11px; color: var(--text-mid); margin-top: 3px; line-height: 1.4; }
+    .flow-arrow {
+      display: flex;
+      align-items: center;
+      padding: 0 4px;
+      color: var(--text-dim);
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    /* Chat demo */
+    .demo-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      margin-bottom: 2rem;
+    }
+    .demo-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 14px;
+    }
+    .chat-bubble {
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      margin-bottom: 8px;
+      max-width: 85%;
+      line-height: 1.55;
+    }
+    .chat-bubble.agent {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius-sm) var(--radius-sm) var(--radius-sm) 2px;
+    }
+    .chat-bubble.tool {
+      background: transparent;
+      border: 1px dashed rgba(126,240,212,0.25);
+      color: var(--teal);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      max-width: 100%;
+      border-radius: var(--radius-sm);
+    }
+
+    /* Key insight card */
+    .insight-card {
+      background: var(--neon-dim);
+      border: 1px solid rgba(200,184,255,0.2);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      margin-bottom: 2rem;
+    }
+    .insight-title { font-size: 13px; font-weight: 600; color: var(--neon); margin-bottom: 6px; }
+    .insight-body { font-size: 13px; color: var(--text-mid); line-height: 1.65; }
+
+    /* Checklist */
+    .checklist { margin-bottom: 2rem; }
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .check-item:last-child { border-bottom: none; }
+    .check-box {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      border: 1px solid var(--border-mid);
+      flex-shrink: 0;
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .check-box.checked {
+      background: var(--neon);
+      border-color: var(--neon);
+      box-shadow: 0 0 10px var(--neon-glow);
+    }
+    .check-box.checked::after {
+      content: '';
+      display: block;
+      width: 9px;
+      height: 5px;
+      border-left: 1.5px solid var(--bg);
+      border-bottom: 1.5px solid var(--bg);
+      transform: rotate(-45deg) translateY(-1px);
+    }
+    .check-label { font-size: 13px; color: var(--text); line-height: 1.5; }
+    .check-label.checked { color: var(--text-dim); text-decoration: line-through; }
+
+    /* Scenarios */
+    .scenario-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      margin-bottom: 12px;
+      transition: border-color 0.2s;
+    }
+    .scenario-box:hover { border-color: var(--border-mid); }
+    .scenario-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--neon);
+      margin-bottom: 8px;
+    }
+    .scenario-text { font-size: 13px; color: var(--text); line-height: 1.6; }
+    .scenario-result {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+      font-family: var(--font-mono);
+    }
+
+    /* Pills */
+    .pill-row { margin-top: 1rem; margin-bottom: 2rem; }
+    .pill-row-label { font-size: 12px; color: var(--text-dim); margin-bottom: 8px; }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.04em;
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin: 3px;
+    }
+    .pill-neon { background: var(--neon-dim); color: var(--neon); border: 1px solid rgba(200,184,255,0.2); }
+    .pill-teal { background: var(--teal-dim); color: var(--teal); border: 1px solid rgba(126,240,212,0.2); }
+    .pill-amber { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(255,207,110,0.2); }
+
+    /* Tips */
+    .tips-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.5rem 0;
+      margin-bottom: 1.5rem;
+    }
+    .tip-row {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      padding: 12px 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .tip-row:last-child { border-bottom: none; }
+    .tip-num {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--neon);
+      min-width: 22px;
+      margin-top: 3px;
+    }
+    .tip-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+    .tip-body { font-size: 12px; color: var(--text-mid); line-height: 1.55; }
+
+    /* Quiz */
+    .quiz-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+    .quiz-option {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--text);
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .quiz-option:hover { border-color: var(--border-mid); background: var(--bg-card-hover); }
+    .quiz-option.correct { border-color: var(--success); background: var(--success-dim); color: var(--success); }
+    .quiz-option.wrong { border-color: var(--danger); background: var(--danger-dim); color: var(--danger); }
+    .opt-key {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 1px solid var(--border-mid);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .quiz-feedback {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      margin-top: 8px;
+      display: none;
+      line-height: 1.55;
+    }
+    .quiz-feedback.show { display: block; }
+    .quiz-feedback.success { background: var(--success-dim); color: var(--success); border: 1px solid rgba(126,240,164,0.2); }
+    .quiz-feedback.error { background: var(--danger-dim); color: var(--danger); border: 1px solid rgba(255,112,112,0.2); }
+
+    /* CTA box */
+    .cta-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      margin-top: 2rem;
+    }
+    .cta-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .cta-body { font-size: 13px; color: var(--text-mid); line-height: 1.65; margin-bottom: 14px; }
+
+    /* Buttons */
+    .btn {
+      font-family: var(--font-head);
+      font-size: 13px;
+      padding: 8px 18px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-mid);
+      cursor: pointer;
+      color: var(--text);
+      background: transparent;
+      transition: all 0.2s;
+    }
+    .btn:hover { background: var(--bg-card-hover); border-color: var(--border-accent); }
+    .btn:active { transform: scale(0.98); }
+    .btn:disabled { opacity: 0.3; cursor: default; transform: none; }
+    .btn-neon {
+      background: var(--neon-dim);
+      border-color: var(--neon);
+      color: var(--neon);
+      box-shadow: 0 0 16px rgba(200,184,255,0.1);
+    }
+    .btn-neon:hover { box-shadow: 0 0 24px rgba(200,184,255,0.2); background: rgba(200,184,255,0.15); }
+
+    /* Nav row */
+    .nav-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 2.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+    .slide-counter {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    .section-div { height: 1px; background: var(--border); margin: 1.75rem 0; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <div class="top-bar">
+      <div class="course-label">Agent Workflows — 30-min intro</div>
+      <div class="timer-wrap">
+        <div class="timer-dot"></div>
+        <div class="timer-val" id="timer">00:00</div>
+      </div>
+    </div>
+
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill" style="width:4%"></div>
+    </div>
+
+    <div class="module-tabs" id="module-tabs">
+      <button class="module-tab active" onclick="goModule(0)">01 / What is an agent?</button>
+      <button class="module-tab" onclick="goModule(1)">02 / How it works</button>
+      <button class="module-tab" onclick="goModule(2)">03 / Building blocks</button>
+      <button class="module-tab" onclick="goModule(3)">04 / Use cases</button>
+      <button class="module-tab" onclick="goModule(4)">05 / Best practices</button>
+    </div>
+
+    <!-- SLIDE 0 -->
+    <div class="slide active" id="slide-0">
+      <div class="slide-header">
+        <div class="module-eyebrow"><span class="eyebrow-line"></span>Module 1 — What is an agent? · 5 min</div>
+        <div class="slide-title">Welcome: from chatbot to coworker</div>
+        <div class="slide-subtitle">You already know how to chat with Claude. An agent workflow takes that one step further — Claude doesn't just answer, it acts.</div>
+      </div>
+
+      <div class="compare-row">
+        <div class="compare-col">
+          <div class="compare-label">Regular Claude chat</div>
+          <div class="compare-item">You ask one question</div>
+          <div class="compare-item">Claude answers immediately</div>
+          <div class="compare-item">You do the next step</div>
+          <div class="compare-item">One turn at a time</div>
+        </div>
+        <div class="compare-col highlight">
+          <div class="compare-label accent">Agent workflow</div>
+          <div class="compare-item">You give a goal</div>
+          <div class="compare-item">Claude plans + takes steps</div>
+          <div class="compare-item">Claude uses tools to act</div>
+          <div class="compare-item">Loops until goal is done</div>
+        </div>
+      </div>
+
+      <div class="quote-block">
+        <div class="quote-text">"Think of regular Claude like a very smart consultant you can call for advice. An agent workflow is that same consultant — except now they can also open your laptop, write the email, and send it."</div>
+      </div>
+
+      <div class="section-div"></div>
+      <div class="quiz-label">Quick check — which of these is an agent-style task?</div>
+      <div id="q0">
+        <div class="quiz-option" onclick="answerQuiz('q0',this,false)"><span class="opt-key">A</span>"What's the capital of France?"</div>
+        <div class="quiz-option" onclick="answerQuiz('q0',this,false)"><span class="opt-key">B</span>"Summarise this paragraph for me"</div>
+        <div class="quiz-option" onclick="answerQuiz('q0',this,true)"><span class="opt-key">C</span>"Find all overdue invoices in my inbox, draft a follow-up for each, and add them to a spreadsheet"</div>
+        <div class="quiz-feedback" id="q0-feedback"></div>
+      </div>
+    </div>
+
+    <!-- SLIDE 1 -->
+    <div class="slide" id="slide-1">
+      <div class="slide-header">
+        <div class="module-eyebrow"><span class="eyebrow-line"></span>Module 2 — How it works · 7 min</div>
+        <div class="slide-title">The agent loop: think, act, observe, repeat</div>
+        <div class="slide-subtitle">Every agent workflow runs a continuous loop. Understanding the loop helps you know what's happening when an agent is "thinking".</div>
+      </div>
+
+      <div class="flow-steps">
+        <div class="flow-step"><div class="flow-box"><div class="step-num">Step 1</div><div class="step-name">Receive goal</div><div class="step-desc">You describe what you want</div></div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="flow-box"><div class="step-num">Step 2</div><div class="step-name">Plan</div><div class="step-desc">Claude breaks it into steps</div></div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="flow-box"><div class="step-num">Step 3</div><div class="step-name">Use a tool</div><div class="step-desc">Search, write, click, read</div></div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="flow-box"><div class="step-num">Step 4</div><div class="step-name">Observe result</div><div class="step-desc">What did the tool return?</div></div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="flow-box"><div class="step-num">Step 5</div><div class="step-name">Decide</div><div class="step-desc">Done? Or next step?</div></div></div>
+      </div>
+
+      <div class="demo-box">
+        <div class="demo-label">Live example — "Summarise my emails about Project X and add action items to Notion"</div>
+        <div class="chat-bubble tool">Tool call: search_email(query="Project X", limit=20)</div>
+        <div class="chat-bubble tool" style="margin-top:6px">Result: 7 emails found. Subjects: "Project X kickoff", "X timeline", "X budget Q2"…</div>
+        <div class="chat-bubble agent" style="margin-top:8px">I found 7 emails. Let me read each one and extract any action items...</div>
+        <div class="chat-bubble tool" style="margin-top:8px">Tool call: create_notion_page(title="Project X actions", content=[...])</div>
+        <div class="chat-bubble agent" style="margin-top:8px">Done. I've created a Notion page with 5 action items grouped by owner. Want me to send a summary to the team?</div>
+      </div>
+
+      <div class="insight-card">
+        <div class="insight-title">The key insight</div>
+        <div class="insight-body">The agent doesn't just generate text — it <em>observes the real world</em> (email, files, web) and <em>takes real actions</em> (write, create, send). You stay in control by deciding when to let it proceed.</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2 -->
+    <div class="slide" id="slide-2">
+      <div class="slide-header">
+        <div class="module-eyebrow"><span class="eyebrow-line"></span>Module 3 — Building blocks · 5 min</div>
+        <div class="slide-title">Four ingredients every agent needs</div>
+        <div class="slide-subtitle">You don't need to build these — but knowing them helps you design better workflows and spot problems faster.</div>
+      </div>
+
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon">◈</div>
+          <div class="card-title">1. The model</div>
+          <div class="card-body">Claude is the brain. It reads your goal, reasons about it, and decides what actions to take next. You set personality and constraints via a system prompt.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">◉</div>
+          <div class="card-title">2. Tools</div>
+          <div class="card-body">What Claude can reach out and touch — web search, Gmail, Google Drive, code execution, file creation, calendar. Each tool is a capability you grant.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">◫</div>
+          <div class="card-title">3. Memory / context</div>
+          <div class="card-body">What the agent knows: past steps in this run, your preferences, documents you've shared. Context = how informed the agent is.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">◳</div>
+          <div class="card-title">4. Human checkpoints</div>
+          <div class="card-body">Moments where the agent pauses and asks for your approval before a risky action — like sending an email or deleting a file.</div>
+        </div>
+      </div>
+
+      <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:10px;">Hands-on checklist — design a simple agent</div>
+      <div class="checklist">
+        <div class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box"></div>
+          <div class="check-label">Decide the goal: what task should the agent complete?</div>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box"></div>
+          <div class="check-label">List the tools it needs (e.g. Gmail access, web search)</div>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box"></div>
+          <div class="check-label">Write a clear system prompt: who is this agent and what are its rules?</div>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box"></div>
+          <div class="check-label">Identify at least one checkpoint: where must Claude ask before acting?</div>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box"></div>
+          <div class="check-label">Test with a simple case before giving it real data</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3 -->
+    <div class="slide" id="slide-3">
+      <div class="slide-header">
+        <div class="module-eyebrow"><span class="eyebrow-line"></span>Module 4 — Real-world use cases · 5 min</div>
+        <div class="slide-title">Where agent workflows shine</div>
+        <div class="slide-subtitle">The best use cases share a pattern: repetitive, multi-step work that requires judgment — not just data retrieval.</div>
+      </div>
+
+      <div class="scenario-box">
+        <div class="scenario-label">Research assistant</div>
+        <div class="scenario-text">"Every Monday, find the top 5 AI news stories, summarise them in plain English, and email them to my team by 8 am."</div>
+        <div class="scenario-result">Tools needed: web search · Gmail · scheduling · Claude summarisation</div>
+      </div>
+      <div class="scenario-box">
+        <div class="scenario-label">HR operations</div>
+        <div class="scenario-text">"When a new employee form is submitted, create their Slack account, add them to the right Google Groups, and draft a welcome email from their manager."</div>
+        <div class="scenario-result">Tools needed: Google Forms trigger · Slack API · Google Admin · Gmail</div>
+      </div>
+      <div class="scenario-box">
+        <div class="scenario-label">Customer support triage</div>
+        <div class="scenario-text">"When a ticket arrives, classify the urgency, look up the customer's history, draft a personalised response, and route it to the right agent."</div>
+        <div class="scenario-result">Tools needed: CRM read · ticket system · email draft · routing logic</div>
+      </div>
+      <div class="scenario-box">
+        <div class="scenario-label">Finance reconciliation</div>
+        <div class="scenario-text">"Each week, pull invoices from Google Drive, match them to payments in the spreadsheet, flag mismatches, and send a status report."</div>
+        <div class="scenario-result">Tools needed: Google Drive · Sheets · email · file comparison</div>
+      </div>
+
+      <div class="pill-row">
+        <div class="pill-row-label">Common patterns across all these examples:</div>
+        <span class="pill pill-neon">Triggered by an event</span>
+        <span class="pill pill-neon">Multi-step reasoning</span>
+        <span class="pill pill-teal">Crosses multiple tools</span>
+        <span class="pill pill-teal">Produces a real output</span>
+        <span class="pill pill-amber">Needs occasional human check</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 4 -->
+    <div class="slide" id="slide-4">
+      <div class="slide-header">
+        <div class="module-eyebrow"><span class="eyebrow-line"></span>Module 5 — Best practices · 5 min</div>
+        <div class="slide-title">Making your agent reliable and safe</div>
+        <div class="slide-subtitle">A well-designed agent is a time-saver. A poorly-designed one creates more work. These five principles separate the two.</div>
+      </div>
+
+      <div class="tips-card">
+        <div class="tip-row">
+          <div class="tip-num">01</div>
+          <div>
+            <div class="tip-title">Start with a narrow scope</div>
+            <div class="tip-body">Give the agent one job first. A focused agent is easier to test and fix than one doing five things at once.</div>
+          </div>
+        </div>
+        <div class="tip-row">
+          <div class="tip-num">02</div>
+          <div>
+            <div class="tip-title">Be specific in your system prompt</div>
+            <div class="tip-body">Don't say "handle customer emails nicely." Say "respond within 50 words, never promise refunds, always escalate billing issues."</div>
+          </div>
+        </div>
+        <div class="tip-row">
+          <div class="tip-num">03</div>
+          <div>
+            <div class="tip-title">Use read-only tools first</div>
+            <div class="tip-body">Give the agent permission to read before it can write. Test that it reads correctly before you let it take action.</div>
+          </div>
+        </div>
+        <div class="tip-row">
+          <div class="tip-num">04</div>
+          <div>
+            <div class="tip-title">Add a human checkpoint for irreversible actions</div>
+            <div class="tip-body">Sending, posting, deleting, billing — these are irreversible. Always require confirmation before the agent proceeds.</div>
+          </div>
+        </div>
+        <div class="tip-row">
+          <div class="tip-num">05</div>
+          <div>
+            <div class="tip-title">Log everything and review weekly</div>
+            <div class="tip-body">Keep a record of what the agent did. Review it once a week for the first month. Agents improve dramatically with iteration.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-div"></div>
+      <div class="quiz-label">Final quiz — you're building an agent that sends proposals to clients. When should it require your approval?</div>
+      <div id="q1">
+        <div class="quiz-option" onclick="answerQuiz('q1',this,false)"><span class="opt-key">A</span>Never — it should just send them automatically</div>
+        <div class="quiz-option" onclick="answerQuiz('q1',this,true)"><span class="opt-key">B</span>Always before sending — proposals are irreversible external communications</div>
+        <div class="quiz-option" onclick="answerQuiz('q1',this,false)"><span class="opt-key">C</span>Only if the proposal is over a certain amount</div>
+        <div class="quiz-feedback" id="q1-feedback"></div>
+      </div>
+
+      <div class="cta-box">
+        <div class="cta-title">What to explore next</div>
+        <div class="cta-body">Try Claude.ai with Google Drive or Gmail connected. Give it a real task from today's work. Start with something low-risk — like drafting, not sending. Notice how it breaks down the steps.</div>
+        <a href="https://claude.ai" target="_blank" style="text-decoration:none;">
+          <button class="btn btn-neon">Open Claude.ai and start building →</button>
+        </a>
+      </div>
+    </div>
+
+    <!-- NAV -->
+    <div class="nav-row">
+      <button class="btn" id="btn-prev" onclick="navigate(-1)" disabled>← Previous</button>
+      <span class="slide-counter" id="slide-counter">Slide 1 of 5</span>
+      <button class="btn btn-neon" id="btn-next" onclick="navigate(1)">Next →</button>
+    </div>
+
+  </div>
+
+  <script>
+    let current = 0;
+    const total = 5;
+    let timerSec = 0;
+    const completedModules = new Set();
+
+    setInterval(() => {
+      timerSec++;
+      const m = Math.floor(timerSec / 60);
+      const s = timerSec % 60;
+      document.getElementById('timer').textContent =
+        String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    }, 1000);
+
+    function goModule(idx) {
+      completedModules.add(current);
+      current = idx;
+      updateUI();
+    }
+
+    function navigate(dir) {
+      completedModules.add(current);
+      current = Math.max(0, Math.min(total - 1, current + dir));
+      updateUI();
+    }
+
+    function updateUI() {
+      document.querySelectorAll('.slide').forEach((s, i) => {
+        s.classList.toggle('active', i === current);
+      });
+      document.querySelectorAll('.module-tab').forEach((t, i) => {
+        t.classList.remove('active', 'done');
+        if (i === current) t.classList.add('active');
+        else if (completedModules.has(i)) t.classList.add('done');
+      });
+      const prog = Math.round(((current + 1) / total) * 100);
+      document.getElementById('progress-fill').style.width = prog + '%';
+      document.getElementById('slide-counter').textContent = 'Slide ' + (current + 1) + ' of ' + total;
+      document.getElementById('btn-prev').disabled = current === 0;
+      const nextBtn = document.getElementById('btn-next');
+      nextBtn.disabled = current === total - 1;
+      nextBtn.textContent = current === total - 1 ? 'Complete' : 'Next →';
+    }
+
+    function answerQuiz(qid, el, isCorrect) {
+      const container = document.getElementById(qid);
+      container.querySelectorAll('.quiz-option').forEach(o => {
+        o.onclick = null;
+        o.style.cursor = 'default';
+      });
+      el.classList.add(isCorrect ? 'correct' : 'wrong');
+      const fb = document.getElementById(qid + '-feedback');
+      fb.classList.add('show', isCorrect ? 'success' : 'error');
+      if (qid === 'q0') {
+        fb.textContent = isCorrect
+          ? 'Correct! That is exactly the kind of multi-step, tool-crossing task that benefits from an agent workflow.'
+          : 'Not quite — simple single-step questions are better handled by regular chat. Agents add value when there are multiple steps, tools, or real actions involved.';
+      } else {
+        fb.textContent = isCorrect
+          ? 'Exactly right. Sending proposals is irreversible — always require a human checkpoint before an external communication goes out.'
+          : 'Reconsider — proposals represent your company externally. Once sent, they cannot be taken back. Human approval is always the right call here.';
+      }
+    }
+
+    function toggleCheck(el) {
+      el.querySelector('.check-box').classList.toggle('checked');
+      el.querySelector('.check-label').classList.toggle('checked');
+    }
+
+    updateUI();
+  </script>
+</body>
+</html>
